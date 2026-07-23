@@ -1,26 +1,130 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-surface: #f9f9f9;
+  --color-surface-dim: #dadada;
+  --color-surface-bright: #f9f9f9;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f3f3f3;
+  --color-surface-container: #eeeeee;
+  --color-surface-container-high: #e8e8e8;
+  --color-surface-container-highest: #e2e2e2;
+  --color-on-surface: #1a1c1c;
+  --color-on-surface-variant: #424751;
+  --color-inverse-surface: #2f3131;
+  --color-inverse-on-surface: #f1f1f1;
+  --color-outline: #727783;
+  --color-outline-variant: #c2c6d3;
+  --color-surface-tint: #175ead;
+  --color-primary: #003e7a;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #0055a4;
+  --color-on-primary-container: #afccff;
+  --color-inverse-primary: #a8c8ff;
+  --color-secondary: #b71513;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #db3329;
+  --color-on-secondary-container: #fffbff;
+  --color-tertiary: #1a4800;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #276200;
+  --color-on-tertiary-container: #6fe52b;
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #93000a;
+  --color-primary-fixed: #d5e3ff;
+  --color-primary-fixed-dim: #a8c8ff;
+  --color-on-primary-fixed: #001b3c;
+  --color-on-primary-fixed-variant: #004689;
+  --color-secondary-fixed: #ffdad5;
+  --color-secondary-fixed-dim: #ffb4aa;
+  --color-on-secondary-fixed: #410001;
+  --color-on-secondary-fixed-variant: #930006;
+  --color-tertiary-fixed: #87fe45;
+  --color-tertiary-fixed-dim: #6be026;
+  --color-on-tertiary-fixed: #082100;
+  --color-on-tertiary-fixed-variant: #1f5100;
+  --color-background: #f9f9f9;
+  --color-on-background: #1a1c1c;
+  --color-surface-variant: #e2e2e2;
+  --color-success: #58CC02;
+  --color-warning: #FF9600;
+  --color-reading-bg: #FFFFFF;
+  --color-ink-dark: #3C3C3C;
+  --color-ink-medium: #777777;
+  --color-syntax-noun: #0055A4;
+  --color-syntax-verb: #EF4135;
+  --color-syntax-adj: #58CC02;
+
+  --font-ui: var(--font-nunito-sans), sans-serif;
+  --font-reading: var(--font-source-serif), serif;
+
+  /* Typography utilities using text-* */
+  --text-headline-lg: 32px;
+  --text-headline-lg--line-height: 40px;
+  --text-headline-lg--font-weight: 800;
+
+  --text-headline-md: 24px;
+  --text-headline-md--line-height: 32px;
+  --text-headline-md--font-weight: 700;
+
+  --text-body-reading: 18px;
+  --text-body-reading--line-height: 30px;
+  --text-body-reading--font-weight: 400;
+  --text-body-reading--letter-spacing: -0.01em;
+
+  --text-body-ui: 16px;
+  --text-body-ui--line-height: 24px;
+  --text-body-ui--font-weight: 400;
+
+  --text-label-caps: 12px;
+  --text-label-caps--line-height: 16px;
+  --text-label-caps--font-weight: 900;
+  --text-label-caps--letter-spacing: 0.05em;
+
+  --text-syntax-label: 14px;
+  --text-syntax-label--line-height: 18px;
+  --text-syntax-label--font-weight: 700;
+
+  --radius-sm: 0.25rem;
+  --radius-DEFAULT: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-full: 9999px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  body {
+    @apply font-ui bg-background text-on-surface;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+  .tactile-button {
+    @apply border-2 border-b-[6px] border-transparent transition-transform active:translate-y-[4px] active:border-b-2;
+  }
+  
+  .tactile-card {
+    @apply border-2 border-surface-variant border-b-4 bg-surface-container-lowest rounded-xl;
+  }
+
+  .text-silent {
+    @apply opacity-40 line-through;
+  }
+
+  .liaison {
+    position: relative;
+  }
+  .liaison::after {
+    content: "‿";
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--color-ink-medium);
+    font-size: 1.2em;
+    pointer-events: none;
+  }
 }

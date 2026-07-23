@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Learner Command Center</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700;800;900&amp;family=Source+Serif+4:wght@400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-variant": "#e2e2e2",
+                        "ink-dark": "#3C3C3C",
+                        "ink-medium": "#777777",
+                        "surface-container-lowest": "#ffffff",
+                        "error": "#ba1a1a",
+                        "tertiary": "#1a4800",
+                        "on-secondary-fixed-variant": "#930006",
+                        "on-primary-fixed-variant": "#004689",
+                        "primary-container": "#0055a4",
+                        "background": "#f9f9f9",
+                        "surface-dim": "#dadada",
+                        "on-error": "#ffffff",
+                        "tertiary-container": "#276200",
+                        "secondary-fixed": "#ffdad5",
+                        "on-tertiary-container": "#6fe52b",
+                        "on-surface-variant": "#424751",
+                        "surface-container-low": "#f3f3f3",
+                        "on-primary-container": "#afccff",
+                        "on-surface": "#1a1c1c",
+                        "on-error-container": "#93000a",
+                        "surface-tint": "#175ead",
+                        "error-container": "#ffdad6",
+                        "syntax-noun": "#0055A4",
+                        "secondary-fixed-dim": "#ffb4aa",
+                        "on-tertiary-fixed": "#082100",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-highest": "#e2e2e2",
+                        "tertiary-fixed": "#87fe45",
+                        "syntax-verb": "#EF4135",
+                        "on-secondary-container": "#fffbff",
+                        "on-tertiary-fixed-variant": "#1f5100",
+                        "surface-container": "#eeeeee",
+                        "warning": "#FF9600",
+                        "primary-fixed-dim": "#a8c8ff",
+                        "on-secondary": "#ffffff",
+                        "inverse-on-surface": "#f1f1f1",
+                        "inverse-surface": "#2f3131",
+                        "syntax-adj": "#58CC02",
+                        "surface-bright": "#f9f9f9",
+                        "on-primary": "#ffffff",
+                        "primary": "#003e7a",
+                        "reading-bg": "#FFFFFF",
+                        "success": "#58CC02",
+                        "on-background": "#1a1c1c",
+                        "surface": "#f9f9f9",
+                        "tertiary-fixed-dim": "#6be026",
+                        "primary-fixed": "#d5e3ff",
+                        "on-primary-fixed": "#001b3c",
+                        "surface-container-high": "#e8e8e8",
+                        "secondary-container": "#db3329",
+                        "outline-variant": "#c2c6d3",
+                        "inverse-primary": "#a8c8ff",
+                        "secondary": "#b71513",
+                        "on-secondary-fixed": "#410001",
+                        "outline": "#727783"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "margin-desktop": "48px",
+                        "gutter": "24px",
+                        "max-width-reading": "680px",
+                        "margin-mobile": "16px"
+                    },
+                    "fontFamily": {
+                        "syntax-label": ["Nunito Sans"],
+                        "body-ui": ["Nunito Sans"],
+                        "body-reading": ["\"Source Serif 4\""],
+                        "label-caps": ["Nunito Sans"],
+                        "headline-md": ["Nunito Sans"],
+                        "headline-lg": ["Nunito Sans"]
+                    },
+                    "fontSize": {
+                        "syntax-label": ["14px", { "lineHeight": "18px", "fontWeight": "700" }],
+                        "body-ui": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-reading": ["18px", { "lineHeight": "30px", "letterSpacing": "-0.01em", "fontWeight": "400" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "900" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "800" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .tactile-card {
+            border: 2px solid theme('colors.surface-variant');
+            border-bottom-width: 4px;
+            background-color: theme('colors.surface-container-lowest');
+            border-radius: theme('borderRadius.xl');
+        }
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-ui min-h-screen pb-24">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-margin-mobile h-16 bg-surface dark:bg-on-surface border-b-2 border-surface-container-highest dark:border-outline flat no shadows">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+<span class="font-headline-md text-headline-md font-black text-primary dark:text-primary-fixed">Learner Command Center</span>
+</div>
+<div class="flex items-center">
+<span class="font-label-caps text-label-caps font-bold text-primary dark:text-primary-fixed">1,250 XP</span>
+</div>
+</header>
+<main class="max-w-[max-width-reading] mx-auto pt-24 px-margin-mobile md:px-margin-desktop space-y-8">
+<!-- Section 1: Vocabulary Growth -->
+<section class="tactile-card p-6">
+<h2 class="font-headline-md text-headline-md mb-4 text-on-surface">Vocabulary Growth</h2>
+<div class="w-full h-64 relative">
+<svg class="w-full h-full text-sm font-syntax-label text-ink-medium fill-current" viewbox="0 0 500 250">
+<!-- Grid lines and labels -->
+<g stroke="#e2e2e2" stroke-width="1">
+<line x1="40" x2="490" y1="210" y2="210"></line>
+<line x1="40" x2="490" y1="170" y2="170"></line>
+<line x1="40" x2="490" y1="130" y2="130"></line>
+<line x1="40" x2="490" y1="90" y2="90"></line>
+<line x1="40" x2="490" y1="50" y2="50"></line>
+<line x1="40" x2="490" y1="10" y2="10"></line>
+</g>
+<g stroke="none" text-anchor="end">
+<text x="30" y="215">0</text>
+<text x="30" y="175">200</text>
+<text x="30" y="135">400</text>
+<text x="30" y="95">600</text>
+<text x="30" y="55">800</text>
+</g>
+<!-- X-axis labels -->
+<g stroke="none" text-anchor="middle">
+<text x="50" y="235">W1</text>
+<text x="130" y="235">W2</text>
+<text x="210" y="235">W3</text>
+<text x="290" y="235">W4</text>
+<text x="370" y="235">W5</text>
+<text x="450" y="235">W6</text>
+</g>
+<!-- Chart Data Area -->
+<path d="M 50,210 L 50,186 L 130,172 L 210,150 L 290,120 L 370,90 L 450,40 L 450,210 Z" fill="#0055a4" opacity="0.2"></path>
+<!-- Chart Data Line -->
+<path d="M 50,186 L 130,172 L 210,150 L 290,120 L 370,90 L 450,40" fill="none" stroke="#0055a4" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"></path>
+<!-- Data Points -->
+<circle cx="50" cy="186" fill="#0055a4" r="5"></circle>
+<circle cx="130" cy="172" fill="#0055a4" r="5"></circle>
+<circle cx="210" cy="150" fill="#0055a4" r="5"></circle>
+<circle cx="290" cy="120" fill="#0055a4" r="5"></circle>
+<circle cx="370" cy="90" fill="#0055a4" r="5"></circle>
+<circle cx="450" cy="40" fill="#0055a4" r="5"></circle>
+</svg>
+</div>
+</section>
+<!-- Section 2: Reading Heatmap -->
+<section class="tactile-card p-6">
+<h2 class="font-headline-md text-headline-md mb-4 text-on-surface">Reading Activity</h2>
+<div class="grid grid-cols-7 gap-2" id="heatmapContainer">
+<!-- Generated heatmap HTML -->
+<div class="w-full aspect-square rounded-sm bg-surface-container-highest"></div>
+<div class="w-full aspect-square rounded-sm bg-[#58CC02]"></div>
+<div class="w-full aspect-square rounded-sm bg-surface-container-highest"></div>
+<div class="w-full aspect-square rounded-sm bg-[#b8f28b] opacity-80"></div>
+<div class="w-full aspect-square rounded-sm bg-[#b8f28b] opacity-80"></div>
+<div class="w-full aspect-square rounded-sm bg-[#b8f28b] opacity-80"></div>
+<div class="w-full aspect-square rounded-sm bg-[#87fe45]"></div>
+<div class="w-full aspect-square rounded-sm bg-surface-container-highest"></div>
+<div class="w-full aspect-square rounded-sm bg-surface-container-highest"></div>
+<div class="w-full aspect-square rounded-sm bg-[#b8f28b] opacity-80"></div>
+<div class="w-full aspect-square rounded-sm bg-[#b8f28b] opacity-80"></div>
+<div class="w-full aspect-square rounded-sm bg-[#87fe45]"></div>
+<div class="w-full aspect-square rounded-sm bg-[#b8f28b] opacity-80"></div>
+<div class="w-full aspect-square rounded-sm bg-[#87fe45]"></div>
+<div class="w-full aspect-square rounded-sm bg-surface-container-highest"></div>
+<div class="w-full aspect-square rounded-sm bg-[#87fe45]"></div>
+<div class="w-full aspect-square rounded-sm bg-[#b8f28b] opacity-80"></div>
+<div class="w-full aspect-square rounded-sm bg-[#b8f28b] opacity-80"></div>
+<div class="w-full aspect-square rounded-sm bg-[#87fe45]"></div>
+<div class="w-full aspect-square rounded-sm bg-[#b8f28b] opacity-80"></div>
+<div class="w-full aspect-square rounded-sm bg-[#b8f28b] opacity-80"></div>
+<div class="w-full aspect-square rounded-sm bg-[#b8f28b] opacity-80"></div>
+<div class="w-full aspect-square rounded-sm bg-[#b8f28b] opacity-80"></div>
+<div class="w-full aspect-square rounded-sm bg-[#87fe45]"></div>
+<div class="w-full aspect-square rounded-sm bg-[#b8f28b] opacity-80"></div>
+<div class="w-full aspect-square rounded-sm bg-[#87fe45]"></div>
+<div class="w-full aspect-square rounded-sm bg-[#b8f28b] opacity-80"></div>
+<div class="w-full aspect-square rounded-sm bg-[#58CC02]"></div>
+<div class="w-full aspect-square rounded-sm bg-surface-container-highest"></div>
+<div class="w-full aspect-square rounded-sm bg-[#58CC02]"></div>
+<div class="w-full aspect-square rounded-sm bg-[#87fe45]"></div>
+<div class="w-full aspect-square rounded-sm bg-surface-container-highest"></div>
+<div class="w-full aspect-square rounded-sm bg-[#b8f28b] opacity-80"></div>
+<div class="w-full aspect-square rounded-sm bg-[#87fe45]"></div>
+<div class="w-full aspect-square rounded-sm bg-[#87fe45]"></div>
+</div>
+</section>
+<!-- Section 3: Grammar Accuracy Radar -->
+<section class="tactile-card p-6">
+<h2 class="font-headline-md text-headline-md mb-4 text-on-surface">Grammar Accuracy</h2>
+<div class="w-full h-64 relative flex justify-center">
+<svg class="w-full h-full text-sm font-syntax-label text-ink-dark fill-current" viewbox="0 0 300 300">
+<!-- Radar Grid -->
+<g fill="none" stroke="#eeeeee" stroke-width="2">
+<!-- Polygons for grid -->
+<polygon points="150,50 245,119 209,231 91,231 55,119"></polygon>
+<polygon points="150,70 226,125 197,215 103,215 74,125"></polygon>
+<polygon points="150,90 207,131 185,199 115,199 93,131"></polygon>
+<polygon points="150,110 188,138 174,183 126,183 112,138"></polygon>
+<polygon points="150,130 169,144 162,167 138,167 131,144"></polygon>
+<!-- Axis lines -->
+<line x1="150" x2="150" y1="150" y2="50"></line>
+<line x1="150" x2="245" y1="150" y2="119"></line>
+<line x1="150" x2="209" y1="150" y2="231"></line>
+<line x1="150" x2="91" y1="150" y2="231"></line>
+<line x1="150" x2="55" y1="150" y2="119"></line>
+</g>
+<!-- Data Labels -->
+<g font-weight="700" stroke="none" text-anchor="middle">
+<text x="150" y="40">Present</text>
+<text x="260" y="119">Past</text>
+<text x="220" y="250">Future</text>
+<text x="80" y="250">Subjunctive</text>
+<text x="40" y="119">Conditional</text>
+<text fill="#777777" font-size="10" x="150" y="65">100</text>
+<text fill="#777777" font-size="10" x="150" y="85">80</text>
+<text fill="#777777" font-size="10" x="150" y="105">60</text>
+<text fill="#777777" font-size="10" x="150" y="125">40</text>
+<text fill="#777777" font-size="10" x="150" y="145">20</text>
+</g>
+<!-- Radar Chart Polygon Area (90, 75, 60, 45, 60) -->
+<!-- Center (150, 150), R=100 -->
+<!-- Present (90%): y = 150 - 90 = 60 -->
+<!-- Past (75%): x = 150 + 75*cos(-18) = 150 + 71.3 = 221.3, y = 150 + 75*sin(-18) = 150 - 23.1 = 126.9 -->
+<!-- Future (60%): x = 150 + 60*cos(54) = 150 + 35.2 = 185.2, y = 150 + 60*sin(54) = 150 + 48.5 = 198.5 -->
+<!-- Subjunctive (45%): x = 150 + 45*cos(126) = 150 - 26.4 = 123.6, y = 150 + 45*sin(126) = 150 + 36.4 = 186.4 -->
+<!-- Conditional (60%): x = 150 + 60*cos(198) = 150 - 57.0 = 93.0, y = 150 + 60*sin(198) = 150 - 18.5 = 131.5 -->
+<polygon fill="#58CC02" opacity="0.3" points="150,60 221.3,126.9 185.2,198.5 123.6,186.4 93.0,131.5" stroke="#58CC02" stroke-width="2"></polygon>
+<!-- Points -->
+<circle cx="150" cy="60" fill="#58CC02" r="4"></circle>
+<circle cx="221.3" cy="126.9" fill="#58CC02" r="4"></circle>
+<circle cx="185.2" cy="198.5" fill="#58CC02" r="4"></circle>
+<circle cx="123.6" cy="186.4" fill="#58CC02" r="4"></circle>
+<circle cx="93.0" cy="131.5" fill="#58CC02" r="4"></circle>
+</svg>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center bg-surface dark:bg-on-surface pb-safe border-t-2 border-surface-container-highest dark:border-outline md:hidden h-20">
+<a class="flex flex-col items-center justify-center text-ink-medium dark:text-outline-variant pt-2 hover:text-primary-container dark:hover:text-primary-fixed-dim w-1/4" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="font-label-caps text-label-caps mt-1">Learn</span>
+</a>
+<a class="flex flex-col items-center justify-center text-ink-medium dark:text-outline-variant pt-2 hover:text-primary-container dark:hover:text-primary-fixed-dim w-1/4" href="#">
+<span class="material-symbols-outlined">history_edu</span>
+<span class="font-label-caps text-label-caps mt-1">Review</span>
+</a>
+<a class="flex flex-col items-center justify-center text-ink-medium dark:text-outline-variant pt-2 hover:text-primary-container dark:hover:text-primary-fixed-dim w-1/4" href="#">
+<span class="material-symbols-outlined">gavel</span>
+<span class="font-label-caps text-label-caps mt-1">Rules</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary dark:text-primary-fixed border-t-4 border-primary dark:border-primary-fixed pt-1 w-1/4 scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">analytics</span>
+<span class="font-label-caps text-label-caps mt-1">Center</span>
+</a>
+</nav>
+</body></html>

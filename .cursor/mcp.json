@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "supabase": {
+      "type": "http",
+      "url": "https://mcp.supabase.com/mcp?read_only=true&features=database,docs,development"
+    },
+    "supabase-local": {
+      "type": "http",
+      "url": "http://localhost:54321/mcp"
+    }
+  }
+}

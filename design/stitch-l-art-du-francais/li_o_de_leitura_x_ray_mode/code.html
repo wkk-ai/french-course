@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Reading Lesson</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700;800;900&amp;family=Source+Serif+4:wght@400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary-fixed": "#d5e3ff",
+                      "tertiary-container": "#276200",
+                      "secondary-fixed-dim": "#ffb4aa",
+                      "on-primary-fixed-variant": "#004689",
+                      "ink-medium": "#777777",
+                      "on-secondary-fixed": "#410001",
+                      "syntax-verb": "#EF4135",
+                      "warning": "#FF9600",
+                      "surface-variant": "#e2e2e2",
+                      "on-secondary-fixed-variant": "#930006",
+                      "surface-container-lowest": "#ffffff",
+                      "tertiary-fixed-dim": "#6be026",
+                      "inverse-surface": "#2f3131",
+                      "on-tertiary-fixed-variant": "#1f5100",
+                      "surface": "#f9f9f9",
+                      "surface-container-low": "#f3f3f3",
+                      "surface-container": "#eeeeee",
+                      "success": "#58CC02",
+                      "on-secondary-container": "#fffbff",
+                      "secondary-fixed": "#ffdad5",
+                      "surface-container-highest": "#e2e2e2",
+                      "syntax-adj": "#58CC02",
+                      "error-container": "#ffdad6",
+                      "on-surface": "#1a1c1c",
+                      "on-surface-variant": "#424751",
+                      "primary-container": "#0055a4",
+                      "tertiary-fixed": "#87fe45",
+                      "syntax-noun": "#0055A4",
+                      "secondary": "#b71513",
+                      "primary": "#003e7a",
+                      "on-tertiary-fixed": "#082100",
+                      "on-background": "#1a1c1c",
+                      "on-primary-container": "#afccff",
+                      "outline-variant": "#c2c6d3",
+                      "surface-container-high": "#e8e8e8",
+                      "inverse-on-surface": "#f1f1f1",
+                      "outline": "#727783",
+                      "background": "#f9f9f9",
+                      "surface-dim": "#dadada",
+                      "on-primary-fixed": "#001b3c",
+                      "reading-bg": "#FFFFFF",
+                      "inverse-primary": "#a8c8ff",
+                      "error": "#ba1a1a",
+                      "secondary-container": "#db3329",
+                      "surface-bright": "#f9f9f9",
+                      "on-tertiary": "#ffffff",
+                      "on-primary": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "on-tertiary-container": "#6fe52b",
+                      "on-secondary": "#ffffff",
+                      "on-error": "#ffffff",
+                      "surface-tint": "#175ead",
+                      "ink-dark": "#3C3C3C",
+                      "primary-fixed-dim": "#a8c8ff",
+                      "tertiary": "#1a4800"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "margin-mobile": "16px",
+                      "max-width-reading": "680px",
+                      "unit": "4px",
+                      "gutter": "24px",
+                      "margin-desktop": "48px"
+              },
+              "fontFamily": {
+                      "label-caps": [
+                              "Nunito Sans"
+                      ],
+                      "body-reading": [
+                              "\"Source Serif 4\""
+                      ],
+                      "body-ui": [
+                              "Nunito Sans"
+                      ],
+                      "headline-lg": [
+                              "Nunito Sans"
+                      ],
+                      "headline-md": [
+                              "Nunito Sans"
+                      ],
+                      "syntax-label": [
+                              "Nunito Sans"
+                      ]
+              },
+              "fontSize": {
+                      "label-caps": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "900"
+                              }
+                      ],
+                      "body-reading": [
+                              "18px",
+                              {
+                                      "lineHeight": "30px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-ui": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "syntax-label": [
+                              "14px",
+                              {
+                                      "lineHeight": "18px",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+        .bottom-border-3d {
+            border-bottom-width: 4px;
+            transition: all 0.1s ease;
+        }
+        .bottom-border-3d:active {
+            transform: translateY(2px);
+            border-bottom-width: 2px;
+        }
+        .liaison-arc {
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 24px;
+            height: 12px;
+            border-bottom: 2px solid #c2c6d3;
+            border-radius: 50%;
+        }
+        .xray-noun {
+            background-color: rgba(0, 85, 164, 0.1);
+            border-bottom: 2px solid #0055A4;
+            color: #0055A4;
+        }
+        .xray-verb {
+            background-color: rgba(239, 65, 53, 0.1);
+            border-bottom: 2px solid #EF4135;
+            color: #EF4135;
+        }
+        .silent-letter {
+            text-decoration: line-through;
+            color: #a0aab8;
+        }
+        /* Toggle Switch CSS */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #58CC02;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #58CC02;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-ui min-h-screen flex flex-col items-center">
+<!-- Top Navigation / Progress (Suppressed global nav due to linear focus) -->
+<header class="w-full max-w-[max-width-reading] px-margin-mobile md:px-margin-desktop py-4 flex items-center gap-4 sticky top-0 bg-surface z-40">
+<button class="text-ink-medium hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[28px]" data-icon="close">close</span>
+</button>
+<div class="flex-grow h-4 bg-surface-container-highest rounded-full overflow-hidden relative">
+<div class="h-full bg-success rounded-full w-[40%] transition-all duration-500 ease-in-out"></div>
+<!-- Glint effect -->
+<div class="absolute top-0 left-0 h-full w-full bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full animate-[shimmer_2s_infinite]"></div>
+</div>
+<div class="text-primary font-label-caps text-label-caps flex items-center gap-1 bg-surface-container-highest/30 px-3 py-1.5 rounded-full border border-surface-container-highest">
+<span class="material-symbols-outlined text-[16px] text-tertiary-container" data-icon="local_fire_department">local_fire_department</span>
+<span>4</span>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-grow w-full max-w-[max-width-reading] px-margin-mobile md:px-margin-desktop py-8 flex flex-col justify-center">
+<!-- Instruction -->
+<h1 class="font-headline-md text-headline-md text-on-surface mb-12 text-left">
+            Read and analyze the sentence
+        </h1>
+<!-- Reading Canvas -->
+<div class="bg-reading-bg border-2 border-surface-container-highest rounded-xl p-8 mb-12 relative bottom-border-3d shadow-sm group">
+<!-- X-Ray Toggle Control -->
+<div class="absolute top-4 right-4 flex items-center gap-2">
+<span class="font-label-caps text-label-caps text-ink-medium">X-RAY</span>
+<div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-2 border-surface-container-highest appearance-none cursor-pointer transition-all duration-200 z-10 top-[2px] left-[2px] peer" id="xray-toggle" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-surface-container-highest cursor-pointer transition-colors duration-200 peer-checked:bg-success" for="xray-toggle"></label>
+</div>
+</div>
+<!-- Sentence Display -->
+<div class="font-body-reading text-[32px] leading-[48px] text-on-surface mt-6 flex flex-wrap gap-x-2 gap-y-4">
+<!-- Les -->
+<div class="relative inline-block xray-noun rounded px-1 transition-colors duration-300">
+                    Le<span class="silent-letter">s</span>
+<!-- Liaison Arc visually linking to 'enfants' -->
+<div class="liaison-arc"></div>
+</div>
+<!-- enfants -->
+<div class="relative inline-block xray-noun rounded px-1 transition-colors duration-300">
+                    enfants
+                </div>
+<!-- mangent (Interactive / Clicked State) -->
+<div class="relative inline-block">
+<!-- The Word -->
+<button class="xray-verb rounded px-1 font-bold transition-all duration-300 relative z-20 outline-none focus:ring-2 focus:ring-primary/50">
+                        mang<span class="silent-letter">ent</span>
+</button>
+<!-- Tooltip (Simulated Clicked State) -->
+<div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 w-64 bg-surface-container-lowest border-2 border-surface-container-highest rounded-xl shadow-lg z-30 p-4 transform transition-all duration-200 scale-100 opacity-100">
+<div class="absolute -bottom-[10px] left-1/2 -translate-x-1/2 w-4 h-4 bg-surface-container-lowest border-b-2 border-r-2 border-surface-container-highest rotate-45"></div>
+<div class="flex justify-between items-start mb-2 relative z-10">
+<span class="font-headline-md text-[20px] leading-[28px] text-on-surface font-bold">manger</span>
+<span class="bg-surface-container-highest text-ink-medium font-label-caps text-[10px] px-2 py-1 rounded-full uppercase tracking-widest">Courant</span>
+</div>
+<p class="font-body-ui text-body-ui text-on-surface-variant mb-4">
+                            to eat, to consume food
+                        </p>
+<div class="flex gap-2">
+<button class="flex-1 bg-surface border-2 border-surface-container-highest text-primary font-label-caps text-label-caps py-2 rounded-lg bottom-border-3d flex items-center justify-center gap-1 hover:bg-surface-container-low">
+<span class="material-symbols-outlined text-[16px]" data-icon="volume_up">volume_up</span> Play
+                            </button>
+<button class="flex-1 bg-primary text-on-primary font-label-caps text-label-caps py-2 rounded-lg bottom-border-3d flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-[16px]" data-icon="settings">settings</span> Conjugate
+                            </button>
+</div>
+</div>
+</div>
+<!-- des -->
+<div class="relative inline-block xray-noun rounded px-1 transition-colors duration-300">
+                    de<span class="silent-letter">s</span>
+</div>
+<!-- pommes -->
+<div class="relative inline-block xray-noun rounded px-1 transition-colors duration-300">
+                    pomme<span class="silent-letter">s</span>.
+                </div>
+</div>
+<!-- Contextual Legend -->
+<div class="mt-8 flex gap-4 pt-6 border-t border-surface-container-highest/50">
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 rounded-full bg-syntax-noun/20 border border-syntax-noun"></div>
+<span class="font-syntax-label text-syntax-label text-ink-medium">Noun / Article</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 rounded-full bg-syntax-verb/20 border border-syntax-verb"></div>
+<span class="font-syntax-label text-syntax-label text-ink-medium">Verb</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Action Bar -->
+<div class="w-full border-t-2 border-surface-container-highest bg-surface p-4 pb-safe md:p-6 sticky bottom-0 z-40 flex justify-center">
+<div class="w-full max-w-[max-width-reading]">
+<button class="w-full bg-success text-on-secondary font-label-caps text-[16px] leading-[24px] uppercase tracking-widest py-4 rounded-xl bottom-border-3d border-b-[#46A302] hover:brightness-105 active:brightness-95 transition-all">
+                Check
+            </button>
+</div>
+</div>
+<!-- Script for interactive toggle simulation -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const xrayToggle = document.getElementById('xray-toggle');
+            const nouns = document.querySelectorAll('.xray-noun');
+            const verbs = document.querySelectorAll('.xray-verb');
+
+            xrayToggle.addEventListener('change', (e) => {
+                const isChecked = e.target.checked;
+                
+                nouns.forEach(el => {
+                    if(isChecked) {
+                        el.classList.add('bg-syntax-noun/10', 'border-b-2', 'border-syntax-noun', 'text-syntax-noun');
+                    } else {
+                        el.classList.remove('bg-syntax-noun/10', 'border-b-2', 'border-syntax-noun', 'text-syntax-noun');
+                    }
+                });
+
+                verbs.forEach(el => {
+                    if(isChecked) {
+                        el.classList.add('bg-syntax-verb/10', 'border-b-2', 'border-syntax-verb', 'text-syntax-verb');
+                    } else {
+                        el.classList.remove('bg-syntax-verb/10', 'border-b-2', 'border-syntax-verb', 'text-syntax-verb');
+                    }
+                });
+            });
+        });
+    </script>
+</body></html>

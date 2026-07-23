@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<title>Grammar Rulebook</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700;800;900&amp;family=Source+Serif+4:opsz,wght@8..60,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary-fixed": "#d5e3ff",
+                      "tertiary-container": "#276200",
+                      "secondary-fixed-dim": "#ffb4aa",
+                      "on-primary-fixed-variant": "#004689",
+                      "ink-medium": "#777777",
+                      "on-secondary-fixed": "#410001",
+                      "syntax-verb": "#EF4135",
+                      "warning": "#FF9600",
+                      "surface-variant": "#e2e2e2",
+                      "on-secondary-fixed-variant": "#930006",
+                      "surface-container-lowest": "#ffffff",
+                      "tertiary-fixed-dim": "#6be026",
+                      "inverse-surface": "#2f3131",
+                      "on-tertiary-fixed-variant": "#1f5100",
+                      "surface": "#f9f9f9",
+                      "surface-container-low": "#f3f3f3",
+                      "surface-container": "#eeeeee",
+                      "success": "#58CC02",
+                      "on-secondary-container": "#fffbff",
+                      "secondary-fixed": "#ffdad5",
+                      "surface-container-highest": "#e2e2e2",
+                      "syntax-adj": "#58CC02",
+                      "error-container": "#ffdad6",
+                      "on-surface": "#1a1c1c",
+                      "on-surface-variant": "#424751",
+                      "primary-container": "#0055a4",
+                      "tertiary-fixed": "#87fe45",
+                      "syntax-noun": "#0055A4",
+                      "secondary": "#b71513",
+                      "primary": "#003e7a",
+                      "on-tertiary-fixed": "#082100",
+                      "on-background": "#1a1c1c",
+                      "on-primary-container": "#afccff",
+                      "outline-variant": "#c2c6d3",
+                      "surface-container-high": "#e8e8e8",
+                      "inverse-on-surface": "#f1f1f1",
+                      "outline": "#727783",
+                      "background": "#f9f9f9",
+                      "surface-dim": "#dadada",
+                      "on-primary-fixed": "#001b3c",
+                      "reading-bg": "#FFFFFF",
+                      "inverse-primary": "#a8c8ff",
+                      "error": "#ba1a1a",
+                      "secondary-container": "#db3329",
+                      "surface-bright": "#f9f9f9",
+                      "on-tertiary": "#ffffff",
+                      "on-primary": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "on-tertiary-container": "#6fe52b",
+                      "on-secondary": "#ffffff",
+                      "on-error": "#ffffff",
+                      "surface-tint": "#175ead",
+                      "ink-dark": "#3C3C3C",
+                      "primary-fixed-dim": "#a8c8ff",
+                      "tertiary": "#1a4800"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "margin-mobile": "16px",
+                      "max-width-reading": "680px",
+                      "unit": "4px",
+                      "gutter": "24px",
+                      "margin-desktop": "48px"
+              },
+              "fontFamily": {
+                      "label-caps": [
+                              "Nunito Sans"
+                      ],
+                      "body-reading": [
+                              "\"Source Serif 4\""
+                      ],
+                      "body-ui": [
+                              "Nunito Sans"
+                      ],
+                      "headline-lg": [
+                              "Nunito Sans"
+                      ],
+                      "headline-md": [
+                              "Nunito Sans"
+                      ],
+                      "syntax-label": [
+                              "Nunito Sans"
+                      ]
+              },
+              "fontSize": {
+                      "label-caps": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "900"
+                              }
+                      ],
+                      "body-reading": [
+                              "18px",
+                              {
+                                      "lineHeight": "30px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-ui": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "syntax-label": [
+                              "14px",
+                              {
+                                      "lineHeight": "18px",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+        body {
+            background-color: theme('colors.background');
+            color: theme('colors.on-background');
+            font-family: theme('fontFamily.body-ui');
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .flat-3d-card {
+            background-color: theme('colors.surface-container-lowest');
+            border: 2px solid theme('colors.surface-container-highest');
+            border-bottom-width: 4px;
+            transition: all 0.1s ease-in-out;
+            border-radius: theme('borderRadius.xl');
+        }
+        
+        .flat-3d-card:active {
+            transform: translateY(2px);
+            border-bottom-width: 2px;
+        }
+
+        .syntax-highlight-verb {
+            background-color: rgba(239, 65, 53, 0.1);
+            border-bottom: 2px solid theme('colors.syntax-verb');
+        }
+        
+        .syntax-highlight-noun {
+            background-color: rgba(0, 85, 164, 0.1);
+            border-bottom: 2px solid theme('colors.syntax-noun');
+        }
+        
+        .syntax-highlight-adj {
+            background-color: rgba(88, 204, 2, 0.1);
+            border-bottom: 2px solid theme('colors.syntax-adj');
+        }
+        
+        /* Hide scrollbar for category pills */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background pb-32">
+<!-- Top App Bar - Replicated from JSON intent but adapted for Search -->
+<header class="fixed top-0 w-full z-50 px-margin-mobile h-16 bg-surface dark:bg-on-surface border-b-2 border-surface-container-highest dark:border-outline flex justify-center items-center">
+<div class="w-full max-w-[680px] relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-ink-medium" style="font-variation-settings: 'FILL' 0;">search</span>
+<input class="w-full h-10 pl-10 pr-4 bg-surface-container-low border-2 border-surface-container-highest rounded-full focus:outline-none focus:border-primary font-body-ui text-body-ui placeholder:text-ink-medium transition-colors" placeholder="Search rules..." type="text"/>
+</div>
+</header>
+<!-- Main Content Container (Fluid-to-Fixed) -->
+<main class="w-full max-w-[680px] mx-auto pt-20 px-margin-mobile md:px-margin-desktop md:pt-24 flex flex-col gap-8">
+<!-- Header -->
+<section class="mt-4">
+<h1 class="font-headline-lg text-headline-lg text-primary tracking-tight">Grammar Rulebook</h1>
+<p class="font-body-reading text-body-reading text-ink-medium mt-2">Master the mechanics of the language.</p>
+</section>
+<!-- Categories (Horizontal Scroll) -->
+<nav class="flex gap-3 overflow-x-auto no-scrollbar py-2 -mx-margin-mobile px-margin-mobile md:mx-0 md:px-0">
+<button class="shrink-0 px-6 py-2 rounded-full bg-primary text-on-primary font-syntax-label text-syntax-label font-bold border-2 border-primary border-b-4 active:border-b-2 active:translate-y-[2px] transition-all">All</button>
+<button class="shrink-0 px-6 py-2 rounded-full bg-surface-container-lowest text-syntax-verb font-syntax-label text-syntax-label font-bold border-2 border-surface-container-highest border-b-4 hover:bg-surface-container-low active:border-b-2 active:translate-y-[2px] transition-all">Verbs</button>
+<button class="shrink-0 px-6 py-2 rounded-full bg-surface-container-lowest text-syntax-noun font-syntax-label text-syntax-label font-bold border-2 border-surface-container-highest border-b-4 hover:bg-surface-container-low active:border-b-2 active:translate-y-[2px] transition-all">Nouns</button>
+<button class="shrink-0 px-6 py-2 rounded-full bg-surface-container-lowest text-syntax-adj font-syntax-label text-syntax-label font-bold border-2 border-surface-container-highest border-b-4 hover:bg-surface-container-low active:border-b-2 active:translate-y-[2px] transition-all">Syntax</button>
+<button class="shrink-0 px-6 py-2 rounded-full bg-surface-container-lowest text-primary font-syntax-label text-syntax-label font-bold border-2 border-surface-container-highest border-b-4 hover:bg-surface-container-low active:border-b-2 active:translate-y-[2px] transition-all">Phonetics</button>
+</nav>
+<!-- Rules Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Card 1: Verbs -->
+<article class="flat-3d-card p-6 flex flex-col gap-4 cursor-pointer group">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-2">
+<span class="px-2 py-1 rounded bg-syntax-verb/10 text-syntax-verb font-label-caps text-label-caps uppercase">Verbs</span>
+<span class="material-symbols-outlined text-syntax-verb text-sm" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+</div>
+<span class="material-symbols-outlined text-outline-variant group-hover:text-primary transition-colors">arrow_forward</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2">Passé Composé vs Imparfait</h3>
+<p class="font-body-reading text-body-reading text-on-surface-variant text-sm leading-relaxed line-clamp-2">Understand when to use the completed past versus the continuous past in storytelling.</p>
+</div>
+<div class="mt-auto pt-4 border-t border-surface-container-highest">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-ink-medium">Mastery</span>
+<span class="font-syntax-label text-syntax-label text-success">85%</span>
+</div>
+<div class="h-2 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-success rounded-full w-[85%]"></div>
+</div>
+</div>
+</article>
+<!-- Card 2: Nouns -->
+<article class="flat-3d-card p-6 flex flex-col gap-4 cursor-pointer group">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-2">
+<span class="px-2 py-1 rounded bg-syntax-noun/10 text-syntax-noun font-label-caps text-label-caps uppercase">Nouns</span>
+</div>
+<span class="material-symbols-outlined text-outline-variant group-hover:text-primary transition-colors">arrow_forward</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2">The Gender of Nouns</h3>
+<p class="font-body-reading text-body-reading text-on-surface-variant text-sm leading-relaxed line-clamp-2">Patterns and exceptions for determining masculine and feminine assignments.</p>
+</div>
+<div class="mt-auto pt-4 border-t border-surface-container-highest">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-ink-medium">Mastery</span>
+<span class="font-syntax-label text-syntax-label text-warning">42%</span>
+</div>
+<div class="h-2 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-warning rounded-full w-[42%]"></div>
+</div>
+</div>
+</article>
+<!-- Card 3: Phonetics -->
+<article class="flat-3d-card p-6 flex flex-col gap-4 cursor-pointer group md:col-span-2">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-2">
+<span class="px-2 py-1 rounded bg-primary/10 text-primary font-label-caps text-label-caps uppercase">Phonetics</span>
+<span class="px-2 py-1 rounded bg-secondary/10 text-secondary font-label-caps text-label-caps uppercase">Advanced</span>
+</div>
+<span class="material-symbols-outlined text-outline-variant group-hover:text-primary transition-colors">arrow_forward</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2">Liaison Rules</h3>
+<p class="font-body-reading text-body-reading text-on-surface-variant text-sm leading-relaxed">Mastering mandatory, optional, and forbidden liaisons to sound more natural in spoken conversation.</p>
+</div>
+<div class="mt-auto pt-4 border-t border-surface-container-highest">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-ink-medium">Mastery</span>
+<span class="font-syntax-label text-syntax-label text-ink-medium">0%</span>
+</div>
+<div class="h-2 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-surface-dim rounded-full w-[0%]"></div>
+</div>
+</div>
+</article>
+</div>
+</main>
+<!-- Bottom Nav Bar (From JSON) -->
+<!-- Navigation Logic: The active tab is "Rules" based on JSON arrays ("label_texts": ["Learn", "Review", "Rules", "Center"]) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center bg-surface dark:bg-on-surface pb-safe border-t-2 border-surface-container-highest dark:border-outline h-20">
+<!-- Learn (Inactive) -->
+<a class="flex flex-col items-center justify-center text-ink-medium dark:text-outline-variant pt-2 w-full hover:text-primary-container dark:hover:text-primary-fixed-dim" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 0;">menu_book</span>
+<span class="font-label-caps text-label-caps">Learn</span>
+</a>
+<!-- Review (Inactive) -->
+<a class="flex flex-col items-center justify-center text-ink-medium dark:text-outline-variant pt-2 w-full hover:text-primary-container dark:hover:text-primary-fixed-dim" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 0;">history_edu</span>
+<span class="font-label-caps text-label-caps">Review</span>
+</a>
+<!-- Rules (Active) -->
+<a class="flex flex-col items-center justify-center text-primary dark:text-primary-fixed border-t-4 border-primary dark:border-primary-fixed pt-1 w-full scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined mb-1 text-primary dark:text-primary-fixed" style="font-variation-settings: 'FILL' 1;">gavel</span>
+<span class="font-label-caps text-label-caps text-primary dark:text-primary-fixed">Rules</span>
+</a>
+<!-- Center (Inactive) -->
+<a class="flex flex-col items-center justify-center text-ink-medium dark:text-outline-variant pt-2 w-full hover:text-primary-container dark:hover:text-primary-fixed-dim" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 0;">analytics</span>
+<span class="font-label-caps text-label-caps">Center</span>
+</a>
+</nav>
+<!-- Desktop Side Nav (Hidden on Mobile, Visible on Desktop) -->
+<nav class="hidden md:flex flex-col fixed left-0 top-16 bottom-0 w-64 bg-surface border-r-2 border-surface-container-highest z-40 py-8">
+<div class="px-6 pb-8">
+<span class="font-headline-md text-headline-md font-black text-primary">Brand Logo</span>
+</div>
+<ul class="flex flex-col gap-2 px-4">
+<li>
+<a class="flex items-center gap-4 px-4 py-3 rounded-xl text-ink-medium hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">menu_book</span>
+<span class="font-body-ui text-body-ui font-bold">Learn</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-4 px-4 py-3 rounded-xl text-ink-medium hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">history_edu</span>
+<span class="font-body-ui text-body-ui font-bold">Review</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-4 px-4 py-3 rounded-xl bg-primary-fixed/30 text-primary border-l-4 border-primary" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">gavel</span>
+<span class="font-body-ui text-body-ui font-bold">Rules</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-4 px-4 py-3 rounded-xl text-ink-medium hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">analytics</span>
+<span class="font-body-ui text-body-ui font-bold">Center</span>
+</a>
+</li>
+</ul>
+</nav>
+</body></html>
