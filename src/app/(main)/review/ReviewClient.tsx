@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { CheckCircle2, RotateCcw } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
@@ -31,15 +31,47 @@ type Mistake = {
   vocabulary: Pick<Vocabulary, 'word' | 'base_translation'> | null
 }
 
-export default function ReviewClient({ initialDueWords, initialMistakes }: { initialDueWords: DueWord[]; initialMistakes: Mistake[] }) {
-  const [words, setWords] = useState(initialDueWords)
-  const [mistakes, setMistakes] = useState(initialMistakes)
+export default function ReviewClient() {
+  const [words, setWords] = useState<DueWord[]>([])
+  const [mistakes, setMistakes] = useState<Mistake[]>([])
   const [index, setIndex] = useState(0)
   const [showAnswer, setShowAnswer] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
   const item = words[index]
+
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user || cancelled) return
+
+      const [dueResult, mistakesResult] = await Promise.all([
+        supabase
+          .from('user_vocab_progress')
+          .select('*, vocabulary(*)')
+          .eq('user_id', user.id)
+          .lte('next_review_at', new Date().toISOString())
+          .order('next_review_at')
+          .limit(20),
+        supabase
+          .from('user_mistakes')
+          .select('*, vocabulary(word, base_translation)')
+          .eq('user_id', user.id)
+          .eq('is_resolved', false)
+          .order('last_error_at', { ascending: false })
+          .limit(10),
+      ])
+      if (cancelled) return
+      setWords((dueResult.data ?? []) as DueWord[])
+      setMistakes((mistakesResult.data ?? []) as Mistake[])
+    })().catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const score = async (quality: number) => {
     if (!item) return

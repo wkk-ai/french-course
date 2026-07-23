@@ -2,11 +2,20 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import type { GrammarRule } from '@/lib/course'
-import { createClient } from '@/utils/supabase/server'
+import { createStaticClient } from '@/utils/supabase/static'
+
+export async function generateStaticParams() {
+  const supabase = createStaticClient()
+  if (!supabase) return []
+  const { data } = await supabase.from('grammar_rules').select('slug')
+  return (data ?? []).map((rule) => ({ slug: rule.slug }))
+}
 
 export default async function RuleDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const supabase = await createClient()
+  const supabase = createStaticClient()
+  if (!supabase) notFound()
+
   const { data } = await supabase.from('grammar_rules').select('*').eq('slug', slug).maybeSingle()
   if (!data) notFound()
 

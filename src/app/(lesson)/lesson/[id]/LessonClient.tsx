@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { hasLessonContent } from '@/lib/course'
 import { BookOpen, ChevronRight, Eye, Flame, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import type { GrammarRule, LessonContent, VerbConjugation, VocabularyWord, WordToken } from '@/lib/course'
@@ -32,7 +33,47 @@ export default function LessonClient({
   const [answers, setAnswers] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [gate, setGate] = useState<'loading' | 'ready' | 'login' | 'locked'>('loading')
   const router = useRouter()
+
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        if (!cancelled) setGate('login')
+        router.replace('/login')
+        return
+      }
+
+      const [{ data: progress }, { data: authored }] = await Promise.all([
+        supabase.from('user_chapter_progress').select('chapter_id, status').eq('user_id', user.id),
+        supabase.from('chapters').select('id, lesson_content, order_index, module:modules(order_index)'),
+      ])
+      const orderedAuthored = (authored ?? [])
+        .filter((item) => hasLessonContent(item.lesson_content))
+        .sort((left, right) => {
+          const leftModule = Array.isArray(left.module) ? left.module[0] : left.module
+          const rightModule = Array.isArray(right.module) ? right.module[0] : right.module
+          return (leftModule?.order_index ?? 0) - (rightModule?.order_index ?? 0) || left.order_index - right.order_index
+        })
+      const completed = new Set((progress ?? []).filter((item) => item.status === 'completed').map((item) => item.chapter_id))
+      const firstIncomplete = orderedAuthored.find((item) => !completed.has(item.id))?.id
+      if (!completed.has(chapterId) && firstIncomplete !== chapterId) {
+        if (!cancelled) setGate('locked')
+        router.replace('/')
+        return
+      }
+      if (!cancelled) setGate('ready')
+    })().catch(() => {
+      if (!cancelled) setGate('login')
+      router.replace('/login')
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [chapterId, router])
   const vocabularyById = useMemo(() => new Map(vocabulary.map((word) => [word.id, word])), [vocabulary])
   const exercises = content.exercises ?? []
   const answeredAll = exercises.every((exercise) => answers[exercise.id] !== undefined)
@@ -69,6 +110,14 @@ export default function LessonClient({
     } finally {
       setLoading(false)
     }
+  }
+
+  if (gate !== 'ready') {
+    return (
+      <main className="mx-auto flex min-h-screen max-w-[680px] items-center justify-center p-6">
+        <p className="text-on-surface-variant">{gate === 'locked' ? 'This lesson is not unlocked yet.' : 'Loading lesson…'}</p>
+      </main>
+    )
   }
 
   return (

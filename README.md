@@ -31,7 +31,27 @@ npm run dev
 ```bash
 npm run lint
 npm run build
+npm run build:pages   # same as CI (GitHub Pages base path)
 ```
+
+## GitHub Pages
+
+The app is a **static export** (`out/`) suitable for GitHub Pages. Supabase stays hosted; the browser loads course data and user progress at runtime.
+
+1. In the repo: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+2. Add repository secrets: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+3. Push to `main`; the workflow `.github/workflows/deploy-pages.yml` builds and deploys.
+4. Site URL: `https://wkk-ai.github.io/french-course/`
+5. In **Supabase Auth → URL Configuration**, set Site URL and redirect URLs to that URL (and `/login`).
+
+Local preview of the Pages build:
+
+```bash
+npm run build:pages
+npx serve out
+```
+
+For day-to-day development, use `npm run dev` (no base path). Only set `NEXT_PUBLIC_BASE_PATH=/french-course` when building for GitHub Pages.
 
 ## Hosted Supabase checklist
 

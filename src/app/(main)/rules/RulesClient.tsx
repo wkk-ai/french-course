@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { createClient } from '@/utils/supabase/client';
 import Link from 'next/link';
 import { Search, ChevronRight } from 'lucide-react';
 import type { GrammarRule } from '@/lib/course';
@@ -18,9 +19,27 @@ type Mastery = {
   correct_attempts: number;
 };
 
-export default function RulesClient({ rules, mastery }: { rules: GrammarRule[]; mastery: Mastery[] }) {
+export default function RulesClient({ rules }: { rules: GrammarRule[] }) {
   const [activeCategory, setActiveCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [mastery, setMastery] = useState<Mastery[]>([]);
+
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user || cancelled) return
+      const { data } = await supabase
+        .from('user_grammar_mastery')
+        .select('grammar_category, total_attempts, correct_attempts')
+        .eq('user_id', user.id)
+      if (!cancelled) setMastery(data ?? [])
+    })().catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const categories = ['All', ...Array.from(new Set(rules.map(r => r.category)))];
 
