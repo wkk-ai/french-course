@@ -11,6 +11,7 @@ import { isCanonicalChapterId } from '@/lib/course-catalog'
 import { calculateLessonScore } from '@/lib/lesson-score'
 import { resolveLessonContent } from '@/lib/lesson-content'
 import { createClient } from '@/utils/supabase/client'
+import { enqueueLocalVocabulary } from '@/lib/local-vocab-vault'
 
 type Stage = 'brief' | 'reading' | 'conversation' | 'exercise'
 
@@ -200,6 +201,51 @@ export default function LessonClient({
     </p>
   )
 
+  const enqueueLessonVocabulary = async (userId: string) => {
+    const lemmaIds = [
+      ...new Set(
+        [...readingParagraphs, ...conversationLines.flatMap((line) => [{ tokens: line.tokens }])]
+          .flatMap((paragraph) => paragraph.tokens)
+          .map((token) => token.lemmaId)
+          .filter((lemmaId): lemmaId is string => Boolean(lemmaId)),
+      ),
+    ]
+    if (!lemmaIds.length) return
+    try {
+      const supabase = createClient()
+      const now = new Date().toISOString()
+      // Ensure dictionary rows exist so Review joins work for bundled Module 1 lemmas.
+      const rows = lemmaIds
+        .map((id) => vocabularyById.get(id))
+        .filter((word): word is VocabularyWord => Boolean(word))
+        .map((word) => ({
+          id: word.id,
+          word: word.word,
+          base_translation: word.base_translation,
+          part_of_speech: word.part_of_speech,
+          gender: word.gender,
+          register: word.register,
+          ipa_pronunciation: word.ipa_pronunciation,
+          is_idiom: word.is_idiom,
+          is_slang: word.is_slang,
+          idiom_explanation: word.idiom_explanation,
+        }))
+      if (rows.length) await supabase.from('vocabulary').upsert(rows, { onConflict: 'id' })
+      await supabase.from('user_vocab_progress').upsert(
+        lemmaIds.map((vocab_id) => ({
+          user_id: userId,
+          vocab_id,
+          next_review_at: now,
+          last_reviewed_at: null,
+        })),
+        { onConflict: 'user_id,vocab_id', ignoreDuplicates: true },
+      )
+      enqueueLocalVocabulary(lemmaIds)
+    } catch {
+      // Vocab Vault seeding is best-effort.
+    }
+  }
+
   const completeLesson = async () => {
     if (!answeredAll) return
     setLoading(true)
@@ -221,6 +267,8 @@ export default function LessonClient({
         p_words_read: content.wordCount ?? 0,
         p_grammar_results: grammarResults,
       })
+
+      await enqueueLessonVocabulary(user.id)
 
       if (rpcError) {
         const { error: progressError } = await supabase.from('user_chapter_progress').upsert({

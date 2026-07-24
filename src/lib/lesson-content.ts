@@ -7,8 +7,11 @@ import {
 } from '@/lib/module1-content'
 
 export function resolveLessonContent(chapterId: string, content: unknown): LessonContent | null {
+  // Prefer authored Module 1 bundle over thin DB stubs that would shadow it.
+  const bundled = MODULE1_LESSONS[chapterId]
+  if (bundled) return bundled
   if (hasLessonContent(content)) return content
-  return MODULE1_LESSONS[chapterId] ?? null
+  return null
 }
 
 export function withResolvedLessonContent<T extends { id: string; lesson_content: unknown }>(chapters: T[]): T[] {

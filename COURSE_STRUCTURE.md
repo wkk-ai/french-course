@@ -4,331 +4,373 @@
 | --- | --- |
 | **Product** | L'Art du Français (reading, grammar, vocabulary) |
 | **Companion doc** | [PRD.md](./PRD.md) |
-| **Recommended duration** | **12 months** (standard track) |
-| **Outcome target** | **CEFR B2+ reading** with **~5,500 core lemmas** + grammar through advanced subjunctive, complex syntax, and high-register text |
+| **Recommended duration** | **18–24 months** (standard track) |
+| **Outcome target** | **CEFR C1 reading** · **~8,000 tracked lemmas** · full tense/mood system · register & nuance |
+| **Shipped today** | **Module 1 only** (4 deep chapters) · Review/Vocab Vault wired · Modules 2–12 = pathway shell |
 
 ---
 
-## 1. How long should this course be?
+## 0. Honest audit (read this first)
 
-### 1.1 What “fluent” means for this app
+### Are we covering “the entire French language”?
 
-This product does **not** train speaking or live conversation. “Fluent” here means:
+**No — not yet.** A fluent reader of French needs roughly:
 
-* Reading **news, blogs, novels, and administrative French** with dictionary support only for niche terms.
-* Understanding **all standard tenses and moods** in context (including subjunctive and literary past).
-* Recognizing **~5,000–6,500 high-utility lemmas** (roughly **B2/C1 reading** vocabulary).
-* Parsing **idioms, register shifts, and formal syntax** (*dont*, *ce dont*, *quoi que*, passé simple in print).
+| Domain | What “fluent reading” requires | Status in this product |
+| --- | --- | --- |
+| Vocabulary | ~8,000–10,000 high-utility lemmas + collocations | **~300** bundled in Module 1; rest planned |
+| Grammar | All indicative tenses, conditionnel, subjunctive, passive, relatives, discourse | **Present + A1 foundations** shipped; rest mapped |
+| Nuance | Register (*tu/vous*, soutenu/familier/argot), false friends, connectors, idioms | Started in Module 1 briefs; deep work in later modules |
+| Volume | ~150k–250k words of guided reading over the course | Module 1 ≈ **1,100** reading words total |
+| Retention | SRS + mistake remediation for months | **Review page live**; lessons enqueue words + grammar misses |
 
-That is a **multi-thousand-hour** outcome compressed into **structured reading**. It cannot honestly fit in 5–6 months unless the learner already knows another Romance language and studies **2+ hours daily**.
+Finishing **chapter 1.1 in one minute** was a real signal that early chapters were demos, not study units. Module 1 is now rebuilt to **~30–60+ minutes per chapter**. That still leaves **~92 planned chapters** unauthored.
 
-### 1.2 Vocabulary math (why duration matters)
+### Why 12 × 4 was too weak
 
-| Milestone | Approx. cumulative lemmas | Typical CEFR |
+| Old plan | Problem |
+| --- | --- |
+| 12 modules × **4** chapters = **48** weeks | One chapter/week cannot absorb A1→C1 if each chapter is thin |
+| “18+ lemmas” quality bar (Module 1) | Far below the **60–100 new lemmas/week** adults need for multi-year fluency |
+| ~30-token readings | Not enough input for grammar to stick |
+| 10 exercises | Not enough retrieval practice |
+
+**New default:** **12 modules × 8 chapters = 96 chapters**, each a **full study session** (not a snack). Calendar ≈ **18–24 months** at 1 chapter/week + weekly Review.
+
+### Shipped vs planned (snapshot)
+
+| Layer | Planned | Shipped |
+| --- | ---: | ---: |
+| Modules (pathway) | 12 | 12 shell titles in DB |
+| Chapters (pathway) | **96** (target) / 48 shell today | **4 playable** (Module 1) |
+| Tracked lemmas | ~8,000 | **~297** in Module 1 bundle |
+| Review / Vocab Vault UI | Yes | **Yes** — lessons enqueue lemmas; mistakes appear under Remembrance |
+| Modules 2–12 lessons | Full map below | **Not authored yet** |
+
+---
+
+## 1. What “fluent” means here
+
+This product trains **reading + grammar + vocabulary**, not speaking.
+
+Fluency target = you can:
+
+* Read **news, essays, novels, admin French** with a dictionary only for niche terms
+* Parse **all standard tenses/moods** (including subjunctive & literary past recognition)
+* Feel **register** (soutenu / courant / familier / argot) and common idioms
+* Hold **~8,000 core lemmas** in long-term memory via SRS
+
+That is **years of input** for most adults. Compressing it into six months produces recognition without retention.
+
+### Vocabulary math
+
+| Milestone | Cumulative lemmas | CEFR (reading) |
 | --- | ---: | --- |
-| Survival social French | 800–1,000 | A1 |
-| Daily life + simple past/future | 1,500–2,000 | A2 |
-| Opinions, media, most tenses | 2,500–3,500 | B1 |
-| Abstract topics, nuance, idioms | 4,000–5,000 | B2 |
-| Literary/formal, rare collocations | 5,500–7,000+ | C1 (reading) |
+| Survival social | 1,000 | A1 |
+| Daily life + past/future | 2,200 | A2 |
+| Opinions, media, most tenses | 4,000 | B1 |
+| Abstract topics, nuance | 6,000 | B2 |
+| Literary / formal / idioms | **8,000+** | **C1 reading** |
 
-Sustainable acquisition for most adults: **~8–12 new lemmas/day** that stick (with SRS), plus grammar depth. Over **12 months** at **~10 lemmas/day** ≈ **3,600 new** + **~2,000** from reinforcement, idioms, and derived forms → **~5,500** realistic course total.
+Sustainable adult pace: **~10–15 new lemmas/day that stick**. Over **20 months** ≈ **6,000–9,000** new + reinforcement → **~8,000** course total is realistic.
 
-### 1.3 Recommended tracks (pick one default in the app)
+### Tracks
 
-| Track | Calendar | Daily commitment | Reading volume | End level (typical) |
-| --- | ---: | --- | --- | --- |
-| **Intensive** | **9 months** | 55–70 min (~450 words/day) | ~120k words | Strong B1 → B2 |
-| **Standard (recommended)** | **12 months** | 40–50 min (~300 words/day) | ~110k words | **B2 reading** |
-| **Relaxed** | **18 months** | 25–35 min (~200 words/day) | ~110k words | B1+ → B2 |
+| Track | Calendar | Daily commitment | End level |
+| --- | ---: | --- | --- |
+| **Intensive** | **15 months** | 60–75 min | Strong B2 → C1 reading |
+| **Standard (recommended)** | **18–24 months** | 45–60 min | **C1 reading prep** |
+| **Relaxed** | **30 months** | 25–35 min | B2+ → C1 |
 
-**Recommendation for the product:** Ship content for the **12-month / 48-chapter** path as the default “full course.” Offer **18-month** as the same chapters with gentler weekly targets. Treat **9-month** as “skip optional enrichment readings,” not less grammar.
-
-**Why not 5–6 months?** You would either (a) overload cognitive load, (b) skip moods/tenses learners need for real text, or (c) teach recognition-only without retention. Six months is reasonable for **A2 completion**, not for “most common vocabulary + full grammar variance.”
+**5–6 months** is only honest for an **A2 bridge**, not “whole French.”
 
 ---
 
-## 2. Course architecture
+## 2. Course architecture (revised)
 
 ```
-Course (12 modules ≈ 12 months)
- └── Module (theme + CEFR band)
-      └── Chapter (1 week on standard track)
-           ├── Pre-lesson brief (theory)
-           ├── Guided reading (omni-clickable)
-           ├── Vocabulary set (SRS seed)
-           ├── Grammar drills (contextual)
-           └── Chapter check (mixed tense/register)
+Course (12 modules ≈ 18–24 months)
+ └── Module (theme + CEFR band · 8 chapters · ~5–7 weeks)
+      └── Chapter (1 deep study unit)
+           ├── Pre-lesson brief (theory + nuance traps)
+           ├── Guided reading (250–800+ words, omni-clickable)
+           ├── Conversation / routine speech
+           ├── Vocabulary set (SRS seed on complete)
+           ├── Grammar drills (20–30 items)
+           └── Spiral review hooks → Review tab
 ```
 
 | Level | Modules | Chapters | New lemmas (approx.) | Grammar focus |
 | ---: | ---: | ---: | ---: | --- |
-| A1 | 1–2 | 8 | 900 | Present, articles, negation, questions, near future |
-| A2 | 3–4 | 8 | 900 | Passé composé, imparfait, futur simple, pronouns |
-| B1 | 5–7 | 12 | 1,400 | Plus-que-parfait, conditionnel, relative pronouns, subjunctive intro |
-| B2 | 8–10 | 12 | 1,500 | Subjunctive full, passive, causative, discourse connectors |
-| C1 prep | 11–12 | 8 | 800 | Passé simple (recognition), formal register, idioms, media/literary |
+| A1 | 1–2 | 16 | 1,400 | Present, articles, negation, questions, near future, possessives |
+| A2 | 3–4 | 16 | 1,400 | Passé composé, imparfait, futur, pronouns *y/en*, COD/COI |
+| B1 | 5–7 | 24 | 2,200 | PQP, conditionnel, relatives, subjunctive intro, discourse |
+| B2 | 8–10 | 24 | 2,000 | Full subjunctive, passive, causative, connectors, reported speech |
+| C1 prep | 11–12 | 16 | 1,000 | Passé simple (recognition), register, admin, literary, idioms |
 
-**Totals:** **12 modules · 48 chapters · ~5,500 tracked lemmas** (plus optional **+400** enrichment in Module 12).
+**Totals (target):** **12 modules · 96 chapters · ~8,000 tracked lemmas**.
 
-**Weekly rhythm (standard track):**
+**Weekly rhythm (standard):** 4–5 study days (brief → reading → dialogue → drills) · **1 Review day** · 1–2 rest/flex.
 
-* **4 study days:** brief → reading → exercises.
-* **1 review day:** Vocab Vault + mistake remediation.
-* **2 rest/flex days:** streak banking, optional “In The Wild” paste.
+### Chapter quality bar (non-negotiable)
 
----
+Every authored chapter must meet:
 
-## 3. Module & chapter map (full path)
-
-Each chapter lists: **grammar**, **new lemmas (count)**, **vocabulary themes**, **reading scenario**, **exercise types**.
-
-Lemma lists below are **curriculum targets** (dictionary entries to author in content). Words marked *(review)* spiral from earlier chapters.
-
----
-
-### Module 1 — Les Fondamentaux *(A1 · Month 1)*
-
-**Module description:** Alphabet awareness, pronunciation (silent letters), *être/avoir*, gender, singular/plural, essential politeness. First clickable readings about identity, time, café life, and family — each chapter ends with a **spoken-routine dialogue** so learners rehearse real turns.
-
-**Chapter quality bar (shipped content):**
-- **≥ 15 new lemmas** made clickable in reading and/or dialogue
-- **≥ 10 graded exercises** (locked after answer; wrong answers reveal the correct option)
-- **1 conversation scene** (multi-turn routine speech applying the chapter grammar)
-- Theory brief with bold/italic emphasis (not raw markdown)
-
-| Ch | Title | Grammar | New | Vocabulary themes & target words | Conversation routine | Exercise mix (10+) |
-| ---: | --- | --- | ---: | --- | --- | --- |
-| 1.1 | Bonjour, je m'appelle… | Subject pronouns; **present** *être*; *c'est* vs *il/elle est*; greetings | 18+ | **Greetings:** bonjour, bonsoir, salut, au revoir, merci, s'il vous plaît, pardon. **Identity:** je, tu, il, elle, s'appeler, habiter, ville, français/française, ami/amie. | First meeting in Paris: introduce name, nationality, city, *comment ça va* | Form of *être*; *c'est* vs *il/elle est*; pronoun choice; greeting register; dialogue comprehension |
-| 1.2 | Les chiffres et le calendrier | Numbers; days; *avoir* for age; *aujourd'hui / demain / hier* | 18+ | **Days:** lundi–dimanche. **Time:** aujourd'hui, demain, hier, semaine, mois, année, anniversaire. **Numbers:** dix, quinze, vingt, trente, ans. | Planning the week + stating age before a birthday | Age with *avoir*; day order; calendar vocab; dialogue detail questions |
-| 1.3 | Au café | Present of *prendre/vouloir/aimer/payer*; articles *un/une* vs *du/de la/de l'* | 18+ | **Food/drink:** café, thé, eau, lait, sucre, croissant, pain, addition. **People/verbs:** serveur, prendre, vouloir, aimer, payer, commander, s'il vous plaît. | Ordering with a waiter: drinks, food, sugar, bill | Articles; verb forms; politeness; café vocab; dialogue orders |
-| 1.4 | Ma famille | Possessives *mon/ma/mes*; family nouns; *avoir* + person | 18+ | **Family:** famille, père, mère, parents, frère, sœur, fils, fille, enfant. **Possessives/traits:** mon, ma, mes, petit, grand, jeune; place: Lyon. | Friend asks about siblings and where parents live | Possessive agreement; *avoir* + family; kinship terms; dialogue residence |
-
-**Module checkpoint:** 250-word biography reading; present-tense Q&A; article/gender quiz; replay all four conversation scenes aloud (self-check).
+| Block | Minimum |
+| --- | --- |
+| Theory brief | **900+ characters**, with **nuance traps** (register, false friends, silent letters) |
+| Guided reading | **220+ French words** (connected prose) |
+| Conversation | **12+ turns** applying the chapter grammar |
+| New lemmas | **60–100** made clickable (meanings + example phrase) |
+| Exercises | **22–30**, locked after answer, wrong → correct + explanation |
+| Study time | **~30–60+ minutes** for a careful learner |
 
 ---
 
-### Module 2 — La vie quotidienne *(A1 · Month 2)*
+## 3. Module map (96 chapters)
 
-**Module description:** Routine, time, places in town, weather, basic negation (*ne…pas*), interrogatives (*est-ce que*, inversion intro).
+Lemma lists are **curriculum targets**. Words marked *(review)* spiral from earlier chapters.
 
-| Ch | Title | Grammar | New | Vocabulary themes & target words |
+> **Implementation note:** The live app currently exposes a **48-chapter pathway shell**. Module 1’s **4 chapters** are fully authored to the quality bar above. Expanding the DB pathway from 48 → 96 chapters is the next platform step; until then, author denser content inside each module’s chapters and split modules when the pathway is upgraded.
+
+---
+
+### Module 1 — Les Fondamentaux *(A1 · Weeks 1–8)* — **SHIPPED (4 deep chapters)**
+
+**Goal:** Identity, politeness, *être/avoir*, gender, greetings, numbers/time, café, family — with **tu/vous** and register awareness from day one.
+
+| Ch | Title | Grammar | New | Focus |
 | ---: | --- | --- | ---: | --- |
-| 2.1 | Ma journée | **Present** -IR/-RE; reflexive routine (*se lever*); time *à*, *de…à* | 75 | **Routine:** se réveiller, se laver, s'habiller, travailler, étudier, dormir, commencer, finir, attendre, partir. **Time:** matin, soir, midi, quart, demi. |
-| 2.2 | En ville | Prepositions *dans*, *sur*, *chez*, *à*; *il y a*; place names | 70 | **Places:** rue, place, magasin, supermarché, banque, poste, pharmacie, hôpital, gare, métro, parc. **Direction:** tout droit, à gauche, à droite, près, loin. |
-| 2.3 | Le temps qu'il fait | Impersonal *il*; weather; clothing | 65 | **Weather:** il fait beau/mauvais, chaud, froid, pluie, neige, vent, nuage, soleil. **Clothes:** pantalon, robe, veste, chaussures, chapeau, porter. |
-| 2.4 | Ce n'est pas possible | **Negation** *ne…pas/jamais/plus*; *personne*, *rien*; *de* after negated verb | 60 | **Opinion:** possible, impossible, important, facile, difficile, vrai, faux. **Verbs:** comprendre, expliquer, chercher, trouver. |
+| 1.1 | Bonjour, je m'appelle… | Subject pronouns; *être*; *c'est* vs *il/elle est*; greetings | 70+ | First meetings, nationality, *habiter*, politeness ladder |
+| 1.2 | Les chiffres et le calendrier | Numbers; days; *avoir* for age; time adverbs | 70+ | Age, week planning, *aujourd'hui/demain/hier* |
+| 1.3 | Au café | *prendre/vouloir/aimer/payer*; articles & partitives | 70+ | Ordering, bill, *s'il vous plaît* |
+| 1.4 | Ma famille | *mon/ma/mes*; kinship; *avoir* + people | 70+ | Family descriptions, agreement |
 
-**Module checkpoint:** Daily schedule paragraph; map-based reading; negation transformation drills.
+**Shipped depth (Module 1):** ~297 lemmas in dictionary · ~1,100 reading words · 24 exercises × 4 · 14–16 dialogue turns each.
+
+**When pathway expands to 8 chapters/module**, split Module 1 further into: alphabet/phonetics, *aller* + places, questions (*est-ce que*), and a Module 1 checkpoint reading.
 
 ---
 
-### Module 3 — Passé et souvenirs *(A2 · Month 3)*
+### Module 2 — La vie quotidienne *(A1 · Weeks 9–16)*
 
-**Module description:** **Passé composé** with *avoir/être*, past time markers, first contrast with **imparfait** (background vs event).
+Routine, town, weather, negation, questions.
 
-| Ch | Title | Grammar | New | Vocabulary themes & target words |
+| Ch | Title | Grammar | New | Themes |
 | ---: | --- | --- | ---: | --- |
-| 3.1 | Hier soir | **Passé composé** (avoir); time adverbs | 80 | **Past markers:** hier, la semaine dernière, soudain, d'abord, ensuite, enfin. **Events:** arriver, rentrer, sortir, rencontrer, téléphoner, écrire, lire, voir, faire. |
-| 3.2 | Vacances | PC with **être** (DR MRS VANDERTRAMP); agreement | 75 | **Travel:** partir, arriver, rester, tomber, naître, mourir, voyage, plage, montagne, hôtel, valise, billet. |
-| 3.3 | Quand j'étais petit | **Imparfait** formation & use (habit, description) | 85 | **Childhood:** école, cours, professeur, ami, jouer, grandir, toujours, souvent, parfois. **Description:** heureux, triste, timide. |
-| 3.4 | Il pleuvait | **PC vs imparfait** in narrative | 70 | **Storytelling:** pendant que, lorsque, soudain, déjà, encore. **Verbs:** entrer, sonner, courir, crier, rire, pleurer. |
-
-**Module checkpoint:** 400-word vacation narrative; tense choice (PC vs imparfait) contextual MCQ.
-
----
-
-### Module 4 — Futur, projets et people *(A2 · Month 4)*
-
-**Module description:** **Futur simple**, **near future** (*aller* + inf.), direct/indirect object pronouns, *y* and *en*.
-
-| Ch | Title | Grammar | New | Vocabulary themes & target words |
-| ---: | --- | --- | ---: | --- |
-| 4.1 | Demain | **Futur simple** regular + key irregulars | 75 | **Projects:** demain, l'année prochaine, bientôt, planifier, espérer, devenir, pouvoir, devoir, vouloir (futur). **Work/study:** emploi, stage, université, diplôme. |
-| 4.2 | Je te le dis | **COD/COI** pronouns (*le, la, les, lui, leur*) | 70 | **Communication:** dire, raconter, demander, répondre, envoyer, recevoir, message, courriel, lettre. |
-| 4.3 | On y va | **Y**, **en**; *on* vs *nous* | 65 | **Places:** y (there), en (some/of them); **Verbs:** aller, venir, entrer, sortir, y avoir. |
-| 4.4 | Les fêtes | Comparative *plus/moins/aussi…que*; superlative | 80 | **Celebrations:** Noël, anniversaire, cadeau, fête, inviter, célébrer. **Qualities:** meilleur, pire, autant. |
-
-**Module checkpoint:** Letter about future plans; pronoun replacement in contextual sentences.
+| 2.1 | Ma journée | Present -ER/-IR/-RE; reflexives | 90 | se lever, travailler, matin/soir |
+| 2.2 | Les horaires | Time *à/de…à*; *quart/demi* | 80 | schedules, school/work |
+| 2.3 | En ville | Prepositions; *il y a* | 90 | rue, métro, magasin, directions |
+| 2.4 | Demander son chemin | Questions; politeness | 80 | où, comment, pardon |
+| 2.5 | Le temps qu'il fait | Impersonal *il*; weather | 85 | beau/mauvais, pluie, vent |
+| 2.6 | S'habiller | Clothing; *porter* | 85 | vêtements, couleurs |
+| 2.7 | Ce n'est pas possible | Negation *ne…pas/jamais/plus* | 80 | rien, personne, *de* after negation |
+| 2.8 | Checkpoint — Une semaine à Paris | Mixed A1 | 60 | long reading + review drills |
 
 ---
 
-### Module 5 — Santé, corps et obligations *(B1 · Month 5)*
+### Module 3 — Passé et souvenirs *(A2 · Weeks 17–24)*
 
-**Module description:** **Modal nuance** (*devoir, falloir, pouvoir*), imperative, health vocabulary, **present participle** (intro).
-
-| Ch | Title | Grammar | New | Vocabulary themes & target words |
-| ---: | --- | --- | ---: | --- |
-| 5.1 | Chez le médecin | **Il faut** + subjunctive preview; imperative | 85 | **Health:** malade, douleur, fièvre, toux, médicament, ordonnance, rendez-vous, santé, repos. **Body:** tête, ventre, dos, bras, jambe. |
-| 5.2 | Il faut que… | **Subjunctive present** (common triggers: il faut que, vouloir que) | 90 | **Triggers:** il est important que, je suis content que, bien que (preview). **Verbs:** faire → fasse, être → soit, aller → aille, avoir → ait. |
-| 5.3 | En marchant | **Present participle**; *en* + participle | 70 | **Manner:** en + vant; **Verbs:** marcher, conduire, travailler, étudier. **City:** bruit, pollution, piéton. |
-| 5.4 | Les règles | **Imperative** (aff/neg); formal *vous* | 65 | **Rules/signs:** interdit, obligatoire, défendu, attention, danger, respecter, obéir. |
-
-**Module checkpoint:** Doctor visit dialogue (reading); subjunctive trigger identification.
-
----
-
-### Module 6 — Travail et société *(B1 · Month 6)*
-
-**Module description:** **Plus-que-parfait**, **conditionnel present**, hypothesis (*si* + imparfait → conditionnel).
-
-| Ch | Title | Grammar | New | Vocabulary themes & target words |
-| ---: | --- | --- | ---: | --- |
-| 6.1 | Mon premier job | **Plus-que-parfait** (past before past) | 80 | **Work:** entreprise, collègue, patron, salaire, réunion, CV, entretien, embauche, licenciement. |
-| 6.2 | Si j'avais… | **Conditionnel** present; si clauses (type 2) | 85 | **Hypothesis:** si, autrement, probablement, peut-être. **Verbs:** aimer (cond.), voudrais, pourrais. |
-| 6.3 | La presse | Relative pronouns **qui, que, où, dont** (intro) | 90 | **Media:** journal, article, titre, auteur, information, actualité, interview, source. |
-| 6.4 | Droit et devoirs | Passive voice intro (*être* + PP); *on* | 75 | **Society:** loi, droit, devoir, citoyen, vote, impôt, justice, police. |
-
-**Module checkpoint:** News summary reading; PQP timeline exercise; conditional *si* chains.
+| Ch | Title | Grammar | New |
+| ---: | --- | --- | ---: |
+| 3.1 | Hier soir | Passé composé (*avoir*) | 90 |
+| 3.2 | Verbes du weekend | Irregular PP (*fait, dit, vu…*) | 85 |
+| 3.3 | Vacances | PC with *être* (DR MRS VANDERTRAMP) | 90 |
+| 3.4 | Accords du participe | Agreement rules | 75 |
+| 3.5 | Quand j'étais petit | Imparfait | 95 |
+| 3.6 | Habitudes d'autrefois | Imparfait narratives | 85 |
+| 3.7 | Il pleuvait… soudain | PC vs imparfait | 90 |
+| 3.8 | Checkpoint — Récit de voyage | Mixed past | 70 |
 
 ---
 
-### Module 7 — Relations et émotions *(B1 · Month 7)*
+### Module 4 — Futur, projets et personnes *(A2 · Weeks 25–32)*
 
-**Module description:** Deep **subjunctive** vs indicative after emotion/doubt; **relative pronouns** *lequel*; reciprocal/reflexive nuance.
-
-| Ch | Title | Grammar | New | Vocabulary themes & target words |
-| ---: | --- | --- | ---: | --- |
-| 7.1 | Amitié et amour | Subjunctive vs indicative (penser que, croire que) | 80 | **Relationships:** ami, amour, couple, rupture, confiance, jalousie, respect, soutenir. |
-| 7.2 | Ce qui me plaît | **Ce qui, ce que, ce dont** | 75 | **Preferences:** plaire, détester, préférer, choisir, hésiter. |
-| 7.3 | Se disputer | Reciprocal *se*; intensity adverbs | 70 | **Conflict:** se disputer, pardonner, reconcilier, crier, calmer, raison. |
-| 7.4 | Lettres personnelles | Register **tu/vous**; formal closings | 65 | **Correspondence:** cher/chère, cordialement, bisous, affectueusement. |
-
-**Module checkpoint:** Emotional letter; subjunctive/indicative contextual blanks.
-
----
-
-### Module 8 — France et francophonie *(B2 · Month 8)*
-
-**Module description:** **Passive** full; **causative** *faire + inf.*; regional/cultural reading; **futur antérieur**.
-
-| Ch | Title | Grammar | New | Vocabulary themes & target words |
-| ---: | --- | --- | ---: | --- |
-| 8.1 | La République | Passive; impersonal *il est* + adj + de | 85 | **Institutions:** gouvernement, ministre, président, Assemblée, laïcité, République. |
-| 8.2 | Québec, Sénégal, Belgique | Francophone cultures; lexical variation | 90 | **Variation:** déjeuner/dîner, char/voiture, magasin; **Places:** Montréal, Dakar, Bruxelles. |
-| 8.3 | D'ici demain | **Futur antérieur** | 75 | **Deadlines:** d'ici, avant que (+ subj.), une fois que (+ fut ant). |
-| 8.4 | On se fait comprendre | **Causative** faire + infinitive | 70 | **Services:** réparer, laver, couper (cheveux), faire faire. |
-
-**Module checkpoint:** Cultural compare/contrast article; FA in time-clause reading.
+| Ch | Title | Grammar | New |
+| ---: | --- | --- | ---: |
+| 4.1 | Je vais + infinitif | Futur proche | 80 |
+| 4.2 | Demain | Futur simple | 90 |
+| 4.3 | Irréguliers du futur | être, avoir, aller, faire, pouvoir… | 85 |
+| 4.4 | Je te le dis | COD pronouns | 85 |
+| 4.5 | Je lui parle | COI pronouns | 80 |
+| 4.6 | On y va | *y* and *en* | 85 |
+| 4.7 | Les fêtes | Comparatives / superlatives | 90 |
+| 4.8 | Checkpoint — Projets d'avenir | Mixed A2 | 70 |
 
 ---
 
-### Module 9 — Opinions et débats *(B2 · Month 9)*
+### Module 5 — Santé, corps et obligations *(B1 · Weeks 33–40)*
 
-**Module description:** Argument connectors, **subjunctive** in concessive (*bien que*, *quoique*), **conditionnel passé**, reported speech.
-
-| Ch | Title | Grammar | New | Vocabulary themes & target words |
-| ---: | --- | --- | ---: | --- |
-| 9.1 | Pour ou contre | Connectors: cependant, en revanche, néanmoins | 85 | **Debate:** argument, opinion, preuve, convaincre, contester, d'accord, pas d'accord. |
-| 9.2 | Bien que ce soit difficile | Concessive subjunctive | 80 | **Contrast:** bien que, quoique, malgré, pourtant. |
-| 9.3 | Il a dit que… | Reported speech; tense backshift | 90 | **Verbs:** affirmer, nier, suggérer, annoncer, déclarer. |
-| 9.4 | Si j'avais su | **Conditionnel passé**; si type 3 | 75 | **Regret:** si j'avais su, j'aurais…; **Verbs:** regretter, regret. |
-
-**Module checkpoint:** Op-ed reading (~600 words); argumentative fill-in.
-
----
-
-### Module 10 — Science, tech et environnement *(B2 · Month 10)*
-
-**Module description:** Nominalization, **relative pronouns** advanced (*dont, lequel*), technical register, **passé simple** (recognition only).
-
-| Ch | Title | Grammar | New | Vocabulary themes & target words |
-| ---: | --- | --- | ---: | --- |
-| 10.1 | Le numérique | Nominalization (*-tion*, *-ment*); tech lexicon | 95 | **Tech:** ordinateur, logiciel, application, données, intelligence artificielle, réseau, sécurité. |
-| 10.2 | Le climat | Environmental policy; **dont** quantities | 90 | **Environment:** climat, réchauffement, énergie, recyclage, pollution, biodiversité. |
-| 10.3 | Il fit un geste | **Passé simple** (3rd pers) recognition | 70 | **Literary:** -a endings, *il vit, il crut*; **Narrative:** autrefois, jadis. |
-| 10.4 | La recherche | Academic register; citations | 85 | **Science:** expérience, hypothèse, résultat, publier, chercheur, université. |
-
-**Module checkpoint:** Science popularization text; PS → PC/imparfait paraphrase.
+| Ch | Title | Grammar | New |
+| ---: | --- | --- | ---: |
+| 5.1 | Chez le médecin | Body; health lexicon | 95 |
+| 5.2 | Impératif | Affirmative / negative | 80 |
+| 5.3 | Il faut / on doit | Obligation | 85 |
+| 5.4 | Il faut que… | Subjunctive triggers (intro) | 100 |
+| 5.5 | Être / avoir / aller / faire au subj. | Core irregulars | 90 |
+| 5.6 | En marchant | Present participle / gérondif | 80 |
+| 5.7 | Les règles | Public signs; formal *vous* | 85 |
+| 5.8 | Checkpoint — Une journée malade | Mixed | 70 |
 
 ---
 
-### Module 11 — Art, littérature et registre *(C1 prep · Month 11)*
+### Module 6 — Travail et société *(B1 · Weeks 41–48)*
 
-**Module description:** **Literary tenses**, figurative language, **soutenu** vs **familier**, slang decoder module integration.
-
-| Ch | Title | Grammar | New | Vocabulary themes & target words |
-| ---: | --- | --- | ---: | --- |
-| 11.1 | Au musée | Art lexicon; descriptive imparfait | 80 | **Art:** peinture, sculpture, exposition, œuvre, artiste, siècle, style. |
-| 11.2 | Un extrait littéraire | **Passé simple** + **imparfait** literary narrative | 85 | **Literature:** roman, poème, chapitre, narrateur, personnage, métaphore. |
-| 11.3 | Argot et SMS | Register tags; idioms (*coup de foudre*, *avoir le cafard*) | 75 | **Idiom/slang:** mdr, stp, oklm, bosser, boulot, mec, nana (with register warnings). |
-| 11.4 | Discours formel | **Subjunctive** past; fixed expressions | 70 | **Formal:** il convient que, avant que, à condition que; **Phrases:** il s'agit de, en ce qui concerne. |
-
-**Module checkpoint:** Literary excerpt with X-Ray syntax; idiom matching.
-
----
-
-### Module 12 — Maîtrise et monde réel *(C1 prep · Month 12)*
-
-**Module description:** Long-form synthesis, administrative French, **false friends**, capstone readings, optional enrichment corpus.
-
-| Ch | Title | Grammar | New | Vocabulary themes & target words |
-| ---: | --- | --- | ---: | --- |
-| 12.1 | Administratif | Forms, **formal imperatives**, legal boilerplate | 90 | **Admin:** dossier, justificatif, formulaire, signature, attestation, préfecture, CAF. |
-| 12.2 | False friends | *actuellement, attendre, blesser, librairie*… | 80 | **False friends:** comprehensive trap list (20+ in reading). |
-| 12.3 | Synthèse B2 | Mixed-tense 900-word essay model | 60 | **Academic:** synthèse, en conclusion, d'une part/d'autre part (mostly review). |
-| 12.4 | Capstone — In The Wild | Open-ended: learner imports + guided reflection | 40 | **Capstone:** no new lemmas; **Skills:** self-annotate, SRS export, mastery audit. |
-
-**Final exam (reading):** ~1,200 words, all tenses; grammar radar targets B2/C1 thresholds per [PRD](./PRD.md) Command Center.
+| Ch | Title | Grammar | New |
+| ---: | --- | --- | ---: |
+| 6.1 | Mon premier job | Work lexicon | 95 |
+| 6.2 | Avant cela… | Plus-que-parfait | 90 |
+| 6.3 | Si j'avais… | Conditionnel présent; *si* type 2 | 95 |
+| 6.4 | Je voudrais / je pourrais | Modal conditionnel | 85 |
+| 6.5 | La presse | *qui / que / où* | 100 |
+| 6.6 | Dont (intro) | *dont* | 90 |
+| 6.7 | On dit que… | Passive intro; *on* | 85 |
+| 6.8 | Checkpoint — Article de journal | Mixed | 75 |
 
 ---
 
-## 4. Grammar & tense coverage checklist
+### Module 7 — Relations et émotions *(B1 · Weeks 49–56)*
 
-Every item below appears in **pre-lesson briefs**, **readings**, and **contextual questions** at least twice (teach + spiral review).
+| Ch | Title | Grammar | New |
+| ---: | --- | --- | ---: |
+| 7.1 | Amitié et amour | Emotion lexicon | 90 |
+| 7.2 | Penser que / ne pas penser que | Indicative vs subjunctive | 95 |
+| 7.3 | Ce qui / ce que / ce dont | Free relatives | 90 |
+| 7.4 | Se disputer / se réconcilier | Reciprocals | 85 |
+| 7.5 | Intensité | *très, trop, assez, si* | 80 |
+| 7.6 | Lettres personnelles | *tu/vous* register | 85 |
+| 7.7 | Courriel professionnel | Formal closings | 90 |
+| 7.8 | Checkpoint — Une lettre difficile | Mixed | 70 |
 
-| Domain | Topics | First introduced | Spiraled through |
+---
+
+### Module 8 — France et francophonie *(B2 · Weeks 57–64)*
+
+| Ch | Title | Grammar | New |
+| ---: | --- | --- | ---: |
+| 8.1 | La République | Institutions; passive | 95 |
+| 8.2 | Laïcité et débat | Formal opinion | 90 |
+| 8.3 | Québec | Lexical variation | 100 |
+| 8.4 | Afrique francophone | Culture + lexicon | 100 |
+| 8.5 | Belgique & Suisse | Variation | 85 |
+| 8.6 | D'ici demain | Futur antérieur | 85 |
+| 8.7 | Se faire couper les cheveux | Causative *faire* | 90 |
+| 8.8 | Checkpoint — Portrait francophone | Mixed | 75 |
+
+---
+
+### Module 9 — Opinions et débats *(B2 · Weeks 65–72)*
+
+| Ch | Title | Grammar | New |
+| ---: | --- | --- | ---: |
+| 9.1 | Pour ou contre | Connectors | 95 |
+| 9.2 | Cependant / néanmoins | Contrast | 85 |
+| 9.3 | Bien que / quoique | Concessive subjunctive | 95 |
+| 9.4 | Discours rapporté | Backshift | 100 |
+| 9.5 | Verbes de déclaration | affirmer, nier, suggérer | 90 |
+| 9.6 | Si j'avais su | Conditionnel passé; *si* type 3 | 95 |
+| 9.7 | Regret et hypothèse | nuance | 85 |
+| 9.8 | Checkpoint — Éditorial | Mixed | 80 |
+
+---
+
+### Module 10 — Science, tech et environnement *(B2 · Weeks 73–80)*
+
+| Ch | Title | Grammar | New |
+| ---: | --- | --- | ---: |
+| 10.1 | Le numérique | Tech lexicon; nominalization | 110 |
+| 10.2 | Données et vie privée | Abstract nouns | 95 |
+| 10.3 | Le climat | Environment | 100 |
+| 10.4 | Dont (advanced) | Quantities / *dont* | 90 |
+| 10.5 | Lequel / laquelle | Complex relatives | 90 |
+| 10.6 | Il fit un geste | Passé simple recognition | 85 |
+| 10.7 | La recherche | Academic register | 95 |
+| 10.8 | Checkpoint — Vulgarisation | Mixed | 80 |
+
+---
+
+### Module 11 — Art, littérature et registre *(C1 prep · Weeks 81–88)*
+
+| Ch | Title | Grammar | New |
+| ---: | --- | --- | ---: |
+| 11.1 | Au musée | Art lexicon | 95 |
+| 11.2 | Décrire une œuvre | Rich adjectives | 90 |
+| 11.3 | Extrait littéraire | PS + imparfait literary | 100 |
+| 11.4 | Figures de style | Metaphor, irony | 85 |
+| 11.5 | Argot et SMS | Register decoder | 90 |
+| 11.6 | Idiomes courants | *coup de foudre*, *avoir le cafard*… | 100 |
+| 11.7 | Discours formel | Subjunctive past; fixed expressions | 90 |
+| 11.8 | Checkpoint — Deux registres | Mixed | 75 |
+
+---
+
+### Module 12 — Maîtrise et monde réel *(C1 prep · Weeks 89–96)*
+
+| Ch | Title | Grammar | New |
+| ---: | --- | --- | ---: |
+| 12.1 | Administratif | Forms, préfecture, CAF | 100 |
+| 12.2 | Contrats et notices | Dense formal French | 90 |
+| 12.3 | False friends | *actuellement, attendre, librairie*… | 90 |
+| 12.4 | Pièges avancés | *depuis/pendant*, *savoir/connaître* | 85 |
+| 12.5 | Synthèse B2/C1 | Essay model connectors | 80 |
+| 12.6 | Médias longs | 900–1,200 word reading | 70 |
+| 12.7 | Capstone prep | Mixed tense radar | 60 |
+| 12.8 | Capstone — In The Wild | Import + annotate | 40 |
+
+**Final reading exam:** ~1,500 words, all tenses; grammar radar toward C1 thresholds.
+
+---
+
+## 4. Grammar coverage checklist
+
+Every item appears in briefs, readings, and drills at least twice (teach + spiral).
+
+| Domain | Topics | Intro | Spiral |
 | --- | --- | --- | --- |
-| **Present** | Indicative all groups; reflexive; impersonal | Mod 1–2 | All modules |
-| **Past** | PC, imparfait, PQP, passé simple (rec.) | Mod 3, 6, 10–11 | 4–12 |
-| **Future** | Proche, simple, antérieur | Mod 4, 8 | 5–12 |
-| **Conditional** | Present, past; si clauses | Mod 6, 9 | 7–12 |
-| **Subjunctive** | Present, past; triggers | Mod 5, 7, 9, 11 | 8–12 |
-| **Moods/imperative** | Affirm/neg; formal | Mod 5 | 12 |
-| **Voice** | Passive, causative faire | Mod 6, 8 | 9–10 |
-| **Pronouns** | COD/COI, y, en, relatifs, ce-, lequel, dont | Mod 4, 6–7, 10 | 8–12 |
-| **Negation** | pas, jamais, plus, personne, rien | Mod 2 | All |
-| **Connectors** | Time, cause, contrast, opinion | Mod 3+ | 9–12 |
-| **Register** | Tu/vous, soutenu/familier/argot | Mod 7, 11 | 11–12 |
+| Present | All groups; reflexive; impersonal | M1–2 | All |
+| Past | PC, imparfait, PQP, passé simple (rec.) | M3, 6, 10–11 | 4–12 |
+| Future | Proche, simple, antérieur | M4, 8 | 5–12 |
+| Conditional | Present, past; *si* clauses | M6, 9 | 7–12 |
+| Subjunctive | Present, past; triggers | M5, 7, 9, 11 | 8–12 |
+| Imperative | Aff/neg; formal | M5 | 12 |
+| Voice | Passive, causative | M6, 8 | 9–10 |
+| Pronouns | COD/COI, *y/en*, relatives, *ce-*, *lequel*, *dont* | M4, 6–7, 10 | 8–12 |
+| Negation | pas, jamais, plus, personne, rien | M2 | All |
+| Connectors | Time, cause, contrast, opinion | M3+ | 9–12 |
+| Register | Tu/vous, soutenu/familier/argot | M1, 7, 11 | 11–12 |
 
 ---
 
-## 5. Exercise pattern per chapter (content template)
+## 5. Review system (Vocab Vault)
 
-Each chapter should ship the same **five blocks** (matches PRD mechanics):
-
-1. **Pre-lesson brief** (~400–600 words UI prose) — rule + 3 examples + link to Rulebook slug.
-2. **Guided reading** (~250–800 words depending on level) — omni-clickable; liaison/ silent toggles on.
-3. **Vocabulary set** — 40–95 new lemmas; auto-add to Vocab Vault on click.
-4. **Contextual questions** — 12–20 items: MCQ tense choice, cloze, register ID, “find the relative pronoun,” short paraphrase (reading-only).
-5. **Syntax builder** (B1+) — 1 scrambled-sentence set per chapter.
-
-**Review cadence:** Every **4th chapter** = mixed review; every **module end** = 30-item checkpoint + grammar mastery update.
+| Feature | Behavior |
+| --- | --- |
+| **Lesson complete** | All clickable lemmas from reading + dialogue are enqueued for SRS |
+| **Wrong exercise** | Grammar category logged → Remembrance Queue |
+| **Review tab** | Due words (SM-2) + unresolved mistakes |
+| **Fallback** | Local vault if remote vocab seed is blocked |
 
 ---
 
-## 6. Content production estimates (for planning)
+## 6. Production estimates (full 96-chapter course)
 
-| Metric | Standard 12-month course |
+| Metric | Target |
 | --- | ---: |
-| Chapters | 48 |
-| Guided reading words (total) | ~110,000 |
-| Unique lemmas authored | ~5,500 |
-| Pre-lesson brief words | ~24,000 |
-| Contextual questions | ~900–960 |
-| Grammar Rulebook entries (linked) | ~85–100 |
+| Chapters | **96** |
+| Guided reading words | **~180,000–220,000** |
+| Unique lemmas | **~8,000** |
+| Exercises | **~2,400–2,800** |
+| Grammar Rulebook entries | **~120–150** |
+| Calendar (standard) | **18–24 months** |
 
 ---
 
-## 7. Summary recommendation
+## 7. Summary
 
 | Question | Answer |
 | --- | --- |
-| **Ideal course length?** | **12 months** at ~40–50 min/day (standard track). |
-| **Shorter option?** | **9 months** intensive — same 48 chapters, higher daily word target. |
-| **Longer option?** | **18 months** — same content, half weekly pressure; good for retention. |
-| **5–6 months?** | Only for **A2 bridge** or Romance-language speakers; **not** for full B2+ vocabulary + grammar. |
-| **Structure** | **12 modules × 4 chapters** = linear pathway from A1 to C1 reading prep. |
-| **Fluency outcome** | Strong **B2 reader** with path to **C1** via Module 11–12 and capstone. |
-
-To wire this into the app database, treat each **chapter** as a content unit with `module_id`, `order`, `cefr_level`, `lemma_ids[]`, and `grammar_categories[]` aligned to `user_grammar_mastery` in the [PRD](./PRD.md).
+| Covering all of French already? | **No.** Pathway + Module 1 deep content only. |
+| Is 12×4 enough? | **No** for C1 reading fluency. Target **12×8 = 96**. |
+| Ideal length? | **18–24 months** at 45–60 min/day. |
+| What changed after the 1-minute chapter? | Module 1 chapters rebuilt to **30–60+ min** depth; Review enqueue fixed; structure doc raised to fluency bar. |
+| Next content priority | Author **Module 2** (8 chapters) to the same quality bar, then expand pathway IDs 48→96. |
