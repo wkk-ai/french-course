@@ -123,9 +123,9 @@ export default function LessonClient({
 
   const syntaxClass = (token: WordToken) => {
     if (!xRayEnabled) return ''
-    if (token.syntax === 'noun') return 'bg-syntax-noun/10 border-b-2 border-syntax-noun'
-    if (token.syntax === 'verb') return 'bg-syntax-verb/10 border-b-2 border-syntax-verb'
-    if (token.syntax === 'adj') return 'bg-syntax-adj/10 border-b-2 border-syntax-adj'
+    if (token.syntax === 'noun') return 'rounded-sm bg-syntax-noun/15 text-syntax-noun'
+    if (token.syntax === 'verb') return 'rounded-sm bg-syntax-verb/15 text-syntax-verb'
+    if (token.syntax === 'adj') return 'rounded-sm bg-syntax-adj/15 text-syntax-adj'
     return ''
   }
 
@@ -188,8 +188,8 @@ export default function LessonClient({
             : []
         const showConjugate = word ? isConjugableVerb(word) : false
         const clickableClass = showConjugate
-          ? 'cursor-pointer rounded px-0.5 text-left underline decoration-dotted decoration-2 decoration-syntax-verb underline-offset-4 hover:bg-syntax-verb/10'
-          : 'cursor-pointer rounded px-0.5 text-left underline decoration-dotted decoration-primary/50 underline-offset-4 hover:bg-surface-container-high'
+          ? 'cursor-pointer rounded px-0.5 text-left hover:bg-syntax-verb/10'
+          : 'cursor-pointer rounded px-0.5 text-left hover:bg-surface-container-high'
         return (
           <span key={token.id} className="relative inline">
             {spaceBefore ? ' ' : null}
@@ -397,7 +397,7 @@ export default function LessonClient({
                   <span className={`block size-4 rounded-full bg-white transition-transform ${xRayEnabled ? 'translate-x-5' : ''}`} />
                 </button>
               </div>
-              <p className="mb-4 pr-28 text-sm text-on-surface-variant">Tap any underlined word for meaning. Verbs include a <span className="font-semibold text-primary">Conjugate</span> button.</p>
+              <p className="mb-4 pr-28 text-sm text-on-surface-variant">Tap any word for meaning. Verbs include a <span className="font-semibold text-primary">Conjugate</span> button. Turn on X-Ray to color nouns, verbs, and adjectives.</p>
               <div className="mt-2 space-y-6">
                 {readingParagraphs.map((paragraph, index) => (
                   <div key={index}>{renderTokens(paragraph.tokens)}</div>

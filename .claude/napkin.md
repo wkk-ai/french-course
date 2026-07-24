@@ -14,8 +14,8 @@
 2. **[2026-07-24] Finished work left local (not on Pages)**
    Do instead: when a playable change set is done, **commit + push** and confirm Deploy to GitHub Pages succeeds before telling the user it’s live.
 
-3. **[2026-07-24] Clickable words looked like plain text**
-   Do instead: give dictionary tokens a dotted underline + cursor-pointer; verbs use verb-colored underline; show a short “tap any word / Conjugate” hint above reading.
+3. **[2026-07-24] Clickable words / X-Ray UX**
+   Do instead: keep words clickable with hover (no dotted underlines); X-Ray must set `token.syntax` from vocab POS in `enrichTokens` — never leave all tokens as `none`.
 
 4. **[2026-07-24] Shipped 1-minute “lessons”**
    Do instead: enforce chapter bar — ~30–60+ min, 220+ reading words, 22+ exercises, 60–100 lemmas, 12+ dialogue turns. Never ship snack demos as chapters.
@@ -50,6 +50,9 @@
 
 7. **[2026-07-24] Exercises were MCQ-only**
    Do instead: use discriminated `LessonExercise` types + `ExerciseCard`; enrich via `enrichLessonExercises` (cloze conversion, chapter extras, spiral, remediation from `user_mistakes`).
+
+8. **[2026-07-24] Typed answers must ignore case**
+   Do instead: grade via `normalizeFrenchInput` (lowercase + strip accents/trailing punct); accept `Bonjour` for `bonjour`.
 
 ## Shell & Command Reliability
 

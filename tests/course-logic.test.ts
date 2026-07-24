@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { enrichTokens, syntaxFromPartOfSpeech } from '../src/lib/clickable-text'
 import { filterCourseCatalog, LEGACY_MODULE_ID } from '../src/lib/course-catalog'
 import { isExerciseCorrect } from '../src/lib/exercises/grading'
 import { resolveLessonContent } from '../src/lib/lesson-content'
@@ -73,4 +74,38 @@ test('cloze grading accepts accents loosely', () => {
   }
   assert.equal(isExerciseCorrect(exercise, { kind: 'text', value: 'suis' }), true)
   assert.equal(isExerciseCorrect(exercise, { kind: 'text', value: 'wrong' }), false)
+})
+
+test('typed answers ignore uppercase', () => {
+  const exercise = {
+    id: 't',
+    type: 'translate' as const,
+    category: 'greetings',
+    prompt: 'Translate',
+    direction: 'en-fr' as const,
+    answers: ['bonjour'],
+    explanation: 'x',
+  }
+  assert.equal(isExerciseCorrect(exercise, { kind: 'text', value: 'Bonjour' }), true)
+  assert.equal(isExerciseCorrect(exercise, { kind: 'text', value: 'BONJOUR' }), true)
+  assert.equal(isExerciseCorrect(exercise, { kind: 'text', value: 'Bounjour' }), false)
+})
+
+test('enrichTokens assigns X-Ray syntax from part of speech', () => {
+  assert.equal(syntaxFromPartOfSpeech('verb'), 'verb')
+  assert.equal(syntaxFromPartOfSpeech('noun'), 'noun')
+  const vocab = [{
+    id: 'v1',
+    word: 'être',
+    base_translation: 'to be',
+    part_of_speech: 'verb',
+    gender: null,
+    register: 'Courant',
+    ipa_pronunciation: null,
+    is_idiom: false,
+    is_slang: false,
+    idiom_explanation: null,
+  }]
+  const tokens = enrichTokens([{ id: '1', text: 'suis', syntax: 'none' }], vocab)
+  assert.equal(tokens[0]?.syntax, 'verb')
 })

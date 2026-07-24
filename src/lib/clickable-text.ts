@@ -1,6 +1,20 @@
-import type { VocabularyWord, WordToken } from '@/lib/course'
+import type { SyntaxClass, VocabularyWord, WordToken } from '@/lib/course'
 
-const PUNCT = new Set(['.', ',', '!', '?', ':', ';', '…', '—', '-', '«', '»', '(', ')'])
+const PUNCT = new Set(['.', ',', '!', '?', ':', ';', '…', '—', '-', '«', '»', '(', ')', '"', "'"])
+
+export function syntaxFromPartOfSpeech(partOfSpeech: string | null | undefined): SyntaxClass {
+  if (!partOfSpeech) return 'none'
+  const pos = partOfSpeech.toLowerCase()
+  if (pos.includes('verb')) return 'verb'
+  if (pos.includes('adj')) return 'adj'
+  if (pos.includes('noun') || pos.includes('determiner') || pos.includes('article')) return 'noun'
+  return 'none'
+}
+
+function syntaxForLemma(lemmaId: string | undefined, vocabularyById: Map<string, VocabularyWord>): SyntaxClass {
+  if (!lemmaId) return 'none'
+  return syntaxFromPartOfSpeech(vocabularyById.get(lemmaId)?.part_of_speech)
+}
 
 export function isPunctuationToken(text: string) {
   return PUNCT.has(text.trim()) || /^[.,!?;:…«»()]+$/.test(text.trim())
@@ -492,6 +506,7 @@ const MULTIWORD = [
 /** Merge multi-word idioms and attach missing lemmaIds from vocabulary. */
 export function enrichTokens(tokens: WordToken[], vocabulary: VocabularyWord[]): WordToken[] {
   const lookup = buildLemmaLookup(vocabulary)
+  const vocabularyById = new Map(vocabulary.map((word) => [word.id, word]))
   const expanded = tokens.flatMap(splitGluedPunctuation)
   const merged: WordToken[] = []
   let i = 0
@@ -508,7 +523,7 @@ export function enrichTokens(tokens: WordToken[], vocabulary: VocabularyWord[]):
         merged.push({
           id: slice[0].id,
           text: slice.map((token) => token.text).join(' '),
-          syntax: slice.find((token) => token.syntax !== 'none')?.syntax ?? 'none',
+          syntax: syntaxForLemma(lemmaId, vocabularyById),
           lemmaId,
         })
         i += parts.length
@@ -520,7 +535,8 @@ export function enrichTokens(tokens: WordToken[], vocabulary: VocabularyWord[]):
 
     const token = expanded[i]
     const lemmaId = token.lemmaId ?? lookup.get(normalizeLookup(token.text))
-    merged.push(lemmaId ? { ...token, lemmaId } : token)
+    const syntax = isPunctuationToken(token.text) ? 'none' : syntaxForLemma(lemmaId, vocabularyById)
+    merged.push(lemmaId ? { ...token, lemmaId, syntax } : { ...token, syntax })
     i += 1
   }
 

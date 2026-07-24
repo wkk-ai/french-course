@@ -11,7 +11,7 @@ import type {
   TrueFalseExercise,
 } from '@/lib/exercises/types'
 
-/** Strip accents and normalize apostrophes for fuzzy French matching. */
+/** Strip accents, case, and light punctuation for fuzzy French matching. */
 export function normalizeFrenchInput(value: string): string {
   return value
     .trim()
@@ -19,6 +19,7 @@ export function normalizeFrenchInput(value: string): string {
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[''`]/g, "'")
+    .replace(/[.,!?;:…]+$/g, '')
     .replace(/\s+/g, ' ')
 }
 
