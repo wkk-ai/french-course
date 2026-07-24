@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import type { GrammarRule, LessonContent, VerbConjugation, VocabularyWord, WordToken } from '@/lib/course'
 import { RichText } from '@/components/RichText'
 import { enrichTokens, isPunctuationToken, tokenizeFrench } from '@/lib/clickable-text'
+import { CONJUGATION_TENSES, conjugationsForWord, isConjugableVerb } from '@/lib/french-conjugations'
 import { isCanonicalChapterId } from '@/lib/course-catalog'
 import { calculateLessonScore } from '@/lib/lesson-score'
 import { resolveLessonContent } from '@/lib/lesson-content'
@@ -34,6 +35,7 @@ export default function LessonClient({
   const [xRayEnabled, setXRayEnabled] = useState(false)
   const [activeWordId, setActiveWordId] = useState<string | null>(null)
   const [conjugationWord, setConjugationWord] = useState<VocabularyWord | null>(null)
+  const [conjugationTense, setConjugationTense] = useState<string>('Présent')
   const [answers, setAnswers] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -141,21 +143,36 @@ export default function LessonClient({
     }
   }
 
+  const needsSpaceBefore = (tokens: WordToken[], index: number) => {
+    if (index === 0) return false
+    const current = tokens[index].text
+    const previous = tokens[index - 1].text
+    // Closing punctuation and commas cling to the previous word.
+    if (isPunctuationToken(current) && current !== '«') return false
+    // Opening guillemet: space before «
+    if (current === '«') return true
+    // After opening guillemet: space before the quoted word (French typography).
+    if (previous === '«') return true
+    // After any other punctuation: space before the next word.
+    if (isPunctuationToken(previous)) return true
+    // Between two words.
+    return true
+  }
+
   const renderTokens = (tokens: WordToken[]) => (
     <p className="text-body-reading leading-relaxed">
       {tokens.map((token, index) => {
         const word = token.lemmaId ? vocabularyById.get(token.lemmaId) : undefined
         const active = token.id === activeWordId
-        const punct = isPunctuationToken(token.text)
-        const prevPunct = index > 0 && isPunctuationToken(tokens[index - 1].text)
-        const spaceBefore = index > 0 && !punct && !prevPunct
+        const spaceBefore = needsSpaceBefore(tokens, index)
         const meanings = word?.meanings?.length
           ? word.meanings
           : word?.base_translation
             ? word.base_translation.split(';').map((part) => part.trim()).filter(Boolean)
             : []
+        const showConjugate = word ? isConjugableVerb(word) : false
         return (
-          <span key={token.id} className={`relative inline ${spaceBefore ? 'ml-1.5' : ''}`}>
+          <span key={token.id} className={`relative inline${spaceBefore ? ' ml-[0.3em]' : ''}`}>
             {word ? (
               <button type="button" onClick={() => setActiveWordId(active ? null : token.id)} className={`rounded px-0.5 text-left transition-colors ${syntaxClass(token)} ${active ? 'bg-surface-container-high' : ''}`}>
                 {token.text}
@@ -188,8 +205,15 @@ export default function LessonClient({
                   </div>
                 )}
                 {word.idiom_explanation && <p className="mt-2 text-xs italic text-on-surface-variant">{word.idiom_explanation}</p>}
-                {conjugations.some((conjugation) => conjugation.vocab_id === word.id) && (
-                  <button type="button" onClick={() => setConjugationWord(word)} className="tactile-button mt-4 w-full rounded-lg border-primary-container bg-primary py-2 text-label-caps text-on-primary">
+                {showConjugate && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setConjugationTense('Présent')
+                      setConjugationWord(word)
+                    }}
+                    className="tactile-button mt-4 w-full rounded-lg border-primary-container bg-primary py-2 text-label-caps text-on-primary"
+                  >
                     CONJUGATE
                   </button>
                 )}
@@ -475,23 +499,40 @@ export default function LessonClient({
 
       {conjugationWord && (
         <div role="dialog" aria-modal="true" aria-label={`${conjugationWord.word} conjugations`} className="fixed inset-0 z-50 flex items-end bg-black/30 p-4 sm:items-center sm:justify-center">
-          <section className="w-full max-w-md rounded-xl border-2 border-surface-variant bg-surface-container-lowest p-6">
-            <div className="flex items-start justify-between">
+          <section className="flex max-h-[85vh] w-full max-w-md flex-col rounded-xl border-2 border-surface-variant bg-surface-container-lowest p-6">
+            <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-label-caps text-primary">VERB ENGINE</p>
                 <h2 className="text-headline-md">{conjugationWord.word}</h2>
+                <p className="mt-1 text-on-surface-variant">{conjugationWord.base_translation}</p>
               </div>
               <button type="button" onClick={() => setConjugationWord(null)} aria-label="Close conjugations" className="rounded-lg p-1 hover:bg-surface-container-low"><X /></button>
             </div>
-            <p className="mt-1 text-on-surface-variant">{conjugationWord.base_translation}</p>
-            <div className="mt-5 divide-y divide-surface-variant">
-              {conjugations.filter((conjugation) => conjugation.vocab_id === conjugationWord.id).map((conjugation) => (
-                <div key={conjugation.id} className="flex justify-between py-2 text-body-ui">
-                  <span className="text-on-surface-variant">{conjugation.pronoun}</span>
-                  <strong>{conjugation.form}</strong>
-                </div>
+            <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
+              {CONJUGATION_TENSES.map((tense) => (
+                <button
+                  key={tense}
+                  type="button"
+                  onClick={() => setConjugationTense(tense)}
+                  className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-bold ${conjugationTense === tense ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-on-surface-variant'}`}
+                >
+                  {tense}
+                </button>
               ))}
             </div>
+            <div className="mt-4 flex-1 divide-y divide-surface-variant overflow-y-auto">
+              {conjugationsForWord(conjugationWord, conjugations)
+                .filter((conjugation) => conjugation.tense === conjugationTense)
+                .map((conjugation) => (
+                  <div key={conjugation.id} className="flex justify-between gap-3 py-2 text-body-ui">
+                    <span className="text-on-surface-variant">{conjugation.pronoun}</span>
+                    <strong className="text-right">{conjugation.form}</strong>
+                  </div>
+                ))}
+            </div>
+            {conjugationTense === 'Passé composé' && (
+              <p className="mt-3 text-xs text-on-surface-variant">Participe passé shown in masculine singular; with *être*, agree with the subject in gender/number.</p>
+            )}
           </section>
         </div>
       )}
