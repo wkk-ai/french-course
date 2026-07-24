@@ -6,6 +6,7 @@ import { BookOpen, ChevronRight, Eye, Flame, MessagesSquare, X } from 'lucide-re
 import { useRouter } from 'next/navigation'
 import type { GrammarRule, LessonContent, VerbConjugation, VocabularyWord, WordToken } from '@/lib/course'
 import { RichText } from '@/components/RichText'
+import { enrichTokens, isPunctuationToken, tokenizeFrench } from '@/lib/clickable-text'
 import { isCanonicalChapterId } from '@/lib/course-catalog'
 import { calculateLessonScore } from '@/lib/lesson-score'
 import { resolveLessonContent } from '@/lib/lesson-content'
@@ -83,6 +84,20 @@ export default function LessonClient({
   }, [chapterId, router])
 
   const vocabularyById = useMemo(() => new Map(vocabulary.map((word) => [word.id, word])), [vocabulary])
+  const readingParagraphs = useMemo(
+    () => content.reading?.map((paragraph) => ({ tokens: enrichTokens(paragraph.tokens, vocabulary) })) ?? [],
+    [content.reading, vocabulary],
+  )
+  const conversationLines = useMemo(
+    () =>
+      content.conversation?.lines.map((line, index) => ({
+        ...line,
+        tokens: line.tokens?.length
+          ? enrichTokens(line.tokens, vocabulary)
+          : tokenizeFrench(line.text, `conv-${index}`, vocabulary),
+      })) ?? [],
+    [content.conversation, vocabulary],
+  )
   const exercises = content.exercises ?? []
   const answeredAll = exercises.length > 0 && exercises.every((exercise) => answers[exercise.id] !== undefined)
   const progress = stage === 'brief' ? 20 : stage === 'reading' ? 45 : stage === 'conversation' ? 70 : 90
@@ -95,13 +110,51 @@ export default function LessonClient({
     return ''
   }
 
+  const recordMistake = async (category: string, context: string) => {
+    try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { data: existing } = await supabase
+        .from('user_mistakes')
+        .select('id, error_count')
+        .eq('user_id', user.id)
+        .eq('grammar_category', category)
+        .eq('is_resolved', false)
+        .is('vocab_id', null)
+        .maybeSingle()
+      if (existing) {
+        await supabase
+          .from('user_mistakes')
+          .update({ error_count: existing.error_count + 1, last_error_at: new Date().toISOString(), error_context: context })
+          .eq('id', existing.id)
+        return
+      }
+      await supabase.from('user_mistakes').insert({
+        user_id: user.id,
+        grammar_category: category,
+        error_context: context,
+      })
+    } catch {
+      // Review logging is best-effort; do not block answering.
+    }
+  }
+
   const renderTokens = (tokens: WordToken[]) => (
-    <p className="flex flex-wrap gap-x-1.5 gap-y-3 text-body-reading">
-      {tokens.map((token) => {
+    <p className="text-body-reading leading-relaxed">
+      {tokens.map((token, index) => {
         const word = token.lemmaId ? vocabularyById.get(token.lemmaId) : undefined
         const active = token.id === activeWordId
+        const punct = isPunctuationToken(token.text)
+        const prevPunct = index > 0 && isPunctuationToken(tokens[index - 1].text)
+        const spaceBefore = index > 0 && !punct && !prevPunct
+        const meanings = word?.meanings?.length
+          ? word.meanings
+          : word?.base_translation
+            ? word.base_translation.split(';').map((part) => part.trim()).filter(Boolean)
+            : []
         return (
-          <span key={token.id} className="relative inline-block">
+          <span key={token.id} className={`relative inline ${spaceBefore ? 'ml-1.5' : ''}`}>
             {word ? (
               <button type="button" onClick={() => setActiveWordId(active ? null : token.id)} className={`rounded px-0.5 text-left transition-colors ${syntaxClass(token)} ${active ? 'bg-surface-container-high' : ''}`}>
                 {token.text}
@@ -110,7 +163,7 @@ export default function LessonClient({
               <span className={syntaxClass(token)}>{token.text}</span>
             )}
             {active && word && (
-              <div className="absolute bottom-full left-1/2 z-30 mb-3 w-64 -translate-x-1/2 rounded-xl border-2 border-surface-variant bg-surface-container-lowest p-4 shadow-lg">
+              <div className="absolute bottom-full left-1/2 z-30 mb-3 w-72 -translate-x-1/2 rounded-xl border-2 border-surface-variant bg-surface-container-lowest p-4 shadow-lg">
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <p className="font-bold">{word.word}</p>
@@ -118,7 +171,22 @@ export default function LessonClient({
                   </div>
                   <span className="rounded-full bg-primary px-2 py-1 text-[10px] font-bold text-on-primary">{word.register}</span>
                 </div>
-                <p className="mt-3 text-sm text-on-surface-variant">{word.base_translation}</p>
+                {meanings.length > 1 ? (
+                  <ul className="mt-3 list-disc space-y-1 pl-4 text-sm text-on-surface-variant">
+                    {meanings.map((meaning) => (
+                      <li key={meaning}>{meaning}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="mt-3 text-sm text-on-surface-variant">{meanings[0] ?? word.base_translation}</p>
+                )}
+                {word.example && (
+                  <div className="mt-3 rounded-lg bg-surface-container-low p-3 text-sm">
+                    <p className="font-medium">{word.example.french}</p>
+                    <p className="mt-1 text-on-surface-variant">{word.example.english}</p>
+                  </div>
+                )}
+                {word.idiom_explanation && <p className="mt-2 text-xs italic text-on-surface-variant">{word.idiom_explanation}</p>}
                 {conjugations.some((conjugation) => conjugation.vocab_id === word.id) && (
                   <button type="button" onClick={() => setConjugationWord(word)} className="tactile-button mt-4 w-full rounded-lg border-primary-container bg-primary py-2 text-label-caps text-on-primary">
                     CONJUGATE
@@ -139,6 +207,7 @@ export default function LessonClient({
     const grammarResults = exercises.map((exercise) => ({
       category: exercise.category,
       correct: answers[exercise.id] === exercise.answer,
+      context: `Lesson exercise: ${exercise.prompt}`,
     }))
     try {
       const supabase = createClient()
@@ -162,6 +231,13 @@ export default function LessonClient({
           completed_at: new Date().toISOString(),
         }, { onConflict: 'user_id,chapter_id' })
         if (progressError) throw rpcError
+
+        // Fallback path: still push wrong answers into Review.
+        await Promise.all(
+          exercises
+            .filter((exercise) => answers[exercise.id] !== exercise.answer)
+            .map((exercise) => recordMistake(exercise.category, `Lesson exercise: ${exercise.prompt}`)),
+        )
       }
 
       router.push('/')
@@ -229,7 +305,7 @@ export default function LessonClient({
                 </button>
               </div>
               <div className="mt-10 space-y-6">
-                {content.reading?.map((paragraph, index) => (
+                {readingParagraphs.map((paragraph, index) => (
                   <div key={index}>{renderTokens(paragraph.tokens)}</div>
                 ))}
               </div>
@@ -264,10 +340,10 @@ export default function LessonClient({
               <p className="mt-2 text-sm text-on-surface-variant">{content.conversation.setting}</p>
             </div>
             <div className="space-y-3">
-              {content.conversation.lines.map((line, index) => (
+              {conversationLines.map((line, index) => (
                 <article key={`${line.speaker}-${index}`} className={`rounded-xl border-2 border-surface-variant p-4 ${index % 2 === 0 ? 'bg-surface-container-lowest' : 'bg-primary-fixed/20'}`}>
                   <p className="text-label-caps text-primary">{line.speaker}</p>
-                  {line.tokens?.length ? <div className="mt-2">{renderTokens(line.tokens)}</div> : <p className="mt-2 text-body-reading">{line.text}</p>}
+                  <div className="mt-2">{renderTokens(line.tokens)}</div>
                 </article>
               ))}
             </div>
@@ -309,6 +385,9 @@ export default function LessonClient({
                           onClick={() => {
                             if (locked) return
                             setAnswers((current) => ({ ...current, [exercise.id]: optionIndex }))
+                            if (optionIndex !== exercise.answer) {
+                              void recordMistake(exercise.category, `Lesson exercise: ${exercise.prompt}`)
+                            }
                           }}
                           className={`rounded-lg border-2 p-3 text-left text-sm font-semibold disabled:cursor-default ${classes}`}
                         >

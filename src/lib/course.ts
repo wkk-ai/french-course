@@ -48,6 +48,10 @@ export type VocabularyWord = {
   id: string
   word: string
   base_translation: string
+  /** Additional senses beyond the primary translation. */
+  meanings?: string[]
+  /** Short usage example shown in the dictionary popup. */
+  example?: { french: string; english: string }
   part_of_speech: string | null
   gender: string | null
   register: string

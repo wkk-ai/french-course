@@ -20,15 +20,33 @@ export function withResolvedLessonContent<T extends { id: string; lesson_content
 
 export function resolveVocabulary(lemmaIds: string[], fromDb: VocabularyWord[]): VocabularyWord[] {
   const byId = new Map(MODULE1_VOCABULARY.map((word) => [word.id, word]))
-  for (const word of fromDb) byId.set(word.id, word)
+  for (const word of fromDb) {
+    const existing = byId.get(word.id)
+    byId.set(
+      word.id,
+      existing
+        ? {
+            ...word,
+            meanings: existing.meanings ?? word.meanings,
+            example: existing.example ?? word.example,
+          }
+        : word,
+    )
+  }
+  // Keep the full Module 1 dictionary so enrichTokens can attach every lemma.
+  if (MODULE1_VOCABULARY.some((word) => lemmaIds.includes(word.id))) return [...byId.values()]
   return lemmaIds.map((id) => byId.get(id)).filter((word): word is VocabularyWord => Boolean(word))
 }
 
 export function resolveConjugations(lemmaIds: string[], fromDb: VerbConjugation[]): VerbConjugation[] {
-  const lemmaSet = new Set(lemmaIds)
-  const fromStatic = MODULE1_CONJUGATIONS.filter((item) => lemmaSet.has(item.vocab_id))
-  if (fromDb.length) return fromDb
-  return fromStatic
+  const byId = new Map(MODULE1_CONJUGATIONS.map((item) => [item.id, item]))
+  for (const item of fromDb) byId.set(item.id, item)
+  const lemmaSet = new Set(lemmaIds.length ? lemmaIds : MODULE1_VOCABULARY.map((word) => word.id))
+  // Prefer full Module 1 tables when any Module 1 verb is in play.
+  if (MODULE1_CONJUGATIONS.some((item) => lemmaSet.has(item.vocab_id))) {
+    return [...byId.values()].sort((left, right) => left.order_index - right.order_index || left.id.localeCompare(right.id))
+  }
+  return fromDb
 }
 
 export function resolveRules(slugs: string[], fromDb: GrammarRule[]): GrammarRule[] {
