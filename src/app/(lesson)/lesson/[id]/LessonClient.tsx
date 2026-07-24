@@ -147,11 +147,11 @@ export default function LessonClient({
     if (index === 0) return false
     const current = tokens[index].text
     const previous = tokens[index - 1].text
-    // Closing punctuation and commas cling to the previous word.
-    if (isPunctuationToken(current) && current !== '«') return false
-    // Opening guillemet: space before «
-    if (current === '«') return true
-    // After opening guillemet: space before the quoted word (French typography).
+    // French guillemets take a space on the outside/inside: « bonjour »
+    if (current === '«' || current === '»') return true
+    // Other closing punctuation clings to the previous word.
+    if (isPunctuationToken(current)) return false
+    // After opening guillemet: space before the quoted word.
     if (previous === '«') return true
     // After any other punctuation: space before the next word.
     if (isPunctuationToken(previous)) return true
