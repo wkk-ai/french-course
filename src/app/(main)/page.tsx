@@ -1,4 +1,5 @@
 import { createStaticClient } from '@/utils/supabase/static'
+import { withResolvedLessonContent } from '@/lib/lesson-content'
 import HomeClient from './HomeClient'
 
 export default async function HomePage() {
@@ -26,5 +27,5 @@ export default async function HomePage() {
     )
   }
 
-  return <HomeClient modules={modules} chapters={chapters} />
+  return <HomeClient modules={modules} chapters={withResolvedLessonContent(chapters)} />
 }

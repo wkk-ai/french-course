@@ -2,24 +2,26 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import type { GrammarRule } from '@/lib/course'
+import { MODULE1_RULES } from '@/lib/module1-content'
 import { createStaticClient } from '@/utils/supabase/static'
 
 export async function generateStaticParams() {
   const supabase = createStaticClient()
-  if (!supabase) return []
-  const { data } = await supabase.from('grammar_rules').select('slug')
-  return (data ?? []).map((rule) => ({ slug: rule.slug }))
+  const fromDb = supabase ? (await supabase.from('grammar_rules').select('slug')).data ?? [] : []
+  const slugs = new Set([...fromDb.map((rule) => rule.slug), ...MODULE1_RULES.map((rule) => rule.slug)])
+  return [...slugs].map((slug) => ({ slug }))
 }
 
 export default async function RuleDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
   const supabase = createStaticClient()
-  if (!supabase) notFound()
+  const { data } = supabase
+    ? await supabase.from('grammar_rules').select('*').eq('slug', slug).maybeSingle()
+    : { data: null }
 
-  const { data } = await supabase.from('grammar_rules').select('*').eq('slug', slug).maybeSingle()
-  if (!data) notFound()
+  const rule = (data as GrammarRule | null) ?? MODULE1_RULES.find((item) => item.slug === slug)
+  if (!rule) notFound()
 
-  const rule = data as GrammarRule
   return (
     <article className="mx-auto max-w-[680px]">
       <Link href="/rules" className="inline-flex items-center gap-2 text-sm font-bold text-primary"><ArrowLeft className="size-4" /> Back to Rulebook</Link>

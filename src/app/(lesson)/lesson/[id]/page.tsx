@@ -1,13 +1,15 @@
 import { notFound } from 'next/navigation'
-import { hasLessonContent, type GrammarRule, type LessonContent, type VerbConjugation, type VocabularyWord } from '@/lib/course'
+import type { GrammarRule, VerbConjugation, VocabularyWord } from '@/lib/course'
+import { resolveConjugations, resolveLessonContent, resolveRules, resolveVocabulary } from '@/lib/lesson-content'
+import { MODULE1_CHAPTER_IDS } from '@/lib/module1-content'
 import { createStaticClient } from '@/utils/supabase/static'
 import LessonClient from './LessonClient'
 
 export async function generateStaticParams() {
   const supabase = createStaticClient()
-  if (!supabase) return []
-  const { data } = await supabase.from('chapters').select('id')
-  return (data ?? []).map((chapter) => ({ id: chapter.id }))
+  const fromDb = supabase ? (await supabase.from('chapters').select('id')).data ?? [] : []
+  const ids = new Set([...fromDb.map((chapter) => chapter.id), ...MODULE1_CHAPTER_IDS])
+  return [...ids].map((id) => ({ id }))
 }
 
 export default async function LessonPage({ params }: { params: Promise<{ id: string }> }) {
@@ -22,7 +24,9 @@ export default async function LessonPage({ params }: { params: Promise<{ id: str
     .maybeSingle()
 
   if (!chapter) notFound()
-  if (!hasLessonContent(chapter.lesson_content)) {
+
+  const content = resolveLessonContent(chapter.id, chapter.lesson_content)
+  if (!content) {
     return (
       <main className="mx-auto flex min-h-screen max-w-[680px] items-center p-6">
         <section className="tactile-card p-6">
@@ -33,7 +37,6 @@ export default async function LessonPage({ params }: { params: Promise<{ id: str
     )
   }
 
-  const content = chapter.lesson_content as LessonContent
   const lemmaIds = [...new Set(content.reading?.flatMap((paragraph) => paragraph.tokens.map((token) => token.lemmaId).filter((lemmaId): lemmaId is string => Boolean(lemmaId))) ?? [])]
   const ruleSlugs = content.brief?.ruleSlugs ?? []
   const [{ data: vocabulary }, { data: conjugations }, { data: rules }] = await Promise.all([
@@ -47,9 +50,9 @@ export default async function LessonPage({ params }: { params: Promise<{ id: str
       chapterId={chapter.id}
       title={chapter.title}
       content={content}
-      vocabulary={(vocabulary ?? []) as VocabularyWord[]}
-      conjugations={(conjugations ?? []) as VerbConjugation[]}
-      rules={(rules ?? []) as GrammarRule[]}
+      vocabulary={resolveVocabulary(lemmaIds, (vocabulary ?? []) as VocabularyWord[])}
+      conjugations={resolveConjugations(lemmaIds, (conjugations ?? []) as VerbConjugation[])}
+      rules={resolveRules(ruleSlugs, (rules ?? []) as GrammarRule[])}
     />
   )
 }
