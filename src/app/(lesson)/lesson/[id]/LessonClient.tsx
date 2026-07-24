@@ -171,21 +171,25 @@ export default function LessonClient({
             ? word.base_translation.split(';').map((part) => part.trim()).filter(Boolean)
             : []
         const showConjugate = word ? isConjugableVerb(word) : false
+        const clickableClass = showConjugate
+          ? 'cursor-pointer rounded px-0.5 text-left underline decoration-dotted decoration-2 decoration-syntax-verb underline-offset-4 hover:bg-syntax-verb/10'
+          : 'cursor-pointer rounded px-0.5 text-left underline decoration-dotted decoration-primary/50 underline-offset-4 hover:bg-surface-container-high'
         return (
           <span key={token.id} className="relative inline">
             {spaceBefore ? ' ' : null}
             {word ? (
-              <button type="button" onClick={() => setActiveWordId(active ? null : token.id)} className={`rounded px-0.5 text-left transition-colors ${syntaxClass(token)} ${active ? 'bg-surface-container-high' : ''}`}>
+              <button type="button" onClick={() => setActiveWordId(active ? null : token.id)} className={`transition-colors ${clickableClass} ${syntaxClass(token)} ${active ? 'bg-surface-container-high' : ''}`}>
                 {token.text}
               </button>
             ) : (
               <span className={syntaxClass(token)}>{token.text}</span>
             )}
             {active && word && (
-              <div className="absolute bottom-full left-1/2 z-30 mb-3 w-72 -translate-x-1/2 rounded-xl border-2 border-surface-variant bg-surface-container-lowest p-4 shadow-lg">
+              <div className="absolute bottom-full left-1/2 z-30 mb-3 w-72 -translate-x-1/2 rounded-xl border-2 border-surface-variant bg-surface-container-lowest p-4 text-left shadow-lg">
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <p className="font-bold">{word.word}</p>
+                    {word.part_of_speech && <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wide text-on-surface-variant">{word.part_of_speech}{showConjugate ? ' · conjugable' : ''}</p>}
                     {word.ipa_pronunciation && <p className="mt-1 text-xs text-ink-medium">/{word.ipa_pronunciation}/</p>}
                   </div>
                   <span className="rounded-full bg-primary px-2 py-1 text-[10px] font-bold text-on-primary">{word.register}</span>
@@ -377,7 +381,8 @@ export default function LessonClient({
                   <span className={`block size-4 rounded-full bg-white transition-transform ${xRayEnabled ? 'translate-x-5' : ''}`} />
                 </button>
               </div>
-              <div className="mt-10 space-y-6">
+              <p className="mb-4 pr-28 text-sm text-on-surface-variant">Tap any underlined word for meaning. Verbs include a <span className="font-semibold text-primary">Conjugate</span> button.</p>
+              <div className="mt-2 space-y-6">
                 {readingParagraphs.map((paragraph, index) => (
                   <div key={index}>{renderTokens(paragraph.tokens)}</div>
                 ))}
@@ -420,6 +425,7 @@ export default function LessonClient({
                 </article>
               ))}
             </div>
+            <p className="text-sm text-on-surface-variant">Dialogue words are tappable too — try a verb for Conjugate.</p>
             <div className="flex gap-3">
               <button type="button" onClick={() => setStage('reading')} className="tactile-button flex-1 rounded-xl border-2 border-surface-variant bg-surface-container-lowest py-4 font-bold text-on-surface">
                 BACK

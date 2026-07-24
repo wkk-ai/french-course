@@ -9,13 +9,13 @@
 ## Execution & Validation (Highest Priority)
 
 1. **[2026-07-24] PWA service worker cache-first hid deploys**
-   Do instead: keep SW **network-first** + bump `CACHE_NAME` when shipping UI fixes; register with `NEXT_PUBLIC_BASE_PATH`. Tell users to hard-refresh once after SW changes.
+   Do instead: keep SW as a **cleanup/unregister** worker (or network-first with bumped `CACHE_NAME`); register with `NEXT_PUBLIC_BASE_PATH`. Clickable words need visible affordance — never ship invisible dictionary hits.
 
 2. **[2026-07-24] Finished work left local (not on Pages)**
    Do instead: when a playable change set is done, **commit + push** and confirm Deploy to GitHub Pages succeeds before telling the user it’s live.
 
-3. **[2026-07-24] Called “done” without verifying UX**
-   Do instead: before finish, check (a) no `Bonjour!Je`-style spacing, (b) *parler*/*habiter* show CONJUGATE, (c) enrichTokens has 0 missing lemmas on Module 1, (d) Review gets words after complete.
+3. **[2026-07-24] Clickable words looked like plain text**
+   Do instead: give dictionary tokens a dotted underline + cursor-pointer; verbs use verb-colored underline; show a short “tap any word / Conjugate” hint above reading.
 
 4. **[2026-07-24] Shipped 1-minute “lessons”**
    Do instead: enforce chapter bar — ~30–60+ min, 220+ reading words, 22+ exercises, 60–100 lemmas, 12+ dialogue turns. Never ship snack demos as chapters.
