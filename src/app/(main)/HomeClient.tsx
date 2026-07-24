@@ -57,20 +57,24 @@ export default function HomeClient({
     }
   }, [])
 
-  const authoredChapters = useMemo(
-    () => courseChapters.filter((chapter) => hasLessonContent(chapter.lesson_content)),
-    [courseChapters]
-  )
-  const firstModuleChapters = authoredChapters.filter((chapter) => chapter.module_id === courseModules[0]?.id)
+  const authoredChapters = useMemo(() => {
+    const authored = courseChapters.filter((chapter) => hasLessonContent(chapter.lesson_content))
+    return [...authored].sort((left, right) => {
+      const leftModule = courseModules.find((module) => module.id === left.module_id)?.order_index ?? 0
+      const rightModule = courseModules.find((module) => module.id === right.module_id)?.order_index ?? 0
+      return leftModule - rightModule || left.order_index - right.order_index
+    })
+  }, [courseChapters, courseModules])
+
+  const firstModule = courseModules[0]
+  const firstModuleChapters = authoredChapters.filter((chapter) => chapter.module_id === firstModule?.id)
   const completedInFirstModule = firstModuleChapters.filter((chapter) => progressByChapter.get(chapter.id) === 'completed').length
   const mastery = firstModuleChapters.length ? Math.round((completedInFirstModule / firstModuleChapters.length) * 100) : 0
-
-  const chapterStatus = (chapter: Chapter) =>
-    deriveChapterStatus(
-      chapter.id,
-      authoredChapters.map((item) => item.id),
-      new Set([...progressByChapter].filter(([, status]) => status === 'completed').map(([id]) => id))
-    )
+  const completedIds = useMemo(
+    () => new Set([...progressByChapter].filter(([, status]) => status === 'completed').map(([id]) => id)),
+    [progressByChapter]
+  )
+  const authoredIds = useMemo(() => authoredChapters.map((item) => item.id), [authoredChapters])
 
   return (
     <div className="flex flex-col gap-8 pb-8">
@@ -100,8 +104,11 @@ export default function HomeClient({
               <p className="mt-1 text-sm text-on-surface-variant">{module.description}</p>
             </header>
 
-            {courseChapters.filter((chapter) => chapter.module_id === module.id).map((chapter) => {
-              const status = chapterStatus(chapter)
+            {courseChapters
+              .filter((chapter) => chapter.module_id === module.id)
+              .sort((a, b) => a.order_index - b.order_index)
+              .map((chapter) => {
+              const status = deriveChapterStatus(chapter.id, authoredIds, completedIds)
               const label = `${module.order_index}.${chapter.order_index} ${chapter.title}`
               const statusContent = {
                 completed: { label: 'Completed', icon: <Star className="size-6 fill-success text-success" />, tone: 'text-success' },
@@ -122,7 +129,7 @@ export default function HomeClient({
                 </div>
               )
               return status === 'active' || status === 'completed'
-                ? <Link key={chapter.id} href={`/lesson/${chapter.id}`} className="outline-none">{card}</Link>
+                ? <Link key={chapter.id} href={`/lesson/${chapter.id}/`} className="outline-none transition-opacity hover:opacity-90">{card}</Link>
                 : <div key={chapter.id}>{card}</div>
             })}
           </div>

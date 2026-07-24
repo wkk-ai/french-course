@@ -1,5 +1,6 @@
-import { createStaticClient } from '@/utils/supabase/static'
+import { filterCourseCatalog } from '@/lib/course-catalog'
 import { withResolvedLessonContent } from '@/lib/lesson-content'
+import { createStaticClient } from '@/utils/supabase/static'
 import HomeClient from './HomeClient'
 
 export default async function HomePage() {
@@ -27,5 +28,11 @@ export default async function HomePage() {
     )
   }
 
-  return <HomeClient modules={modules} chapters={withResolvedLessonContent(chapters)} />
+  const catalog = filterCourseCatalog(modules, chapters)
+  return (
+    <HomeClient
+      modules={catalog.modules}
+      chapters={withResolvedLessonContent(catalog.chapters)}
+    />
+  )
 }

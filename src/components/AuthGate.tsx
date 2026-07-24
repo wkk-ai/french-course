@@ -4,6 +4,12 @@ import { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 
+function normalizePath(pathname: string | null) {
+  if (!pathname) return '/'
+  const trimmed = pathname.replace(/\/+$/, '') || '/'
+  return trimmed
+}
+
 export function AuthGate({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
@@ -12,21 +18,22 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let cancelled = false
     const supabase = createClient()
+    const path = normalizePath(pathname)
 
     const ensureSession = async () => {
       const { data: { session } } = await supabase.auth.getSession()
       if (cancelled) return
 
       if (!session) {
-        if (!pathname?.startsWith('/login')) {
-          router.replace('/login')
+        if (path !== '/login') {
+          router.replace('/login/')
         } else {
           setReady(true)
         }
         return
       }
 
-      if (pathname?.startsWith('/login')) {
+      if (path === '/login') {
         router.replace('/')
         return
       }
@@ -35,14 +42,14 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     }
 
     ensureSession().catch(() => {
-      if (!cancelled) router.replace('/login')
+      if (!cancelled) router.replace('/login/')
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (cancelled) return
       if (!session) {
         setReady(false)
-        router.replace('/login')
+        router.replace('/login/')
       }
     })
 

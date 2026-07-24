@@ -6,20 +6,26 @@ import { Home, BookOpen, ScrollText, BarChart2 } from 'lucide-react';
 
 const navItems = [
   { name: 'Learn', href: '/', icon: Home },
-  { name: 'Review', href: '/review', icon: BookOpen },
-  { name: 'Rules', href: '/rules', icon: ScrollText },
-  { name: 'Center', href: '/center', icon: BarChart2 },
+  { name: 'Review', href: '/review/', icon: BookOpen },
+  { name: 'Rules', href: '/rules/', icon: ScrollText },
+  { name: 'Center', href: '/center/', icon: BarChart2 },
 ];
 
 export function Navigation() {
   const pathname = usePathname();
+  const current = (pathname ?? '/').replace(/\/+$/, '') || '/';
+
+  const isItemActive = (href: string) => {
+    const target = href.replace(/\/+$/, '') || '/';
+    return current === target || (target !== '/' && current.startsWith(`${target}/`));
+  };
 
   return (
     <>
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-surface-container-lowest border-t-2 border-surface-variant flex justify-around items-center z-50 pb-safe">
         {navItems.map((item) => {
-          const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(`${item.href}/`));
+          const isActive = isItemActive(item.href);
           const Icon = item.icon;
           return (
             <Link
@@ -47,7 +53,7 @@ export function Navigation() {
         
         <div className="flex flex-col space-y-6 w-full">
           {navItems.map((item) => {
-            const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(`${item.href}/`));
+            const isActive = isItemActive(item.href);
             const Icon = item.icon;
             return (
               <Link

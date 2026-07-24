@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import type { GrammarRule, VerbConjugation, VocabularyWord } from '@/lib/course'
+import { isCanonicalChapterId } from '@/lib/course-catalog'
 import { resolveConjugations, resolveLessonContent, resolveRules, resolveVocabulary } from '@/lib/lesson-content'
 import { MODULE1_CHAPTER_IDS } from '@/lib/module1-content'
 import { createStaticClient } from '@/utils/supabase/static'
@@ -8,7 +9,10 @@ import LessonClient from './LessonClient'
 export async function generateStaticParams() {
   const supabase = createStaticClient()
   const fromDb = supabase ? (await supabase.from('chapters').select('id')).data ?? [] : []
-  const ids = new Set([...fromDb.map((chapter) => chapter.id), ...MODULE1_CHAPTER_IDS])
+  const ids = new Set([
+    ...fromDb.map((chapter) => chapter.id).filter(isCanonicalChapterId),
+    ...MODULE1_CHAPTER_IDS,
+  ])
   return [...ids].map((id) => ({ id }))
 }
 
