@@ -30,9 +30,30 @@ function writeStore(store: VaultStore) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(store))
 }
 
-/** Enqueue lemmas into the local Vocab Vault (due immediately). */
-export function enqueueLocalVocabulary(lemmaIds: string[]) {
+/** Spread new lemmas across days so Review stays infinite without dumping everything due today. */
+export function staggerReviewDates(lemmaIds: string[], from = new Date()): Map<string, string> {
+  const map = new Map<string, string>()
+  const unique = [...new Set(lemmaIds)]
+  const immediate = Math.min(10, unique.length)
+  for (let index = 0; index < unique.length; index += 1) {
+    const date = new Date(from)
+    if (index < immediate) {
+      // Due now
+    } else {
+      // Spread remaining across the next 7 days
+      const dayOffset = 1 + ((index - immediate) % 7)
+      date.setDate(date.getDate() + dayOffset)
+    }
+    map.set(unique[index], date.toISOString())
+  }
+  return map
+}
+
+/** Enqueue lemmas into the local Vocab Vault (staggered by default). */
+export function enqueueLocalVocabulary(lemmaIds: string[], options?: { stagger?: boolean }) {
   const store = readStore()
+  const stagger = options?.stagger !== false
+  const dates = stagger ? staggerReviewDates(lemmaIds) : null
   const now = new Date().toISOString()
   for (const vocab_id of lemmaIds) {
     if (store[vocab_id]) {
@@ -46,18 +67,22 @@ export function enqueueLocalVocabulary(lemmaIds: string[]) {
       interval_days: 0,
       total_encounters: 1,
       mistake_count: 0,
-      next_review_at: now,
+      next_review_at: dates?.get(vocab_id) ?? now,
       last_reviewed_at: null,
     }
   }
   writeStore(store)
 }
 
+/** Full local pool for the infinite review loop. */
+export function getAllLocalVocabulary(): LocalVaultItem[] {
+  return Object.values(readStore()).sort((left, right) => left.next_review_at.localeCompare(right.next_review_at))
+}
+
 export function getDueLocalVocabulary(limit = 20): LocalVaultItem[] {
   const now = Date.now()
-  return Object.values(readStore())
+  return getAllLocalVocabulary()
     .filter((item) => new Date(item.next_review_at).getTime() <= now)
-    .sort((left, right) => left.next_review_at.localeCompare(right.next_review_at))
     .slice(0, limit)
 }
 

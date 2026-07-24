@@ -3,9 +3,11 @@ import test from 'node:test'
 import { enrichTokens, syntaxFromPartOfSpeech } from '../src/lib/clickable-text'
 import { filterCourseCatalog, LEGACY_MODULE_ID } from '../src/lib/course-catalog'
 import { isExerciseCorrect } from '../src/lib/exercises/grading'
+import { staggerReviewDates } from '../src/lib/local-vocab-vault'
 import { resolveLessonContent } from '../src/lib/lesson-content'
 import { calculateLessonScoreLegacy } from '../src/lib/lesson-score'
 import { deriveChapterStatus } from '../src/lib/progression'
+import { buildReviewSession } from '../src/lib/review/session'
 import { calculateSrsSchedule } from '../src/lib/srs'
 
 test('legacy Module 1 duplicates are filtered from the catalog', () => {
@@ -108,4 +110,30 @@ test('enrichTokens assigns X-Ray syntax from part of speech', () => {
   }]
   const tokens = enrichTokens([{ id: '1', text: 'suis', syntax: 'none' }], vocab)
   assert.equal(tokens[0]?.syntax, 'verb')
+})
+
+test('infinite review session never empties when the pool has items', () => {
+  const now = new Date('2026-07-24T12:00:00Z')
+  const pool = Array.from({ length: 5 }, (_, index) => ({
+    vocab_id: `10000000-0000-0000-0000-00000000000${index + 1}`,
+    repetition_count: 0,
+    ease_factor: 2.5,
+    interval_days: 0,
+    total_encounters: 1,
+    mistake_count: index,
+    next_review_at: new Date(now.getTime() + index * 86400000).toISOString(),
+    last_reviewed_at: null,
+    source: 'local' as const,
+    word: ['bonjour', 'je', "s'appeler", 'Marc', 'être'][index],
+    base_translation: ['hello', 'I', 'to be called', 'Marc', 'to be'][index],
+  }))
+  const daily = buildReviewSession(pool, [], 'daily', { size: 12 })
+  assert.equal(daily.tasks.length, 12)
+  assert.equal(daily.poolSize, 5)
+  const cont = buildReviewSession(pool, [], 'continue', { size: 10 })
+  assert.equal(cont.tasks.length, 10)
+  const staggered = staggerReviewDates(pool.map((item) => item.vocab_id), now)
+  assert.equal(staggered.size, 5)
+  const immediate = [...staggered.values()].filter((value) => value === now.toISOString()).length
+  assert.ok(immediate <= 10)
 })

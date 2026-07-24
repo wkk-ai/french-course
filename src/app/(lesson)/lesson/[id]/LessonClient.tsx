@@ -15,7 +15,7 @@ import { isCanonicalChapterId } from '@/lib/course-catalog'
 import { calculateLessonScore } from '@/lib/lesson-score'
 import { resolveLessonContent } from '@/lib/lesson-content'
 import { createClient } from '@/utils/supabase/client'
-import { enqueueLocalVocabulary } from '@/lib/local-vocab-vault'
+import { enqueueLocalVocabulary, staggerReviewDates } from '@/lib/local-vocab-vault'
 
 type Stage = 'brief' | 'reading' | 'conversation' | 'exercise'
 
@@ -262,7 +262,6 @@ export default function LessonClient({
     if (!lemmaIds.length) return
     try {
       const supabase = createClient()
-      const now = new Date().toISOString()
       // Ensure dictionary rows exist so Review joins work for bundled Module 1 lemmas.
       const rows = lemmaIds
         .map((id) => vocabularyById.get(id))
@@ -280,11 +279,12 @@ export default function LessonClient({
           idiom_explanation: word.idiom_explanation,
         }))
       if (rows.length) await supabase.from('vocabulary').upsert(rows, { onConflict: 'id' })
+      const staggered = staggerReviewDates(lemmaIds)
       await supabase.from('user_vocab_progress').upsert(
         lemmaIds.map((vocab_id) => ({
           user_id: userId,
           vocab_id,
-          next_review_at: now,
+          next_review_at: staggered.get(vocab_id) ?? new Date().toISOString(),
           last_reviewed_at: null,
         })),
         { onConflict: 'user_id,vocab_id', ignoreDuplicates: true },

@@ -43,7 +43,7 @@
    Do instead: `resolveLessonContent` must prefer bundled `MODULE1_LESSONS` over incomplete DB `lesson_content`.
 
 5. **[2026-07-24] Review/Vocab Vault empty after lessons**
-   Do instead: on complete, enqueue reading+dialogue lemmas (remote upsert + local vault fallback); log wrong answers to `user_mistakes` immediately; Review must resolve labels from bundled vocab if DB join is null.
+   Do instead: enqueue lemmas into one **infinite loop** (staggered dates); Review builds mixed sessions (due/repair/spiral/weak) and **Keep reviewing** never empties while pool > 0; resolve mistakes only after a correct drill.
 
 6. **[2026-07-24] Popup missing meanings / examples**
    Do instead: every vocab entry gets `meanings[]` + `example { french, english }`; show multi-sense lists in the word popup.
@@ -53,6 +53,9 @@
 
 8. **[2026-07-24] Typed answers must ignore case**
    Do instead: grade via `normalizeFrenchInput` (lowercase + strip accents/trailing punct); accept `Bonjour` for `bonjour`.
+
+9. **[2026-07-24] Review was recognition-only “caught up”**
+   Do instead: `buildReviewSession` + ExerciseCard modalities (meaning/cloze/produce/repair); hub shows pool size + Start session / Keep reviewing.
 
 ## Shell & Command Reliability
 
