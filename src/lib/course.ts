@@ -11,6 +11,8 @@ export type WordToken = {
 
 export type ReadingParagraph = {
   tokens: WordToken[]
+  /** When true, render as a bullet list item (grouped with neighbors). */
+  listItem?: boolean
 }
 
 import type { LessonExercise } from '@/lib/exercises/types'

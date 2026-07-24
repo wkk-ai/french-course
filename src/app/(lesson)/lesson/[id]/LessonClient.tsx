@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { BookOpen, ChevronRight, Eye, Flame, MessagesSquare, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import type { ExerciseAnswer, GrammarRule, LessonContent, VerbConjugation, VocabularyWord, WordToken } from '@/lib/course'
@@ -99,7 +99,11 @@ export default function LessonClient({
 
   const vocabularyById = useMemo(() => new Map(vocabulary.map((word) => [word.id, word])), [vocabulary])
   const readingParagraphs = useMemo(
-    () => content.reading?.map((paragraph) => ({ tokens: enrichTokens(paragraph.tokens, vocabulary) })) ?? [],
+    () =>
+      content.reading?.map((paragraph) => ({
+        ...paragraph,
+        tokens: enrichTokens(paragraph.tokens, vocabulary),
+      })) ?? [],
     [content.reading, vocabulary],
   )
   const conversationLines = useMemo(
@@ -399,9 +403,31 @@ export default function LessonClient({
               </div>
               <p className="mb-4 pr-28 text-sm text-on-surface-variant">Tap any word for meaning. Verbs include a <span className="font-semibold text-primary">Conjugate</span> button. Turn on X-Ray to color nouns, verbs, and adjectives.</p>
               <div className="mt-2 space-y-6">
-                {readingParagraphs.map((paragraph, index) => (
-                  <div key={index}>{renderTokens(paragraph.tokens)}</div>
-                ))}
+                {(() => {
+                  const blocks: ReactNode[] = []
+                  let listBuffer: { tokens: WordToken[]; key: number }[] = []
+                  const flushList = () => {
+                    if (!listBuffer.length) return
+                    blocks.push(
+                      <ul key={`list-${listBuffer[0].key}`} className="list-disc space-y-2 pl-6">
+                        {listBuffer.map((item) => (
+                          <li key={item.key} className="marker:text-primary">{renderTokens(item.tokens)}</li>
+                        ))}
+                      </ul>,
+                    )
+                    listBuffer = []
+                  }
+                  readingParagraphs.forEach((paragraph, index) => {
+                    if (paragraph.listItem) {
+                      listBuffer.push({ tokens: paragraph.tokens, key: index })
+                      return
+                    }
+                    flushList()
+                    blocks.push(<div key={index}>{renderTokens(paragraph.tokens)}</div>)
+                  })
+                  flushList()
+                  return blocks
+                })()}
               </div>
               {xRayEnabled && (
                 <div className="mt-8 flex flex-wrap gap-4 border-t border-surface-variant pt-4 text-syntax-label text-on-surface-variant">

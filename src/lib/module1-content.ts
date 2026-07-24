@@ -320,7 +320,7 @@ export const MODULE1_LESSONS: Record<string, LessonContent> = {
     },
     reading: readingParagraphs('c1', [
       'Bonjour ! Je m\'appelle Marc et je suis français. J\'habite à Paris, une grande ville en France. Je suis étudiant et j\'aime ma ville. Mon amie Marie est française aussi : elle habite à Lyon, une autre grande ville. Nous sommes amis et nous aimons le français.',
-      'En France, la politesse est très importante au quotidien. Voici les formules utiles : · bonjour le matin · bonsoir le soir · salut entre amis · vous et s\'il vous plaît avec un inconnu ou un professeur · pardon quand on dérange.',
+      'En France, la politesse est très importante au quotidien. Voici les formules utiles :\n- bonjour le matin\n- bonsoir le soir\n- salut entre amis\n- vous et s\'il vous plaît avec un inconnu ou un professeur\n- pardon quand on dérange',
       'Pour se présenter, on dit : Je m\'appelle… ou Moi, c\'est… plus un nom. Pour la nationalité : Je suis français ou Elle est française. Attention à la différence : C\'est Marc identifie une personne. Il est français décrit. C\'est une différence très importante en français !',
       'Marc et Marie se rencontrent à Paris un lundi. Marc dit : Bonjour ! Je m\'appelle Marc. Enchanté. Marie répond : Salut Marc ! Moi, c\'est Marie. Enchantée. Marc demande : Tu es française ? Marie dit : Oui, je suis française. Et toi ? Marc répond : Je suis français. J\'habite à Paris. Marie ajoute : Moi aussi ! Comment ça va ? Marc dit : Ça va bien, merci.',
       'Le soir, Marc dit bonsoir à son ami Paul. Paul est anglais mais il habite en France. Marc demande : Tu es anglais ? Paul répond : Oui, je suis anglais, mais j\'habite à Paris avec plaisir. En partant, les amis disent au revoir et à bientôt. En France, on dit souvent merci — c\'est la base d\'une bonne conversation.',
@@ -646,11 +646,11 @@ export const MODULE1_LESSONS: Record<string, LessonContent> = {
     },
     reading: readingParagraphs('c2', [
       'Aujourd\'hui, c\'est lundi. Demain, c\'est mardi, et après-demain, c\'est mercredi. Marc regarde le calendrier : cette semaine, il a trois cours de français. Hier, c\'était dimanche, et Marie est restée à la maison avec sa famille.',
-      'Marc a vingt ans. Marie a vingt ans aussi. Son anniversaire est vendredi. Les amis disent : Joyeux anniversaire ! En France, on dit toujours J\'ai … ans pour l\'âge. Exemples : · J\'ai quinze ans · Elle a trente ans · Nous avons dix-huit ans.',
+      'Marc a vingt ans. Marie a vingt ans aussi. Son anniversaire est vendredi. Les amis disent : Joyeux anniversaire ! En France, on dit toujours J\'ai … ans pour l\'âge. Exemples :\n- J\'ai quinze ans\n- Elle a trente ans\n- Nous avons dix-huit ans',
       'Les jours de la semaine sont importants pour organiser la vie. Lundi, mardi, mercredi, jeudi et vendredi sont les jours de travail ou d\'école. Samedi et dimanche sont le week-end. Marc demande : On se voit samedi ? Marie répond : Oui, samedi à dix heures.',
       'Les nombres servent partout : l\'âge, l\'heure, l\'argent. Marc a dix euros. Un café coûte deux euros et un croissant coûte un euro cinquante. Un touriste demande : Combien ça coûte ? Le serveur répond : Ça coûte trois euros.',
-      'Chaque mois a environ trente jours. Une année a douze mois et cinquante-deux semaines. Questions utiles au quotidien : · Quel jour sommes-nous ? · Nous sommes lundi. · Quelle heure est-il ? · Il est midi.',
-      'Marie planifie sa semaine : · lundi et mercredi : des cours · mardi : café avec Marc · jeudi : étudier à la maison · vendredi : son anniversaire · samedi : se reposer · dimanche : préparer la semaine prochaine.',
+      'Chaque mois a environ trente jours. Une année a douze mois et cinquante-deux semaines. Questions utiles au quotidien :\n- Quel jour sommes-nous ?\n- Nous sommes lundi.\n- Quelle heure est-il ?\n- Il est midi.',
+      'Marie planifie sa semaine :\n- lundi et mercredi : des cours\n- mardi : café avec Marc\n- jeudi : étudier à la maison\n- vendredi : son anniversaire\n- samedi : se reposer\n- dimanche : préparer la semaine prochaine',
     ], V),
     conversation: {
       title: 'Planning the week',
@@ -974,7 +974,7 @@ export const MODULE1_LESSONS: Record<string, LessonContent> = {
       'Au café du coin, Marc et Marie s\'installent à la terrasse. Il est dix heures du matin. Le serveur arrive et dit : Bonjour ! Vous désirez ? Marc répond : Je prends un café et un croissant, s\'il vous plaît. Marie dit : Pour moi, un thé et de l\'eau, s\'il vous plaît.',
       'Le serveur demande : Vous voulez du sucre ? Marie répond : Oui, un peu de sucre, merci. Marc dit : Non, merci. Le serveur apporte les boissons chaudes. Le café est chaud et le thé est délicieux. Marie aime le pain français avec du beurre.',
       'À la table voisine, un couple commande deux cafés et du jus d\'orange. L\'homme demande : Combien ça coûte ? La serveuse répond : Ça coûte huit euros. La femme dit : Je paie. Elle donne dix euros. La serveuse dit : Merci. De rien.',
-      'Marc regarde le menu : · café · thé · chocolat chaud · eau · jus · croissant · pain. Marc demande : Tu veux un chocolat chaud ? Marie répond : Non, je prends du thé. Marc ajoute : Moi, je prends un café. J\'aime le café français.',
+      'Marc regarde le menu :\n- café\n- thé\n- chocolat chaud\n- eau\n- jus\n- croissant\n- pain\nMarc demande : Tu veux un chocolat chaud ? Marie répond : Non, je prends du thé. Marc ajoute : Moi, je prends un café. J\'aime le café français.',
       'Après le petit-déjeuner, Marc dit : L\'addition, s\'il vous plaît. Le serveur apporte l\'addition : quatre euros cinquante pour Marc, trois euros pour Marie. Marc paie avec une carte. Il dit merci beaucoup. Le serveur répond : De rien. Au revoir !',
       'En France, le café est une tradition. Les gens prennent un café le matin, parfois l\'après-midi aussi. On commande à la terrasse ou au comptoir. On dit toujours bonjour au serveur et merci en partant. C\'est la politesse de base.',
     ], V),
@@ -1302,7 +1302,7 @@ export const MODULE1_LESSONS: Record<string, LessonContent> = {
       'Mes parents ont des frères et sœurs aussi. Mon père a un frère, mon oncle Henri, et une sœur, ma tante Anne. Ma mère a une sœur, ma tante Lucie. J\'ai trois cousins : deux cousins et une cousine. Nous nous voyons souvent le dimanche.',
       'Chez Marie, la famille est différente. Elle a un frère et une sœur. Son frère s\'appelle Lucas et sa sœur s\'appelle Emma. Ses parents habitent en France. Son père est français et sa mère est anglaise. Marie dit : Ma famille est internationale !',
       'Le dimanche, les familles se retrouvent souvent. Mes parents préparent un bon repas. Mon grand-père raconte des histoires. Ma grand-mère apporte du pain et du fromage. Les enfants jouent dans le jardin. C\'est un beau moment ensemble.',
-      'Pour parler de la famille en français, on utilise souvent avoir. Exemples : · J\'ai un frère · Elle a deux enfants · Nous avons une grande famille. On utilise être pour décrire : · Mon père est grand · Ma mère est française. C\'est simple et très utile !',
+      'Pour parler de la famille en français, on utilise souvent avoir. Exemples :\n- J\'ai un frère\n- Elle a deux enfants\n- Nous avons une grande famille\nOn utilise être pour décrire :\n- Mon père est grand\n- Ma mère est française\nC\'est simple et très utile !',
     ], V),
     conversation: {
       title: 'Talking about family',
