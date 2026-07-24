@@ -4,7 +4,10 @@ import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { BookOpen, ChevronRight, Eye, Flame, MessagesSquare, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import type { GrammarRule, LessonContent, VerbConjugation, VocabularyWord, WordToken } from '@/lib/course'
+import type { ExerciseAnswer, GrammarRule, LessonContent, VerbConjugation, VocabularyWord, WordToken } from '@/lib/course'
+import { ExerciseCard } from '@/components/lesson/ExerciseCard'
+import { buildRemediationExercises } from '@/lib/exercises/enrich'
+import { isExerciseAnswered, isExerciseCorrect } from '@/lib/exercises/grading'
 import { RichText } from '@/components/RichText'
 import { enrichTokens, isPunctuationToken, tokenizeFrench } from '@/lib/clickable-text'
 import { CONJUGATION_TENSES, conjugationsForWord, isConjugableVerb } from '@/lib/french-conjugations'
@@ -36,7 +39,8 @@ export default function LessonClient({
   const [activeWordId, setActiveWordId] = useState<string | null>(null)
   const [conjugationWord, setConjugationWord] = useState<VocabularyWord | null>(null)
   const [conjugationTense, setConjugationTense] = useState<string>('Présent')
-  const [answers, setAnswers] = useState<Record<string, number>>({})
+  const [answers, setAnswers] = useState<Record<string, ExerciseAnswer>>({})
+  const [remediationCategories, setRemediationCategories] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [gate, setGate] = useState<'loading' | 'ready' | 'login' | 'locked'>('loading')
@@ -54,10 +58,17 @@ export default function LessonClient({
         return
       }
 
-      const [{ data: progress }, { data: authored }] = await Promise.all([
+      const [{ data: progress }, { data: authored }, { data: mistakes }] = await Promise.all([
         supabase.from('user_chapter_progress').select('chapter_id, status').eq('user_id', user.id),
         supabase.from('chapters').select('id, lesson_content, order_index, module:modules(order_index)'),
+        supabase.from('user_mistakes').select('grammar_category').eq('user_id', user.id).eq('is_resolved', false),
       ])
+
+      if (!cancelled) {
+        setRemediationCategories([
+          ...new Set((mistakes ?? []).map((item) => item.grammar_category).filter((category): category is string => Boolean(category))),
+        ])
+      }
 
       const orderedAuthored = (authored ?? [])
         .filter((item) => isCanonicalChapterId(item.id) && resolveLessonContent(item.id, item.lesson_content))
@@ -101,8 +112,13 @@ export default function LessonClient({
       })) ?? [],
     [content.conversation, vocabulary],
   )
-  const exercises = content.exercises ?? []
-  const answeredAll = exercises.length > 0 && exercises.every((exercise) => answers[exercise.id] !== undefined)
+  const exercises = useMemo(() => {
+    const base = content.exercises ?? []
+    const remediation = buildRemediationExercises(remediationCategories)
+    const existingIds = new Set(base.map((exercise) => exercise.id))
+    return [...base, ...remediation.filter((exercise) => !existingIds.has(exercise.id))]
+  }, [content.exercises, remediationCategories])
+  const answeredAll = exercises.length > 0 && exercises.every((exercise) => isExerciseAnswered(exercise, answers[exercise.id]))
   const progress = stage === 'brief' ? 20 : stage === 'reading' ? 45 : stage === 'conversation' ? 70 : 90
 
   const syntaxClass = (token: WordToken) => {
@@ -281,7 +297,7 @@ export default function LessonClient({
     setError(null)
     const grammarResults = exercises.map((exercise) => ({
       category: exercise.category,
-      correct: answers[exercise.id] === exercise.answer,
+      correct: isExerciseCorrect(exercise, answers[exercise.id]),
       context: `Lesson exercise: ${exercise.prompt}`,
     }))
     try {
@@ -289,7 +305,7 @@ export default function LessonClient({
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Your session expired. Please sign in again.')
 
-      const score = calculateLessonScore(answers, Object.fromEntries(exercises.map((exercise) => [exercise.id, exercise.answer])))
+      const score = calculateLessonScore(answers, exercises)
       const { error: rpcError } = await supabase.rpc('complete_chapter', {
         p_chapter_id: chapterId,
         p_score: score,
@@ -312,7 +328,7 @@ export default function LessonClient({
         // Fallback path: still push wrong answers into Review.
         await Promise.all(
           exercises
-            .filter((exercise) => answers[exercise.id] !== exercise.answer)
+            .filter((exercise) => !isExerciseCorrect(exercise, answers[exercise.id]))
             .map((exercise) => recordMistake(exercise.category, `Lesson exercise: ${exercise.prompt}`)),
         )
       }
@@ -439,53 +455,20 @@ export default function LessonClient({
 
         {stage === 'exercise' && (
           <section className="mt-8 space-y-5">
-            <p className="text-body-reading text-on-surface-variant">Answer each question once. If you miss it, the correct option is shown.</p>
-            {exercises.map((exercise, exerciseIndex) => {
-              const selected = answers[exercise.id]
-              const locked = selected !== undefined
-              const correct = selected === exercise.answer
-              return (
-                <article key={exercise.id} className="tactile-card p-5">
-                  <p className="text-label-caps text-primary">QUESTION {exerciseIndex + 1} OF {exercises.length}</p>
-                  <h2 className="mt-2 text-body-ui font-bold">{exercise.prompt}</h2>
-                  <div className="mt-4 grid gap-2">
-                    {exercise.options.map((option, optionIndex) => {
-                      const isSelected = selected === optionIndex
-                      const isCorrectOption = optionIndex === exercise.answer
-                      let classes = 'border-surface-variant'
-                      if (locked && isCorrectOption) classes = 'border-success bg-success/10 text-tertiary'
-                      else if (locked && isSelected && !correct) classes = 'border-error bg-error-container/40 text-on-error-container'
-                      else if (!locked) classes = 'border-surface-variant hover:bg-surface-container-low'
-                      return (
-                        <button
-                          key={option}
-                          type="button"
-                          disabled={locked}
-                          onClick={() => {
-                            if (locked) return
-                            setAnswers((current) => ({ ...current, [exercise.id]: optionIndex }))
-                            if (optionIndex !== exercise.answer) {
-                              void recordMistake(exercise.category, `Lesson exercise: ${exercise.prompt}`)
-                            }
-                          }}
-                          className={`rounded-lg border-2 p-3 text-left text-sm font-semibold disabled:cursor-default ${classes}`}
-                        >
-                          {option}
-                          {locked && isCorrectOption ? ' ✓' : ''}
-                          {locked && isSelected && !correct ? ' ✗' : ''}
-                        </button>
-                      )
-                    })}
-                  </div>
-                  {locked && (
-                    <p className={`mt-4 text-sm ${correct ? 'text-tertiary' : 'text-secondary'}`}>
-                      {correct ? 'Correct. ' : `Not quite — the answer is “${exercise.options[exercise.answer]}”. `}
-                      {exercise.explanation}
-                    </p>
-                  )}
-                </article>
-              )
-            })}
+            <p className="text-body-reading text-on-surface-variant">
+              Mixed drills: multiple choice, fill-in, matching, word order, and more. Answer each once — wrong answers feed Review.
+            </p>
+            {exercises.map((exercise, exerciseIndex) => (
+              <ExerciseCard
+                key={exercise.id}
+                exercise={exercise}
+                index={exerciseIndex}
+                total={exercises.length}
+                answer={answers[exercise.id]}
+                onAnswer={(value) => setAnswers((current) => ({ ...current, [exercise.id]: value }))}
+                onMistake={() => void recordMistake(exercise.category, `Lesson exercise: ${exercise.prompt}`)}
+              />
+            ))}
             {error && <p role="alert" className="rounded-lg bg-error-container p-3 text-sm text-on-error-container">{error}</p>}
             <div className="flex gap-3">
               <button type="button" onClick={() => setStage(hasConversation ? 'conversation' : 'reading')} className="tactile-button flex-1 rounded-xl border-2 border-surface-variant bg-surface-container-lowest py-4 font-bold text-on-surface">

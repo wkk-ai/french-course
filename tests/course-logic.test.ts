@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { filterCourseCatalog, LEGACY_MODULE_ID } from '../src/lib/course-catalog'
+import { isExerciseCorrect } from '../src/lib/exercises/grading'
 import { resolveLessonContent } from '../src/lib/lesson-content'
-import { calculateLessonScore } from '../src/lib/lesson-score'
+import { calculateLessonScoreLegacy } from '../src/lib/lesson-score'
 import { deriveChapterStatus } from '../src/lib/progression'
 import { calculateSrsSchedule } from '../src/lib/srs'
 
@@ -48,5 +49,28 @@ test('SM-2 resets a missed card and scores contextual exercises', () => {
   assert.equal(schedule.repetitionCount, 0)
   assert.equal(schedule.intervalDays, 1)
   assert.equal(schedule.nextReview.toISOString(), '2026-01-02T00:00:00.000Z')
-  assert.equal(calculateLessonScore({ a: 1, b: 2 }, { a: 1, b: 0 }), 50)
+  assert.equal(calculateLessonScoreLegacy({ a: 1, b: 2 }, { a: 1, b: 0 }), 50)
+})
+
+test('enriched Module 1 lessons include varied exercise types', () => {
+  const content = resolveLessonContent('22222222-0000-0000-0000-000000000101', { tokens: [] })
+  const types = new Set((content?.exercises ?? []).map((exercise) => exercise.type ?? 'mcq'))
+  assert.ok(types.has('mcq') || types.has('cloze'))
+  assert.ok(types.has('match'))
+  assert.ok(types.has('order'))
+  assert.ok((content?.exercises?.length ?? 0) >= 30)
+})
+
+test('cloze grading accepts accents loosely', () => {
+  const exercise = {
+    id: 't',
+    type: 'cloze' as const,
+    category: 'test',
+    prompt: 'x',
+    text: 'Je ___',
+    answers: ['suis'],
+    explanation: 'x',
+  }
+  assert.equal(isExerciseCorrect(exercise, { kind: 'text', value: 'suis' }), true)
+  assert.equal(isExerciseCorrect(exercise, { kind: 'text', value: 'wrong' }), false)
 })

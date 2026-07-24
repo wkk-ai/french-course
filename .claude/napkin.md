@@ -48,6 +48,9 @@
 6. **[2026-07-24] Popup missing meanings / examples**
    Do instead: every vocab entry gets `meanings[]` + `example { french, english }`; show multi-sense lists in the word popup.
 
+7. **[2026-07-24] Exercises were MCQ-only**
+   Do instead: use discriminated `LessonExercise` types + `ExerciseCard`; enrich via `enrichLessonExercises` (cloze conversion, chapter extras, spiral, remediation from `user_mistakes`).
+
 ## Shell & Command Reliability
 
 1. **[2026-07-24] Assumed `gh` on PATH**

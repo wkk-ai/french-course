@@ -1,4 +1,5 @@
 import { hasLessonContent, type GrammarRule, type LessonContent, type VerbConjugation, type VocabularyWord } from '@/lib/course'
+import { enrichLessonExercises } from '@/lib/exercises/enrich'
 import {
   MODULE1_CONJUGATIONS,
   MODULE1_LESSONS,
@@ -6,12 +7,19 @@ import {
   MODULE1_VOCABULARY,
 } from '@/lib/module1-content'
 
-export function resolveLessonContent(chapterId: string, content: unknown): LessonContent | null {
+export function resolveLessonContent(
+  chapterId: string,
+  content: unknown,
+  options?: { remediationCategories?: string[] },
+): LessonContent | null {
   // Prefer authored Module 1 bundle over thin DB stubs that would shadow it.
   const bundled = MODULE1_LESSONS[chapterId]
-  if (bundled) return bundled
-  if (hasLessonContent(content)) return content
-  return null
+  const base = bundled ?? (hasLessonContent(content) ? content : null)
+  if (!base) return null
+  return {
+    ...base,
+    exercises: enrichLessonExercises(chapterId, base.exercises ?? [], options?.remediationCategories ?? []),
+  }
 }
 
 export function withResolvedLessonContent<T extends { id: string; lesson_content: unknown }>(chapters: T[]): T[] {

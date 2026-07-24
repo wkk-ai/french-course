@@ -13,14 +13,9 @@ export type ReadingParagraph = {
   tokens: WordToken[]
 }
 
-export type LessonExercise = {
-  id: string
-  category: string
-  prompt: string
-  options: string[]
-  answer: number
-  explanation: string
-}
+import type { LessonExercise } from '@/lib/exercises/types'
+
+export type { ExerciseAnswer, ExerciseSource, LessonExercise } from '@/lib/exercises/types'
 
 export type ConversationLine = {
   speaker: string
