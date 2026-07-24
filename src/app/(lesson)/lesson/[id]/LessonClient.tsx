@@ -172,7 +172,8 @@ export default function LessonClient({
             : []
         const showConjugate = word ? isConjugableVerb(word) : false
         return (
-          <span key={token.id} className={`relative inline${spaceBefore ? ' ml-[0.3em]' : ''}`}>
+          <span key={token.id} className="relative inline">
+            {spaceBefore ? ' ' : null}
             {word ? (
               <button type="button" onClick={() => setActiveWordId(active ? null : token.id)} className={`rounded px-0.5 text-left transition-colors ${syntaxClass(token)} ${active ? 'bg-surface-container-high' : ''}`}>
                 {token.text}

@@ -25,16 +25,8 @@ export function resolveVocabulary(lemmaIds: string[], fromDb: VocabularyWord[]):
   const byId = new Map(MODULE1_VOCABULARY.map((word) => [word.id, word]))
   for (const word of fromDb) {
     const existing = byId.get(word.id)
-    byId.set(
-      word.id,
-      existing
-        ? {
-            ...word,
-            meanings: existing.meanings ?? word.meanings,
-            example: existing.example ?? word.example,
-          }
-        : word,
-    )
+    // Prefer bundled Module 1 dictionary (meanings, examples, POS) over thin DB rows.
+    byId.set(word.id, existing ? { ...word, ...existing } : word)
   }
   // Keep the full Module 1 dictionary so enrichTokens can attach every lemma.
   if (MODULE1_VOCABULARY.some((word) => lemmaIds.includes(word.id))) return [...byId.values()]

@@ -17,16 +17,38 @@ function normalizeLookup(text: string) {
     .replace(/[.,!?;:]+$/g, '')
 }
 
-/** Split trailing punctuation glued onto a word token (e.g. "Moi," → "Moi" + ","). */
+/** Split leading/trailing punctuation glued onto words (e.g. "Moi," → "Moi" + ","). */
 function splitGluedPunctuation(token: WordToken): WordToken[] {
-  const match = token.text.match(/^(.+?)([.,!?;:]+)$/)
-  if (!match || isPunctuationToken(token.text)) return [token]
-  const [, word, punct] = match
-  if (!word || isPunctuationToken(word)) return [token]
-  return [
-    { ...token, text: word },
-    { id: `${token.id}-p`, text: punct, syntax: 'none' },
-  ]
+  if (isPunctuationToken(token.text)) {
+    // Split runs like "»," or "!»" into single marks for spacing rules.
+    if (token.text.length > 1 && /^[.,!?;:…«»()]+$/.test(token.text)) {
+      return [...token.text].map((mark, index) => ({
+        id: `${token.id}-m${index}`,
+        text: mark,
+        syntax: 'none' as const,
+      }))
+    }
+    return [token]
+  }
+
+  const match = token.text.match(/^([«»"“”([{}]*)(.+?)([«»"“”)\]}.,!?;:]+)?$/)
+  if (!match) return [token]
+  const [, leading, word, trailing] = match
+  if (!word || (!leading && !trailing)) return [token]
+
+  const parts: WordToken[] = []
+  if (leading) {
+    for (const [index, mark] of [...leading].entries()) {
+      parts.push({ id: `${token.id}-l${index}`, text: mark, syntax: 'none' })
+    }
+  }
+  parts.push({ ...token, text: word })
+  if (trailing) {
+    for (const [index, mark] of [...trailing].entries()) {
+      parts.push({ id: `${token.id}-t${index}`, text: mark, syntax: 'none' })
+    }
+  }
+  return parts
 }
 
 /** Build lookup keys for surface forms → lemma id. */
