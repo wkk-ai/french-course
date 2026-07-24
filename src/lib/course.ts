@@ -22,6 +22,12 @@ export type LessonExercise = {
   explanation: string
 }
 
+export type ConversationLine = {
+  speaker: string
+  text: string
+  tokens?: WordToken[]
+}
+
 export type LessonContent = {
   brief?: {
     title: string
@@ -29,6 +35,11 @@ export type LessonContent = {
     ruleSlugs: string[]
   }
   reading?: ReadingParagraph[]
+  conversation?: {
+    title: string
+    setting: string
+    lines: ConversationLine[]
+  }
   exercises?: LessonExercise[]
   wordCount?: number
 }

@@ -2,15 +2,16 @@
 
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
-import { BookOpen, ChevronRight, Eye, Flame, X } from 'lucide-react'
+import { BookOpen, ChevronRight, Eye, Flame, MessagesSquare, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import type { GrammarRule, LessonContent, VerbConjugation, VocabularyWord, WordToken } from '@/lib/course'
+import { RichText } from '@/components/RichText'
 import { isCanonicalChapterId } from '@/lib/course-catalog'
 import { calculateLessonScore } from '@/lib/lesson-score'
 import { resolveLessonContent } from '@/lib/lesson-content'
 import { createClient } from '@/utils/supabase/client'
 
-type Stage = 'brief' | 'reading' | 'exercise'
+type Stage = 'brief' | 'reading' | 'conversation' | 'exercise'
 
 export default function LessonClient({
   chapterId,
@@ -36,6 +37,7 @@ export default function LessonClient({
   const [error, setError] = useState<string | null>(null)
   const [gate, setGate] = useState<'loading' | 'ready' | 'login' | 'locked'>('loading')
   const router = useRouter()
+  const hasConversation = Boolean(content.conversation?.lines.length)
 
   useEffect(() => {
     let cancelled = false
@@ -83,7 +85,7 @@ export default function LessonClient({
   const vocabularyById = useMemo(() => new Map(vocabulary.map((word) => [word.id, word])), [vocabulary])
   const exercises = content.exercises ?? []
   const answeredAll = exercises.length > 0 && exercises.every((exercise) => answers[exercise.id] !== undefined)
-  const progress = stage === 'brief' ? 25 : stage === 'reading' ? 60 : 90
+  const progress = stage === 'brief' ? 20 : stage === 'reading' ? 45 : stage === 'conversation' ? 70 : 90
 
   const syntaxClass = (token: WordToken) => {
     if (!xRayEnabled) return ''
@@ -92,6 +94,43 @@ export default function LessonClient({
     if (token.syntax === 'adj') return 'bg-syntax-adj/10 border-b-2 border-syntax-adj'
     return ''
   }
+
+  const renderTokens = (tokens: WordToken[]) => (
+    <p className="flex flex-wrap gap-x-1.5 gap-y-3 text-body-reading">
+      {tokens.map((token) => {
+        const word = token.lemmaId ? vocabularyById.get(token.lemmaId) : undefined
+        const active = token.id === activeWordId
+        return (
+          <span key={token.id} className="relative inline-block">
+            {word ? (
+              <button type="button" onClick={() => setActiveWordId(active ? null : token.id)} className={`rounded px-0.5 text-left transition-colors ${syntaxClass(token)} ${active ? 'bg-surface-container-high' : ''}`}>
+                {token.text}
+              </button>
+            ) : (
+              <span className={syntaxClass(token)}>{token.text}</span>
+            )}
+            {active && word && (
+              <div className="absolute bottom-full left-1/2 z-30 mb-3 w-64 -translate-x-1/2 rounded-xl border-2 border-surface-variant bg-surface-container-lowest p-4 shadow-lg">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <p className="font-bold">{word.word}</p>
+                    {word.ipa_pronunciation && <p className="mt-1 text-xs text-ink-medium">/{word.ipa_pronunciation}/</p>}
+                  </div>
+                  <span className="rounded-full bg-primary px-2 py-1 text-[10px] font-bold text-on-primary">{word.register}</span>
+                </div>
+                <p className="mt-3 text-sm text-on-surface-variant">{word.base_translation}</p>
+                {conjugations.some((conjugation) => conjugation.vocab_id === word.id) && (
+                  <button type="button" onClick={() => setConjugationWord(word)} className="tactile-button mt-4 w-full rounded-lg border-primary-container bg-primary py-2 text-label-caps text-on-primary">
+                    CONJUGATE
+                  </button>
+                )}
+              </div>
+            )}
+          </span>
+        )
+      })}
+    </p>
+  )
 
   const completeLesson = async () => {
     if (!answeredAll) return
@@ -106,20 +145,20 @@ export default function LessonClient({
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Your session expired. Please sign in again.')
 
+      const score = calculateLessonScore(answers, Object.fromEntries(exercises.map((exercise) => [exercise.id, exercise.answer])))
       const { error: rpcError } = await supabase.rpc('complete_chapter', {
         p_chapter_id: chapterId,
-        p_score: calculateLessonScore(answers, Object.fromEntries(exercises.map((exercise) => [exercise.id, exercise.answer]))),
+        p_score: score,
         p_words_read: content.wordCount ?? 0,
         p_grammar_results: grammarResults,
       })
 
       if (rpcError) {
-        // Fallback if RPC is missing or restricted: mark chapter completed directly.
         const { error: progressError } = await supabase.from('user_chapter_progress').upsert({
           user_id: user.id,
           chapter_id: chapterId,
           status: 'completed',
-          score: calculateLessonScore(answers, Object.fromEntries(exercises.map((exercise) => [exercise.id, exercise.answer]))),
+          score,
           completed_at: new Date().toISOString(),
         }, { onConflict: 'user_id,chapter_id' })
         if (progressError) throw rpcError
@@ -159,7 +198,7 @@ export default function LessonClient({
             <div className="tactile-card p-6">
               <div className="flex items-center gap-2 text-primary"><BookOpen className="size-5" /><p className="text-label-caps">THEORY FIRST</p></div>
               <h2 className="mt-3 text-headline-md">{content.brief.title}</h2>
-              <p className="mt-4 whitespace-pre-line text-body-reading text-on-surface-variant">{content.brief.body}</p>
+              <RichText text={content.brief.body} className="mt-4 text-body-reading text-on-surface-variant" />
             </div>
             {rules.length > 0 && (
               <div>
@@ -191,41 +230,7 @@ export default function LessonClient({
               </div>
               <div className="mt-10 space-y-6">
                 {content.reading?.map((paragraph, index) => (
-                  <p key={index} className="flex flex-wrap gap-x-1.5 gap-y-3 text-body-reading">
-                    {paragraph.tokens.map((token) => {
-                      const word = token.lemmaId ? vocabularyById.get(token.lemmaId) : undefined
-                      const active = token.id === activeWordId
-                      return (
-                        <span key={token.id} className="relative inline-block">
-                          {word ? (
-                            <button type="button" onClick={() => setActiveWordId(active ? null : token.id)} className={`rounded px-0.5 text-left transition-colors ${syntaxClass(token)} ${active ? 'bg-surface-container-high' : ''}`}>
-                              {token.text}
-                            </button>
-                          ) : (
-                            <span className={syntaxClass(token)}>{token.text}</span>
-                          )}
-                          {active && word && (
-                            <div className="absolute bottom-full left-1/2 z-30 mb-3 w-64 -translate-x-1/2 rounded-xl border-2 border-surface-variant bg-surface-container-lowest p-4 shadow-lg">
-                              <div className="flex items-start justify-between gap-2">
-                                <div>
-                                  <p className="font-bold">{word.word}</p>
-                                  {word.ipa_pronunciation && <p className="mt-1 text-xs text-ink-medium">/{word.ipa_pronunciation}/</p>}
-                                </div>
-                                <span className="rounded-full bg-primary px-2 py-1 text-[10px] font-bold text-on-primary">{word.register}</span>
-                              </div>
-                              <p className="mt-3 text-sm text-on-surface-variant">{word.base_translation}</p>
-                              {word.idiom_explanation && <p className="mt-2 text-sm text-secondary">{word.idiom_explanation}</p>}
-                              {conjugations.some((conjugation) => conjugation.vocab_id === word.id) && (
-                                <button type="button" onClick={() => setConjugationWord(word)} className="tactile-button mt-4 w-full rounded-lg border-primary-container bg-primary py-2 text-label-caps text-on-primary">
-                                  CONJUGATE
-                                </button>
-                              )}
-                            </div>
-                          )}
-                        </span>
-                      )
-                    })}
-                  </p>
+                  <div key={index}>{renderTokens(paragraph.tokens)}</div>
                 ))}
               </div>
               {xRayEnabled && (
@@ -240,6 +245,36 @@ export default function LessonClient({
               <button type="button" onClick={() => setStage('brief')} className="tactile-button flex-1 rounded-xl border-2 border-surface-variant bg-surface-container-lowest py-4 font-bold text-on-surface">
                 BACK
               </button>
+              <button
+                type="button"
+                onClick={() => setStage(hasConversation ? 'conversation' : 'exercise')}
+                className="tactile-button flex-[2] flex items-center justify-center gap-2 rounded-xl border-primary-container bg-primary py-4 font-bold text-on-primary"
+              >
+                {hasConversation ? 'OPEN CONVERSATION' : 'PRACTICE THE RULES'} <ChevronRight className="size-5" />
+              </button>
+            </div>
+          </section>
+        )}
+
+        {stage === 'conversation' && content.conversation && (
+          <section className="mt-8 space-y-5">
+            <div className="tactile-card p-5">
+              <div className="flex items-center gap-2 text-primary"><MessagesSquare className="size-5" /><p className="text-label-caps">ROUTINE SPEECH</p></div>
+              <h2 className="mt-3 text-headline-md">{content.conversation.title}</h2>
+              <p className="mt-2 text-sm text-on-surface-variant">{content.conversation.setting}</p>
+            </div>
+            <div className="space-y-3">
+              {content.conversation.lines.map((line, index) => (
+                <article key={`${line.speaker}-${index}`} className={`rounded-xl border-2 border-surface-variant p-4 ${index % 2 === 0 ? 'bg-surface-container-lowest' : 'bg-primary-fixed/20'}`}>
+                  <p className="text-label-caps text-primary">{line.speaker}</p>
+                  {line.tokens?.length ? <div className="mt-2">{renderTokens(line.tokens)}</div> : <p className="mt-2 text-body-reading">{line.text}</p>}
+                </article>
+              ))}
+            </div>
+            <div className="flex gap-3">
+              <button type="button" onClick={() => setStage('reading')} className="tactile-button flex-1 rounded-xl border-2 border-surface-variant bg-surface-container-lowest py-4 font-bold text-on-surface">
+                BACK
+              </button>
               <button type="button" onClick={() => setStage('exercise')} className="tactile-button flex-[2] flex items-center justify-center gap-2 rounded-xl border-primary-container bg-primary py-4 font-bold text-on-primary">
                 PRACTICE THE RULES <ChevronRight className="size-5" />
               </button>
@@ -249,34 +284,53 @@ export default function LessonClient({
 
         {stage === 'exercise' && (
           <section className="mt-8 space-y-5">
-            <p className="text-body-reading text-on-surface-variant">Use the sentence and theory to choose the best answer.</p>
-            {exercises.map((exercise, exerciseIndex) => (
-              <article key={exercise.id} className="tactile-card p-5">
-                <p className="text-label-caps text-primary">QUESTION {exerciseIndex + 1}</p>
-                <h2 className="mt-2 text-body-ui font-bold">{exercise.prompt}</h2>
-                <div className="mt-4 grid gap-2">
-                  {exercise.options.map((option, optionIndex) => (
-                    <button
-                      key={option}
-                      type="button"
-                      onClick={() => setAnswers((current) => ({ ...current, [exercise.id]: optionIndex }))}
-                      className={`rounded-lg border-2 p-3 text-left text-sm font-semibold ${answers[exercise.id] === optionIndex ? 'border-primary bg-primary-fixed/30 text-primary' : 'border-surface-variant hover:bg-surface-container-low'}`}
-                    >
-                      {option}
-                    </button>
-                  ))}
-                </div>
-                {answers[exercise.id] !== undefined && (
-                  <p className={`mt-4 text-sm ${answers[exercise.id] === exercise.answer ? 'text-tertiary' : 'text-secondary'}`}>
-                    {answers[exercise.id] === exercise.answer ? 'Correct. ' : 'Not quite. '}
-                    {exercise.explanation}
-                  </p>
-                )}
-              </article>
-            ))}
+            <p className="text-body-reading text-on-surface-variant">Answer each question once. If you miss it, the correct option is shown.</p>
+            {exercises.map((exercise, exerciseIndex) => {
+              const selected = answers[exercise.id]
+              const locked = selected !== undefined
+              const correct = selected === exercise.answer
+              return (
+                <article key={exercise.id} className="tactile-card p-5">
+                  <p className="text-label-caps text-primary">QUESTION {exerciseIndex + 1} OF {exercises.length}</p>
+                  <h2 className="mt-2 text-body-ui font-bold">{exercise.prompt}</h2>
+                  <div className="mt-4 grid gap-2">
+                    {exercise.options.map((option, optionIndex) => {
+                      const isSelected = selected === optionIndex
+                      const isCorrectOption = optionIndex === exercise.answer
+                      let classes = 'border-surface-variant'
+                      if (locked && isCorrectOption) classes = 'border-success bg-success/10 text-tertiary'
+                      else if (locked && isSelected && !correct) classes = 'border-error bg-error-container/40 text-on-error-container'
+                      else if (!locked) classes = 'border-surface-variant hover:bg-surface-container-low'
+                      return (
+                        <button
+                          key={option}
+                          type="button"
+                          disabled={locked}
+                          onClick={() => {
+                            if (locked) return
+                            setAnswers((current) => ({ ...current, [exercise.id]: optionIndex }))
+                          }}
+                          className={`rounded-lg border-2 p-3 text-left text-sm font-semibold disabled:cursor-default ${classes}`}
+                        >
+                          {option}
+                          {locked && isCorrectOption ? ' ✓' : ''}
+                          {locked && isSelected && !correct ? ' ✗' : ''}
+                        </button>
+                      )
+                    })}
+                  </div>
+                  {locked && (
+                    <p className={`mt-4 text-sm ${correct ? 'text-tertiary' : 'text-secondary'}`}>
+                      {correct ? 'Correct. ' : `Not quite — the answer is “${exercise.options[exercise.answer]}”. `}
+                      {exercise.explanation}
+                    </p>
+                  )}
+                </article>
+              )
+            })}
             {error && <p role="alert" className="rounded-lg bg-error-container p-3 text-sm text-on-error-container">{error}</p>}
             <div className="flex gap-3">
-              <button type="button" onClick={() => setStage('reading')} className="tactile-button flex-1 rounded-xl border-2 border-surface-variant bg-surface-container-lowest py-4 font-bold text-on-surface">
+              <button type="button" onClick={() => setStage(hasConversation ? 'conversation' : 'reading')} className="tactile-button flex-1 rounded-xl border-2 border-surface-variant bg-surface-container-lowest py-4 font-bold text-on-surface">
                 BACK
               </button>
               <button

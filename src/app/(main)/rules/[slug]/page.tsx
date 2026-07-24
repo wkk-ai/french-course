@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import type { GrammarRule } from '@/lib/course'
+import { RichText } from '@/components/RichText'
 import { MODULE1_RULES } from '@/lib/module1-content'
 import { createStaticClient } from '@/utils/supabase/static'
 
@@ -28,7 +29,7 @@ export default async function RuleDetailPage({ params }: { params: Promise<{ slu
       <div className="tactile-card mt-6 p-6">
         <p className="text-label-caps text-primary">{rule.category}</p>
         <h1 className="mt-2 text-headline-lg">{rule.title}</h1>
-        <p className="mt-4 text-body-reading text-on-surface-variant">{rule.full_explanation}</p>
+        <RichText text={rule.full_explanation} className="mt-4 text-body-reading text-on-surface-variant" />
         <h2 className="mt-8 text-headline-md">Examples</h2>
         <div className="mt-4 grid gap-3">
           {rule.examples.map((example) => (

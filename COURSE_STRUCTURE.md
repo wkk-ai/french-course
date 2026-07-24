@@ -89,16 +89,22 @@ Lemma lists below are **curriculum targets** (dictionary entries to author in co
 
 ### Module 1 — Les Fondamentaux *(A1 · Month 1)*
 
-**Module description:** Alphabet, pronunciation rules (silent letters, basic liaison), être/avoir, gender, singular/plural, essential politeness. First clickable readings about identity and greetings.
+**Module description:** Alphabet awareness, pronunciation (silent letters), *être/avoir*, gender, singular/plural, essential politeness. First clickable readings about identity, time, café life, and family — each chapter ends with a **spoken-routine dialogue** so learners rehearse real turns.
 
-| Ch | Title | Grammar | New | Vocabulary themes & target words |
-| ---: | --- | --- | ---: | --- |
-| 1.1 | Bonjour, je m'appelle… | Subject pronouns; **present** *être*; *c'est* vs *il/elle est* | 65 | **Greetings:** bonjour, bonsoir, salut, au revoir, à bientôt, merci, s'il vous plaît, pardon, excusez-moi. **Identity:** je, tu, il, elle, s'appeler, nom, prénom, âge, ans. **Nationality:** français/française, anglais/anglaise, habiter, ville, pays. |
-| 1.2 | Les chiffres et le calendrier | Numbers 0–100; days, months; *il y a* (age) | 55 | **Time:** lundi–dimanche, janvier–décembre, aujourd'hui, demain, hier, semaine, mois, année, heure, minute. **Numbers:** cardinal forms in context ( téléphone, adresse ). |
-| 1.3 | Au café | **Present** -ER verbs; articles *le/la/les*, *un/une/des*; *du/de la/des* | 70 | **Food/drink:** café, thé, eau, lait, sucre, croissant, pain, beurre, confiture, menu, addition, serveur. **Verbs:** commander, payer, prendre, boire, manger, vouloir, aimer. |
-| 1.4 | Ma famille | Possessives *mon/ma/mes*; family nouns; *avoir* + noun | 60 | **Family:** mère, père, parents, frère, sœur, enfant, fils, fille, grand-parent, mari, femme, copain, copine. **Traits:** grand/petit, jeune, vieux/vieille. |
+**Chapter quality bar (shipped content):**
+- **≥ 15 new lemmas** made clickable in reading and/or dialogue
+- **≥ 10 graded exercises** (locked after answer; wrong answers reveal the correct option)
+- **1 conversation scene** (multi-turn routine speech applying the chapter grammar)
+- Theory brief with bold/italic emphasis (not raw markdown)
 
-**Module checkpoint:** 250-word biography reading; present-tense Q&A; article/gender quiz.
+| Ch | Title | Grammar | New | Vocabulary themes & target words | Conversation routine | Exercise mix (10+) |
+| ---: | --- | --- | ---: | --- | --- | --- |
+| 1.1 | Bonjour, je m'appelle… | Subject pronouns; **present** *être*; *c'est* vs *il/elle est*; greetings | 18+ | **Greetings:** bonjour, bonsoir, salut, au revoir, merci, s'il vous plaît, pardon. **Identity:** je, tu, il, elle, s'appeler, habiter, ville, français/française, ami/amie. | First meeting in Paris: introduce name, nationality, city, *comment ça va* | Form of *être*; *c'est* vs *il/elle est*; pronoun choice; greeting register; dialogue comprehension |
+| 1.2 | Les chiffres et le calendrier | Numbers; days; *avoir* for age; *aujourd'hui / demain / hier* | 18+ | **Days:** lundi–dimanche. **Time:** aujourd'hui, demain, hier, semaine, mois, année, anniversaire. **Numbers:** dix, quinze, vingt, trente, ans. | Planning the week + stating age before a birthday | Age with *avoir*; day order; calendar vocab; dialogue detail questions |
+| 1.3 | Au café | Present of *prendre/vouloir/aimer/payer*; articles *un/une* vs *du/de la/de l'* | 18+ | **Food/drink:** café, thé, eau, lait, sucre, croissant, pain, addition. **People/verbs:** serveur, prendre, vouloir, aimer, payer, commander, s'il vous plaît. | Ordering with a waiter: drinks, food, sugar, bill | Articles; verb forms; politeness; café vocab; dialogue orders |
+| 1.4 | Ma famille | Possessives *mon/ma/mes*; family nouns; *avoir* + person | 18+ | **Family:** famille, père, mère, parents, frère, sœur, fils, fille, enfant. **Possessives/traits:** mon, ma, mes, petit, grand, jeune; place: Lyon. | Friend asks about siblings and where parents live | Possessive agreement; *avoir* + family; kinship terms; dialogue residence |
+
+**Module checkpoint:** 250-word biography reading; present-tense Q&A; article/gender quiz; replay all four conversation scenes aloud (self-check).
 
 ---
 
