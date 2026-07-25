@@ -47,7 +47,7 @@ export default async function LessonPage({ params }: { params: Promise<{ id: str
         <section className="tactile-card p-6">
           <h1 className="text-headline-md">{chapter.title}</h1>
           <p className="mt-2 text-on-surface-variant">
-            This chapter is on the Grand Pathway map, but its full lesson is still being authored. Phase I (Modules 1–6) is playable now.
+            This chapter is on the Grand Pathway map. If you still see this screen, the lesson failed to load — try refresh or reopen from Learn.
           </p>
         </section>
       </main>

@@ -181,15 +181,18 @@ test('Grand Pathway catalog covers 36 modules; Phase I is playable', async () =>
   const { PATHWAY_MODULES, mergePathwayChapters } = await import('../src/lib/pathway/catalog')
   const { BUNDLED_CHAPTER_IDS, BUNDLED_LESSONS } = await import('../src/lib/bundled-lessons')
   assert.equal(PATHWAY_MODULES.length, 36)
-  assert.equal(PATHWAY_MODULES.filter((m) => m.status === 'playable').length, 6)
-  assert.equal(BUNDLED_CHAPTER_IDS.length, 90)
+  assert.equal(PATHWAY_MODULES.filter((m) => m.status === 'playable').length, 36)
+  assert.equal(BUNDLED_CHAPTER_IDS.length, 540)
   assert.ok(BUNDLED_LESSONS['22222222-0000-0000-0000-000000000201']?.brief)
+  assert.ok(BUNDLED_LESSONS['22222222-0000-0000-0000-000000003605']?.brief)
   const merged = mergePathwayChapters([])
   assert.equal(merged.length, 36 * 15)
   const m2 = resolveLessonContent('22222222-0000-0000-0000-000000000201', {})
   assert.ok(m2?.reading?.length)
   assert.ok((m2?.exercises?.length ?? 0) >= 20)
   assert.ok(m2?.brief?.body.includes('Words to learn first (meanings)'))
+  const m36 = resolveLessonContent('22222222-0000-0000-0000-000000003651', {})
+  assert.ok(m36?.brief?.body.includes('Words to learn first (meanings)'))
 })
 
 test('Module 1 theory briefs teach meanings before grammar examples', () => {
@@ -451,7 +454,7 @@ test('repair-style mistake context is never turned into a true-false review card
 })
 
 test('every Module 1 grammar rule meets the deep authoring bar', () => {
-  assert.equal(MODULE1_RULES.length, 17)
+  assert.equal(MODULE1_RULES.length, 45) // 8 M01 + 9 Phase I + 28 later
   for (const rule of MODULE1_RULES) {
     const result = validateGrammarRule(rule)
     assert.equal(result.ok, true, `${rule.slug}: ${!result.ok ? result.reason : ''}`)

@@ -190,10 +190,10 @@ export default function HomeClient({
         {courseModules.map((module) => {
           const pathwayModule = PATHWAY_BY_MODULE_ID.get(module.id)
           const units = pathwayModule ? unitsForModule(pathwayModule) : []
+          const outlined = false
           const playableCount = pathwayModule
             ? pathwayModule.subchapters.filter((sub) => hasLessonContent(chaptersById.get(sub.id)?.lesson_content)).length
             : courseChapters.filter((c) => c.module_id === module.id && hasLessonContent(c.lesson_content)).length
-          const outlined = pathwayModule?.status === 'outlined'
 
           return (
             <div key={module.id} className="flex flex-col gap-6">
@@ -201,7 +201,7 @@ export default function HomeClient({
                 <p className="text-label-caps text-primary">
                   MODULE {module.order_index} · {module.cefr_level}
                   {pathwayModule ? ' · 5 UNITS · 15 SUB-CHAPTERS' : ''}
-                  {outlined ? ' · OUTLINED' : playableCount ? ` · ${playableCount} PLAYABLE` : ''}
+                  {playableCount ? ` · ${playableCount} PLAYABLE` : ''}
                 </p>
                 <h2 className="text-headline-md">{module.title}</h2>
                 <p className="mt-1 text-sm text-on-surface-variant">{module.description}</p>

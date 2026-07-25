@@ -31,8 +31,8 @@
 1. **[2026-07-24] Always commit + push when finished (this chat / this product)**
    Do instead: end every completed change set with commit → push → Pages deploy so the user can check live.
 
-2. **[2026-07-24] Course must aim at real fluency (months), not a thin 12×4**
-   Do instead: honest ship — **Phase I M01–M06 = 90 playable**; M07–M36 = pathway shell (coming soon). Catalog `pathway/catalog.ts`; content `BUNDLED_LESSONS`. Full map: `COURSE_STRUCTURE.md`.
+2. **[2026-07-25] All 36 modules must be rich + playable (not shells)**
+   Do instead: factory themes M02–M36 + Module 1 hand bundle → `BUNDLED_LESSONS` (540 A/B/C); catalog all `playable`; Rules include later-phase docs; never leave M07+ as coming-soon titles only.
 
 3. **[2026-07-25] Review = vocab + grammar only**
    Do instead: no character/plot quizzes; no Marc/Marie/Paris flashcards; names OK in reading clickable dict, not in Review/Flashcards.
@@ -44,7 +44,7 @@
    Do instead: shuffle both match columns; authored pathway order unlocks next; Today’s Reading Module 1 X/15 + daily 300 words; mobile nav `pb-safe` + main `pb-[calc(4rem+env(safe-area))]`.
 
 6. **[2026-07-25] Learn / Review / Rules wiring**
-   Do instead: resolve `BUNDLED_LESSONS`; Review + rule unlock scan all `BUNDLED_CHAPTER_IDS`; lesson page pathway fallback if DB row missing; static-generate playable IDs only (not 540 shells).
+   Do instead: resolve `BUNDLED_LESSONS` (540); Review + rule unlock scan all `BUNDLED_CHAPTER_IDS`; lesson page pathway fallback if DB row missing; static-generate all playable IDs.
 
 ## Domain Behavior Guardrails
 

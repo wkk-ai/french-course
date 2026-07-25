@@ -1,4 +1,5 @@
 import { PHASE1_RULE_DOCUMENTS } from '@/lib/rules/documents/phase1'
+import { LATER_RULE_DOCUMENTS } from '@/lib/rules/documents/later-phases'
 import { SUBJECT_PRONOUNS } from '@/lib/rules/documents/subject-pronouns'
 import {
   ARTICLES_PARTITIVES,
@@ -22,15 +23,16 @@ export const MODULE1_RULE_DOCUMENTS: GrammarRuleDocument[] = [
   SILENT_FINALS,
 ]
 
-/** All bundled grammar docs (Module 1 + Phase I). */
+/** All bundled grammar docs (Module 1 + Phase I + later phases). */
 export const ALL_RULE_DOCUMENTS: GrammarRuleDocument[] = [
   ...MODULE1_RULE_DOCUMENTS,
   ...PHASE1_RULE_DOCUMENTS,
+  ...LATER_RULE_DOCUMENTS,
 ]
 
 export function getRuleBySlug(slug: string): GrammarRuleDocument | undefined {
   return ALL_RULE_DOCUMENTS.find((rule) => rule.slug === slug)
 }
 
-/** Legacy export name — now includes Phase I rules too. */
+/** Legacy export name — all bundled rules. */
 export const MODULE1_RULES = ALL_RULE_DOCUMENTS
