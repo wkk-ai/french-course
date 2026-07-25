@@ -14,6 +14,26 @@ function shuffle<T>(items: T[]): T[] {
   return copy
 }
 
+/** Stable shuffle from a string seed (avoids hydration mismatch; mix left/right lines). */
+function seededOrder(length: number, seed: string): number[] {
+  const order = Array.from({ length }, (_, index) => index)
+  let hash = 2166136261
+  for (let i = 0; i < seed.length; i += 1) {
+    hash ^= seed.charCodeAt(i)
+    hash = Math.imul(hash, 16777619)
+  }
+  for (let i = length - 1; i > 0; i -= 1) {
+    hash = Math.imul(hash ^ (hash >>> 13), 1274126177)
+    const j = Math.abs(hash) % (i + 1)
+    ;[order[i], order[j]] = [order[j], order[i]]
+  }
+  // If seed somehow left identity order, rotate so answers are never same-line.
+  if (length > 1 && order.every((value, index) => value === index)) {
+    return order.map((_, index) => (index + 1) % length)
+  }
+  return order
+}
+
 function optionClasses(locked: boolean, isSelected: boolean, isCorrectOption: boolean, userCorrect: boolean) {
   if (locked && isCorrectOption) return 'border-success bg-success/10 text-tertiary'
   if (locked && isSelected && !userCorrect) return 'border-error bg-error-container/40 text-on-error-container'
@@ -45,6 +65,14 @@ export function ExerciseCard({
   const [matchPairs, setMatchPairs] = useState<Record<number, number>>(() => (answer?.kind === 'match' ? answer.value : {}))
 
   const usedRight = useMemo(() => new Set(Object.values(matchPairs)), [matchPairs])
+  const matchRightOrder = useMemo(() => {
+    if (!('type' in exercise) || exercise.type !== 'match') return []
+    return seededOrder(exercise.right.length, `${exercise.id}:right`)
+  }, [exercise])
+  const matchLeftOrder = useMemo(() => {
+    if (!('type' in exercise) || exercise.type !== 'match') return []
+    return seededOrder(exercise.left.length, `${exercise.id}:left`)
+  }, [exercise])
 
   const submitChoice = (value: number) => {
     if (locked) return
@@ -256,12 +284,13 @@ export function ExerciseCard({
       {exercise.type === 'match' && (
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            {exercise.left.map((item, leftIndex) => {
+            {matchLeftOrder.map((leftIndex) => {
+              const item = exercise.left[leftIndex]
               const pairedRight = matchPairs[leftIndex]
               const isSelected = matchSelection?.side === 'left' && matchSelection.index === leftIndex
               return (
                 <button
-                  key={item}
+                  key={`L-${leftIndex}-${item}`}
                   type="button"
                   disabled={locked || pairedRight !== undefined}
                   onClick={() => handleMatchClick('left', leftIndex)}
@@ -274,12 +303,13 @@ export function ExerciseCard({
             })}
           </div>
           <div className="space-y-2">
-            {exercise.right.map((item, rightIndex) => {
+            {matchRightOrder.map((rightIndex) => {
+              const item = exercise.right[rightIndex]
               const isUsed = usedRight.has(rightIndex)
               const isSelected = matchSelection?.side === 'right' && matchSelection.index === rightIndex
               return (
                 <button
-                  key={item}
+                  key={`R-${rightIndex}-${item}`}
                   type="button"
                   disabled={locked || isUsed}
                   onClick={() => handleMatchClick('right', rightIndex)}

@@ -40,6 +40,9 @@
 4. **[2026-07-25] Theory must teach meanings before grammar examples**
    Do instead: every Theory First brief starts with **Words to learn first (meanings)**; never *mon frère* before *frère = brother*; deep multi-section briefs.
 
+5. **[2026-07-25] Match pairs sat on the same line; pathway B locked after A**
+   Do instead: shuffle both match columns (seeded); Module 01 B/C/U5 are authored so unlock follows pathway order; Today’s Reading shows pathway X/15 and “goal met” when daily words exceed 300.
+
 ## Domain Behavior Guardrails
 
 1. **[2026-07-25] Theory used French words before teaching meanings (*frère*, *père*)**

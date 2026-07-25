@@ -450,6 +450,16 @@ export function buildRemediationExercises(categories: string[]): LessonExercise[
       prompt: 'Extra practice: être with family.',
       explanation: 'Nous sommes une famille.',
     },
+    'silent-final-consonants': {
+      id: 'remediation-silent-finals',
+      type: 'true-false',
+      category: 'silent-final-consonants',
+      source: 'remediation',
+      statement: 'Many French final consonants are written but not pronounced.',
+      answer: true,
+      prompt: 'Extra practice: silent finals.',
+      explanation: 'Final -s/-t/-d/-ent are often silent in speech.',
+    },
   }
 
   const seen = new Set<string>()

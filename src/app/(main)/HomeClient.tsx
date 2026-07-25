@@ -7,6 +7,7 @@ import { hasLessonContent } from '@/lib/course'
 import {
   MODULE01_BY_ID,
   MODULE01_ID,
+  MODULE01_SUBCHAPTERS,
   pathwayLabel,
   unitsForModule01,
 } from '@/lib/pathway/module01'
@@ -128,17 +129,27 @@ export default function HomeClient({
     })
   }, [courseChapters, courseModules])
 
+  const DAILY_GOAL = 300
   const firstModule = courseModules[0]
-  const firstModuleChapters = authoredChapters.filter((chapter) => chapter.module_id === firstModule?.id)
-  const completedInFirstModule = firstModuleChapters.filter((chapter) => progressByChapter.get(chapter.id) === 'completed').length
-  const mastery = firstModuleChapters.length ? Math.round((completedInFirstModule / firstModuleChapters.length) * 100) : 0
+  const pathwayIds = useMemo(
+    () => (firstModule?.id === MODULE01_ID ? MODULE01_SUBCHAPTERS.map((sub) => sub.id) : []),
+    [firstModule?.id],
+  )
   const completedIds = useMemo(
     () => new Set([...progressByChapter].filter(([, status]) => status === 'completed').map(([id]) => id)),
     [progressByChapter],
   )
+  const completedInPathway = pathwayIds.filter((id) => completedIds.has(id)).length
+  const pathwayTotal = pathwayIds.length || authoredChapters.filter((c) => c.module_id === firstModule?.id).length
+  const mastery = pathwayTotal ? Math.round((completedInPathway / pathwayTotal) * 100) : 0
   const authoredIds = useMemo(() => authoredChapters.map((item) => item.id), [authoredChapters])
   const chaptersById = useMemo(() => new Map(courseChapters.map((chapter) => [chapter.id, chapter])), [courseChapters])
   const module01Units = useMemo(() => unitsForModule01(), [])
+  const dailyPct = Math.min(100, Math.round((wordsRead / DAILY_GOAL) * 100))
+  const dailyLabel =
+    wordsRead >= DAILY_GOAL
+      ? `${wordsRead} words today · goal ${DAILY_GOAL} met`
+      : `${wordsRead} / ${DAILY_GOAL} words read today`
 
   return (
     <div className="flex flex-col gap-8 pb-8">
@@ -147,15 +158,13 @@ export default function HomeClient({
         <div className="mt-2 flex items-end justify-between gap-4">
           <div>
             <h1 className="text-headline-md">Bienvenue</h1>
-            <p className="mt-1 text-body-ui text-on-surface-variant">
-              {wordsRead} / 300 words read today
-            </p>
+            <p className="mt-1 text-body-ui text-on-surface-variant">{dailyLabel}</p>
           </div>
           <div className="text-right">
             <p className="text-label-caps text-on-surface-variant">MODULE 1</p>
             <p className="text-headline-lg text-success">{mastery}%</p>
             <p className="text-xs text-on-surface-variant">
-              {completedInFirstModule}/{firstModuleChapters.length || 0} playable
+              {completedInPathway}/{pathwayTotal || 0} sub-chapters
             </p>
           </div>
         </div>
@@ -169,10 +178,7 @@ export default function HomeClient({
           <div>
             <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-on-surface-variant">Daily reading goal</p>
             <div className="h-2 overflow-hidden rounded-full bg-surface-container-high">
-              <div
-                className="h-full rounded-full bg-primary transition-all"
-                style={{ width: `${Math.min(100, Math.round((wordsRead / 300) * 100))}%` }}
-              />
+              <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${dailyPct}%` }} />
             </div>
           </div>
         </div>
