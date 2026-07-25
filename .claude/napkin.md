@@ -31,8 +31,8 @@
 1. **[2026-07-24] Always commit + push when finished (this chat / this product)**
    Do instead: end every completed change set with commit → push → Pages deploy so the user can check live.
 
-2. **[2026-07-25] All 36 modules must be rich + playable (not shells)**
-   Do instead: factory themes M02–M36 + Module 1 hand bundle → `BUNDLED_LESSONS` (540 A/B/C); catalog all `playable`; Rules include later-phase docs; never leave M07+ as coming-soon titles only.
+2. **[2026-07-25] All modules must match Module-1 deepest bar (not thin factory)**
+   Do instead: every sub-chapter passes `validateChapterContent` (meanings-first brief depth by role, ≥220 reading words, ≥12 dialogue, ≥22 exercises, no story-memory). Deepen via `deepenLessonToModule1Bar` + deep `readingFr`/theory themes. Never ship snack/factory-pad-only lessons.
 
 3. **[2026-07-25] Review = vocab + grammar only**
    Do instead: no character/plot quizzes; no Marc/Marie/Paris flashcards; names OK in reading clickable dict, not in Review/Flashcards.
@@ -72,8 +72,8 @@
 8. **[2026-07-24] Broken token spacing in reading/conversation**
    Do instead: real `' '` text node after punct/`« »`; keep `œ` inside words.
 
-9. **[2026-07-24] Thin DB lesson stubs shadowed rich Module 1**
-   Do instead: `resolveLessonContent` prefers bundled `MODULE1_LESSONS` over incomplete DB stubs. Pathway titles = seed; playable = `MODULE1_LESSONS`. Expand chapters in seed + TS; `HomeClient` maps rows / `module01.ts` merge.
+9. **[2026-07-25] Thin factory / DB stubs shadowed rich lessons**
+   Do instead: `resolveLessonContent` prefers `BUNDLED_LESSONS`; every chapter deepened to Module-1 bar; CI `validateChapterContent` on all 540.
 
 10. **[2026-07-24] Typed answers must ignore case**
     Do instead: grade via `normalizeFrenchInput` (lowercase + strip accents/trailing punct).

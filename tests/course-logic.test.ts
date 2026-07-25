@@ -195,6 +195,22 @@ test('Grand Pathway catalog covers 36 modules; Phase I is playable', async () =>
   assert.ok(m36?.brief?.body.includes('Words to learn first (meanings)'))
 })
 
+test('every bundled lesson meets the Module-1 depth bar', async () => {
+  const { BUNDLED_CHAPTER_IDS, BUNDLED_LESSONS } = await import('../src/lib/bundled-lessons')
+  const { validateChapterContent } = await import('../src/lib/pathway/validate-chapter')
+  const { PATHWAY_BY_CHAPTER_ID } = await import('../src/lib/pathway/catalog')
+  for (const chapterId of BUNDLED_CHAPTER_IDS) {
+    const lesson = BUNDLED_LESSONS[chapterId]
+    const role = PATHWAY_BY_CHAPTER_ID.get(chapterId)?.sub.role ?? 'A'
+    const result = validateChapterContent(lesson, { role })
+    assert.equal(result.ok, true, `${chapterId}: ${!result.ok ? result.reason : ''}`)
+    assert.ok((lesson.brief?.body.length ?? 0) >= 900, `${chapterId} brief`)
+    for (const exercise of lesson.exercises ?? []) {
+      assert.equal(validateLessonExercise(exercise).ok, true, `${chapterId} ${exercise.id}`)
+    }
+  }
+})
+
 test('Module 1 theory briefs teach meanings before grammar examples', () => {
   for (const chapterId of MODULE1_CHAPTER_IDS) {
     const body = MODULE1_LESSONS[chapterId]?.brief?.body ?? ''

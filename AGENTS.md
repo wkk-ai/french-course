@@ -25,10 +25,10 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Keep `œ` inside words (*sœur*); split glued punct (`Moi,`); prefer `tokenizeFrench` / `readingParagraphs` over hand tokens.
 
 ## Content + Review
-- Bundled `BUNDLED_LESSONS` (Module 1 + Phase I M02–M06) **wins** over thin DB stubs in `resolveLessonContent`.
-- Pathway UI: `src/lib/pathway/catalog.ts` (36 modules). Playable = authored only; M07+ coming soon.
+- Bundled `BUNDLED_LESSONS` (all 36 modules × A/B/C = 540) **wins** over thin DB stubs in `resolveLessonContent`.
+- Pathway UI: `src/lib/pathway/catalog.ts`. Every module playable at **Module-1 depth bar** (`validateChapterContent`).
 - Lesson complete must enqueue lemmas for Review (remote and/or local vault); wrong answers → `user_mistakes`.
-- Before done: check missing lemmas after enrich, conjugate on *parler*/*habiter*, spacing, Review queue after complete.
+- Before done: check missing lemmas after enrich, conjugate on infinitives, spacing, Review queue after complete, depth CI on all bundled lessons.
 
 ## Theory First (meanings before grammar)
 - Never use a French content word in a grammar example until its **English meaning** is taught in the brief.
