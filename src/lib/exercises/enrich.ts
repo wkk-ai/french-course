@@ -1,6 +1,6 @@
 import type { LessonExercise } from '@/lib/exercises/types'
 import { CHAPTER_EXERCISE_EXTRAS } from '@/lib/exercises/chapter-extras'
-import { MODULE1_CHAPTER_IDS, MODULE1_LESSONS } from '@/lib/module1-content'
+import { BUNDLED_CHAPTER_IDS, BUNDLED_LESSONS } from '@/lib/bundled-lessons'
 import { validateLessonExercise } from '@/lib/exercises/validate'
 
 const FILL_IN_RE = /^(?:Complete|Fill in):\s*(.+)$/i
@@ -45,12 +45,12 @@ function normalizeMcq(exercise: LessonExercise): LessonExercise {
 }
 
 function spiralExercises(chapterId: string, count = 3): LessonExercise[] {
-  const index = MODULE1_CHAPTER_IDS.indexOf(chapterId as (typeof MODULE1_CHAPTER_IDS)[number])
+  const index = BUNDLED_CHAPTER_IDS.indexOf(chapterId)
   if (index <= 0) return []
-  const priorIds = MODULE1_CHAPTER_IDS.slice(0, index)
+  const priorIds = BUNDLED_CHAPTER_IDS.slice(0, index)
   const pool: LessonExercise[] = []
   for (const priorId of priorIds) {
-    const lesson = MODULE1_LESSONS[priorId]
+    const lesson = BUNDLED_LESSONS[priorId]
     if (!lesson?.exercises) continue
     for (const exercise of lesson.exercises) {
       pool.push({

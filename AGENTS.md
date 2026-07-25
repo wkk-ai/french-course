@@ -25,7 +25,8 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Keep `œ` inside words (*sœur*); split glued punct (`Moi,`); prefer `tokenizeFrench` / `readingParagraphs` over hand tokens.
 
 ## Content + Review
-- Bundled Module 1 **wins** over thin DB stubs in `resolveLessonContent`.
+- Bundled `BUNDLED_LESSONS` (Module 1 + Phase I M02–M06) **wins** over thin DB stubs in `resolveLessonContent`.
+- Pathway UI: `src/lib/pathway/catalog.ts` (36 modules). Playable = authored only; M07+ coming soon.
 - Lesson complete must enqueue lemmas for Review (remote and/or local vault); wrong answers → `user_mistakes`.
 - Before done: check missing lemmas after enrich, conjugate on *parler*/*habiter*, spacing, Review queue after complete.
 

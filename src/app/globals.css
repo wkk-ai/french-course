@@ -102,6 +102,14 @@
 }
 
 @layer utilities {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
   .tactile-button {
     @apply border-2 border-b-[6px] border-transparent transition-transform active:translate-y-[4px] active:border-b-2;
   }

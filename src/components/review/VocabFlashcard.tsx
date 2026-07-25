@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { BookOpen } from 'lucide-react'
 import type { FlashcardItem } from '@/lib/review/types'
 import { isConjugableVerb } from '@/lib/french-conjugations'
-import { MODULE1_VOCABULARY } from '@/lib/module1-content'
+import { BUNDLED_VOCABULARY } from '@/lib/phase1/content'
 
 const REGISTER_LABEL: Record<string, string> = {
   Courant: 'Everyday',
@@ -27,7 +27,7 @@ export function VocabFlashcard({
   disabled?: boolean
 }) {
   const [revealed, setRevealed] = useState(false)
-  const bundled = MODULE1_VOCABULARY.find((word) => word.id === card.vocab_id)
+  const bundled = BUNDLED_VOCABULARY.find((word) => word.id === card.vocab_id)
   const meanings = bundled?.meanings?.length
     ? bundled.meanings
     : card.base_translation.split(';').map((part) => part.trim()).filter(Boolean)

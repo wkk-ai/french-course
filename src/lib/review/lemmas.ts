@@ -1,13 +1,14 @@
-import { MODULE1_CHAPTER_IDS, MODULE1_LESSONS, MODULE1_VOCABULARY } from '@/lib/module1-content'
+import { BUNDLED_CHAPTER_IDS, BUNDLED_LESSONS } from '@/lib/bundled-lessons'
+import { BUNDLED_VOCABULARY } from '@/lib/phase1/content'
 import type { VocabularyWord } from '@/lib/course'
 import { isReviewablePartOfSpeech } from '@/lib/exercises/validate'
-import { MODULE01_BY_ID, pathwayLabel } from '@/lib/pathway/module01'
+import { PATHWAY_BY_CHAPTER_ID, pathwayLabel } from '@/lib/pathway/catalog'
 
-/** Collect unique lemma IDs from a bundled Module 1 lesson (reading + dialogue). Skips proper nouns. */
+/** Collect unique lemma IDs from a bundled lesson (reading + dialogue). Skips proper nouns. */
 export function lemmaIdsForChapter(chapterId: string): string[] {
-  const lesson = MODULE1_LESSONS[chapterId]
+  const lesson = BUNDLED_LESSONS[chapterId]
   if (!lesson) return []
-  const byId = new Map(MODULE1_VOCABULARY.map((word) => [word.id, word]))
+  const byId = new Map(BUNDLED_VOCABULARY.map((word) => [word.id, word]))
   const ids = new Set<string>()
   const add = (lemmaId: string | undefined) => {
     if (!lemmaId) return
@@ -25,7 +26,7 @@ export function lemmaIdsForChapter(chapterId: string): string[] {
 }
 
 export function vocabularyRowsForLemmas(lemmaIds: string[]): VocabularyWord[] {
-  const byId = new Map(MODULE1_VOCABULARY.map((word) => [word.id, word]))
+  const byId = new Map(BUNDLED_VOCABULARY.map((word) => [word.id, word]))
   return lemmaIds
     .map((id) => byId.get(id))
     .filter((word): word is VocabularyWord => {
@@ -34,16 +35,18 @@ export function vocabularyRowsForLemmas(lemmaIds: string[]): VocabularyWord[] {
     })
 }
 
-/** Map lemma → first Module 1 chapter that taught it (e.g. "1.U1.A · First meetings"). */
+/** Map lemma → first authored chapter that taught it. */
 let lemmaLessonCache: Map<string, string> | null = null
 
 export function lessonLabelForLemma(vocabId: string | null | undefined): string | null {
   if (!vocabId) return null
   if (!lemmaLessonCache) {
     lemmaLessonCache = new Map()
-    MODULE1_CHAPTER_IDS.forEach((chapterId, index) => {
-      const pathway = MODULE01_BY_ID.get(chapterId)
-      const display = pathway ? pathwayLabel(pathway) : `Lesson 1.${index + 1}`
+    BUNDLED_CHAPTER_IDS.forEach((chapterId) => {
+      const hit = PATHWAY_BY_CHAPTER_ID.get(chapterId)
+      const display = hit
+        ? pathwayLabel(hit.module.orderIndex, hit.sub)
+        : `Lesson`
       for (const lemmaId of lemmaIdsForChapter(chapterId)) {
         if (!lemmaLessonCache!.has(lemmaId)) lemmaLessonCache!.set(lemmaId, display)
       }

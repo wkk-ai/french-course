@@ -9,10 +9,10 @@ export default function MainLayout({
 }) {
   return (
     <AuthGate>
-      <div className="min-h-screen pb-16 md:pb-0 md:pl-24 pt-16 relative">
+      <div className="relative min-h-screen pb-[calc(4rem+env(safe-area-inset-bottom,0px))] pt-16 md:pb-0 md:pl-24">
         <TopBar />
         <Navigation />
-        <main className="max-w-[680px] mx-auto p-4 md:p-12">
+        <main className="mx-auto max-w-[680px] p-4 md:p-12">
           {children}
         </main>
       </div>

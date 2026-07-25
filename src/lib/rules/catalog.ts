@@ -1,3 +1,4 @@
+import { PHASE1_RULE_DOCUMENTS } from '@/lib/rules/documents/phase1'
 import { SUBJECT_PRONOUNS } from '@/lib/rules/documents/subject-pronouns'
 import {
   ARTICLES_PARTITIVES,
@@ -21,9 +22,15 @@ export const MODULE1_RULE_DOCUMENTS: GrammarRuleDocument[] = [
   SILENT_FINALS,
 ]
 
+/** All bundled grammar docs (Module 1 + Phase I). */
+export const ALL_RULE_DOCUMENTS: GrammarRuleDocument[] = [
+  ...MODULE1_RULE_DOCUMENTS,
+  ...PHASE1_RULE_DOCUMENTS,
+]
+
 export function getRuleBySlug(slug: string): GrammarRuleDocument | undefined {
-  return MODULE1_RULE_DOCUMENTS.find((rule) => rule.slug === slug)
+  return ALL_RULE_DOCUMENTS.find((rule) => rule.slug === slug)
 }
 
-/** Legacy export name used across the app. */
-export const MODULE1_RULES = MODULE1_RULE_DOCUMENTS
+/** Legacy export name — now includes Phase I rules too. */
+export const MODULE1_RULES = ALL_RULE_DOCUMENTS

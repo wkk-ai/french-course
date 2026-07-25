@@ -32,7 +32,7 @@
    Do instead: end every completed change set with commit → push → Pages deploy so the user can check live.
 
 2. **[2026-07-24] Course must aim at real fluency (months), not a thin 12×4**
-   Do instead: be honest that only authored modules are playable; **Complete Edition** = 720 A/B/C/D sub-chapters + Prove gates + placement + chunks/register/francophonie/Wild — see `COURSE_STRUCTURE.md` §1–§10; Module 01 UI = 5 units × A/B/C via `module01.ts` (add **D** when authoring).
+   Do instead: honest ship — **Phase I M01–M06 = 90 playable**; M07–M36 = pathway shell (coming soon). Catalog `pathway/catalog.ts`; content `BUNDLED_LESSONS`. Full map: `COURSE_STRUCTURE.md`.
 
 3. **[2026-07-25] Review = vocab + grammar only**
    Do instead: no character/plot quizzes; no Marc/Marie/Paris flashcards; names OK in reading clickable dict, not in Review/Flashcards.
@@ -40,8 +40,11 @@
 4. **[2026-07-25] Theory must teach meanings before grammar examples**
    Do instead: every Theory First brief starts with **Words to learn first (meanings)**; never *mon frère* before *frère = brother*; deep multi-section briefs.
 
-5. **[2026-07-25] Match pairs sat on the same line; pathway B locked after A**
-   Do instead: shuffle both match columns (seeded); Module 01 B/C/U5 are authored so unlock follows pathway order; Today’s Reading shows pathway X/15 and “goal met” when daily words exceed 300.
+5. **[2026-07-25] Match / unlock / mobile safe-area**
+   Do instead: shuffle both match columns; authored pathway order unlocks next; Today’s Reading Module 1 X/15 + daily 300 words; mobile nav `pb-safe` + main `pb-[calc(4rem+env(safe-area))]`.
+
+6. **[2026-07-25] Learn / Review / Rules wiring**
+   Do instead: resolve `BUNDLED_LESSONS`; Review + rule unlock scan all `BUNDLED_CHAPTER_IDS`; lesson page pathway fallback if DB row missing; static-generate playable IDs only (not 540 shells).
 
 ## Domain Behavior Guardrails
 

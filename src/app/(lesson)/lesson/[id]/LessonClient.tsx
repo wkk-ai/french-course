@@ -16,7 +16,7 @@ import { calculateLessonScore } from '@/lib/lesson-score'
 import { resolveLessonContent } from '@/lib/lesson-content'
 import { createClient } from '@/utils/supabase/client'
 import { bumpLocalMistakeCount, enqueueLocalVocabulary } from '@/lib/local-vocab-vault'
-import { MODULE1_VOCABULARY } from '@/lib/module1-content'
+import { BUNDLED_VOCABULARY } from '@/lib/phase1/content'
 import { lemmaIdsForChapter, vocabularyRowsForLemmas } from '@/lib/review/lemmas'
 import type { LessonExercise } from '@/lib/exercises/types'
 
@@ -30,7 +30,7 @@ function lemmaIdFromExercise(exercise: LessonExercise): string | null {
   }
   for (const candidate of candidates) {
     const normalized = candidate.toLowerCase().trim()
-    const match = MODULE1_VOCABULARY.find((word) => word.word.toLowerCase() === normalized)
+    const match = BUNDLED_VOCABULARY.find((word) => word.word.toLowerCase() === normalized)
     if (match) return match.id
   }
   return null

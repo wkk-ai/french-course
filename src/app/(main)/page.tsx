@@ -1,6 +1,6 @@
 import { filterCourseCatalog } from '@/lib/course-catalog'
 import { withResolvedLessonContent } from '@/lib/lesson-content'
-import { applyModule01Meta, mergeModule01Chapters } from '@/lib/pathway/module01'
+import { applyPathwayModuleMeta, mergePathwayChapters } from '@/lib/pathway/catalog'
 import { createStaticClient } from '@/utils/supabase/static'
 import HomeClient from './HomeClient'
 
@@ -30,8 +30,8 @@ export default async function HomePage() {
   }
 
   const catalog = filterCourseCatalog(modules, chapters)
-  const pathwayModules = applyModule01Meta(catalog.modules)
-  const pathwayChapters = mergeModule01Chapters(catalog.chapters)
+  const pathwayModules = applyPathwayModuleMeta(catalog.modules)
+  const pathwayChapters = mergePathwayChapters(catalog.chapters)
   return (
     <HomeClient
       modules={pathwayModules}

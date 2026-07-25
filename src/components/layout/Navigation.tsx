@@ -23,7 +23,7 @@ export function Navigation() {
   return (
     <>
       {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-surface-container-lowest border-t-2 border-surface-variant flex justify-around items-center z-50 pb-safe">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 flex h-[calc(4rem+env(safe-area-inset-bottom,0px))] items-center justify-around border-t-2 border-surface-variant bg-surface-container-lowest pb-safe md:hidden">
         {navItems.map((item) => {
           const isActive = isItemActive(item.href);
           const Icon = item.icon;

@@ -6,7 +6,8 @@ import { ExerciseCard } from '@/components/lesson/ExerciseCard'
 import { VocabFlashcard } from '@/components/review/VocabFlashcard'
 import type { ExerciseAnswer } from '@/lib/exercises/types'
 import { isExerciseCorrect } from '@/lib/exercises/grading'
-import { MODULE1_CHAPTER_IDS, MODULE1_VOCABULARY } from '@/lib/module1-content'
+import { BUNDLED_CHAPTER_IDS } from '@/lib/bundled-lessons'
+import { BUNDLED_VOCABULARY } from '@/lib/phase1/content'
 import { getAllLocalVocabulary, enqueueLocalVocabulary, scoreLocalVocabulary } from '@/lib/local-vocab-vault'
 import { buildFlashcardDeck, countPoolByFilter, FLASHCARD_FILTERS, flashcardQuality } from '@/lib/review/flashcards'
 import { buildReviewSession, emptySessionMessage } from '@/lib/review/session'
@@ -23,7 +24,7 @@ import { calculateSrsSchedule } from '@/lib/srs'
 import { createClient } from '@/utils/supabase/client'
 
 function resolveBundled(vocabId: string) {
-  return MODULE1_VOCABULARY.find((item) => item.id === vocabId) ?? null
+  return BUNDLED_VOCABULARY.find((item) => item.id === vocabId) ?? null
 }
 
 function enrichPoolItem(item: Omit<ReviewPoolItem, 'source'> & { source?: 'remote' | 'local' }, source: 'remote' | 'local'): ReviewPoolItem {
@@ -121,12 +122,12 @@ export default function ReviewClient() {
     })
 
     const completedIds = (completedResult.data ?? []).map((row) => row.chapter_id)
-    const module1Completed = completedIds.filter((id) => (MODULE1_CHAPTER_IDS as readonly string[]).includes(id))
+    const authoredCompleted = completedIds.filter((id) => BUNDLED_CHAPTER_IDS.includes(id))
     const remoteIds = new Set(remote.map((item) => item.vocab_id))
     let localItems = getAllLocalVocabulary()
 
-    if (remote.length === 0 && localItems.length === 0 && module1Completed.length > 0) {
-      const lemmaIds = [...new Set(module1Completed.flatMap((id) => lemmaIdsForChapter(id)))]
+    if (remote.length === 0 && localItems.length === 0 && authoredCompleted.length > 0) {
+      const lemmaIds = [...new Set(authoredCompleted.flatMap((id) => lemmaIdsForChapter(id)))]
       if (lemmaIds.length) {
         enqueueLocalVocabulary(lemmaIds)
         const rows = vocabularyRowsForLemmas(lemmaIds).map((word) => ({

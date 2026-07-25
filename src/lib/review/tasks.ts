@@ -2,10 +2,10 @@ import { validateLessonExercise } from '@/lib/exercises/validate'
 import { lessonLabelForLemma } from '@/lib/review/lemmas'
 import type { ReviewPoolItem, ReviewTask, ReviewTaskKind } from '@/lib/review/types'
 import type { LessonExercise } from '@/lib/exercises/types'
-import { MODULE1_VOCABULARY } from '@/lib/module1-content'
+import { BUNDLED_VOCABULARY } from '@/lib/phase1/content'
 
 function bundledWord(vocabId: string) {
-  return MODULE1_VOCABULARY.find((word) => word.id === vocabId) ?? null
+  return BUNDLED_VOCABULARY.find((word) => word.id === vocabId) ?? null
 }
 
 function distractorsFor(correct: string, pool: string[], count = 3): string[] {
@@ -50,7 +50,7 @@ export function taskFromPoolItem(item: ReviewPoolItem, kind: ReviewTaskKind, mod
   const translation = item.base_translation ?? bundled?.base_translation ?? 'word'
   const exampleFrench = item.example_french ?? bundled?.example?.french ?? null
   const exampleEnglish = item.example_english ?? bundled?.example?.english ?? null
-  const meaningPool = MODULE1_VOCABULARY.map((entry) => entry.base_translation.split(';')[0].trim()).filter(Boolean)
+  const meaningPool = BUNDLED_VOCABULARY.map((entry) => entry.base_translation.split(';')[0].trim()).filter(Boolean)
 
   const modalities: LessonExercise[] = []
 

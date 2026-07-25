@@ -1,22 +1,22 @@
-import { MODULE1_CHAPTER_IDS, MODULE1_LESSONS } from '@/lib/module1-content'
-import { MODULE01_BY_ID, pathwayLabel } from '@/lib/pathway/module01'
+import { BUNDLED_CHAPTER_IDS, BUNDLED_LESSONS } from '@/lib/bundled-lessons'
+import { PATHWAY_BY_CHAPTER_ID, pathwayLabel } from '@/lib/pathway/catalog'
 import type { GrammarRuleDocument } from '@/lib/rules/types'
 
 /** Map rule slug → chapter IDs that teach it (from brief.ruleSlugs). */
 export function unlockChaptersForSlug(slug: string): string[] {
   const ids: string[] = []
-  for (const chapterId of MODULE1_CHAPTER_IDS) {
-    const slugs = MODULE1_LESSONS[chapterId]?.brief?.ruleSlugs ?? []
+  for (const chapterId of BUNDLED_CHAPTER_IDS) {
+    const slugs = BUNDLED_LESSONS[chapterId]?.brief?.ruleSlugs ?? []
     if (slugs.includes(slug)) ids.push(chapterId)
   }
   return ids
 }
 
 export function lessonLabelForChapter(chapterId: string): string {
-  const pathway = MODULE01_BY_ID.get(chapterId)
-  if (pathway) return pathwayLabel(pathway)
-  const index = (MODULE1_CHAPTER_IDS as readonly string[]).indexOf(chapterId)
-  return index >= 0 ? `Lesson 1.${index + 1}` : 'Lesson'
+  const hit = PATHWAY_BY_CHAPTER_ID.get(chapterId)
+  if (hit) return pathwayLabel(hit.module.orderIndex, hit.sub)
+  const index = BUNDLED_CHAPTER_IDS.indexOf(chapterId)
+  return index >= 0 ? `Lesson ${index + 1}` : 'Lesson'
 }
 
 export function isRuleUnlocked(rule: GrammarRuleDocument, completedChapterIds: Set<string>): boolean {
