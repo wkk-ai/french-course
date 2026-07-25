@@ -32,7 +32,7 @@
    Do instead: end every completed change set with commit → push → Pages deploy so the user can check live.
 
 2. **[2026-07-24] Course must aim at real fluency (months), not a thin 12×4**
-   Do instead: be honest that only authored modules are playable; Grand Pathway target **540 sub-chapters / ~12k lemmas / 36–48 months**; Module 01 UI = **5 units × A/B/C** via `src/lib/pathway/module01.ts` merge (not flat 4 cards).
+   Do instead: be honest that only authored modules are playable; **Complete Edition** = 720 A/B/C/D sub-chapters + Prove gates + placement + chunks/register/francophonie/Wild — see `COURSE_STRUCTURE.md` §1–§10; Module 01 UI = 5 units × A/B/C via `module01.ts` (add **D** when authoring).
 
 3. **[2026-07-25] Review = vocab + grammar only**
    Do instead: no character/plot quizzes; no Marc/Marie/Paris flashcards; names OK in reading clickable dict, not in Review/Flashcards.
