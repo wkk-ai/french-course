@@ -177,6 +177,21 @@ test('Module 01 Grand Pathway has 5 units × 3 sub-chapters', () => {
   assert.equal(merged.find((c) => c.id.endsWith('0153'))?.order_index, 15)
 })
 
+test('Module 1 theory briefs teach meanings before grammar examples', () => {
+  for (const chapterId of MODULE1_CHAPTER_IDS) {
+    const body = MODULE1_LESSONS[chapterId]?.brief?.body ?? ''
+    assert.ok(body.includes('Words to learn first (meanings)'), `${chapterId} missing meanings-first section`)
+    assert.ok(body.length >= 2500, `${chapterId} brief too short: ${body.length}`)
+    const meaningsAt = body.indexOf('Words to learn first (meanings)')
+    if (chapterId.endsWith('0104')) {
+      const frereMeaning = body.indexOf('*frère* = brother')
+      const monFrere = body.indexOf('*mon frère*')
+      assert.ok(frereMeaning > meaningsAt, 'frère meaning must appear')
+      assert.ok(monFrere > frereMeaning, 'mon frère must come after frère = brother')
+    }
+  }
+})
+
 test('story-memory and character-fact exercises are rejected', () => {
   const banned = [
     'According to the reading, where does Marie live?',

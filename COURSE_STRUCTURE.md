@@ -82,6 +82,7 @@ Course — Complete Edition (~48–60 months)
 | **Grammar** | Introduced A → drilled B → spiraled C → tested D |
 | **Lemmas** | 40–80 new (A); 25–50 (B); 15–35 spiral (C); D tests prior unit lemmas |
 | **Collocations** | **8–12 fixed chunks** per unit (e.g. *avoir faim*, *faire une erreur*) — own Review deck tag `chunk` |
+| **Meanings-first theory** | Brief lists **lemma = English** for every content word **before** that word appears in a grammar example |
 | **Register trio** | Same idea in **soutenu / courant / familier** (read-only for familier until Phase V) |
 | **Francophonie lens** | Each module tags one region (France default; rotate QC · SN · MA · BE · GP · RE) |
 | **Rulebook** | 1–3 rules unlock on **A** complete; each rule has **Try it** drills tied to that unit |
@@ -249,7 +250,7 @@ Introduced in **M36 · U4**; unlocks fully after **Phase III capstone**.
 
 | Block | Learn (A) | Apply (B) | Integrate (C) | Prove (D) |
 | --- | --- | --- | --- | --- |
-| Theory brief | 900+ chars | 600+ | 400+ | — |
+| Theory brief | **Meanings first** then grammar; 2,500+ chars; sections + traps + chunks | 1,500+ | 900+ | — |
 | Reading | 300–600 words | 300–500 | **400–800** | **150–250** cold |
 | Dialogue | 15–20 turns | 12–18 | 12–15 | — |
 | New lemmas | 40–80 | 25–50 | 15–35 spiral | tests A–C |

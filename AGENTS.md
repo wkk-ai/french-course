@@ -28,4 +28,10 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Bundled Module 1 **wins** over thin DB stubs in `resolveLessonContent`.
 - Lesson complete must enqueue lemmas for Review (remote and/or local vault); wrong answers → `user_mistakes`.
 - Before done: check missing lemmas after enrich, conjugate on *parler*/*habiter*, spacing, Review queue after complete.
+
+## Theory First (meanings before grammar)
+- Never use a French content word in a grammar example until its **English meaning** is taught in the brief.
+- Open every Theory First with **Words to learn first (meanings)** (lemma = English), then patterns, traps, chunks, practice order.
+- Bad: *mon frère* before *frère = brother*. Good: meanings list → then *mon frère*.
+- Briefs should be deep (multi-section), not one short paragraph.
 <!-- END:french-course-lessons-learned -->
