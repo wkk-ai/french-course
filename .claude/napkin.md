@@ -32,7 +32,7 @@
    Do instead: end every completed change set with commit → push → Pages deploy so the user can check live.
 
 2. **[2026-07-24] Course must aim at real fluency (months), not a thin 12×4**
-   Do instead: be honest that only authored modules are playable; target ~96 chapters / ~8k lemmas / 18–24 months; do not claim “all of French” early.
+   Do instead: be honest that only authored modules are playable; Grand Pathway target **540 sub-chapters / ~12k lemmas / 36–48 months**; Module 01 UI = **5 units × A/B/C** via `src/lib/pathway/module01.ts` merge (not flat 4 cards).
 
 3. **[2026-07-25] Review = vocab + grammar only**
    Do instead: no character/plot quizzes; no Marc/Marie/Paris flashcards; names OK in reading clickable dict, not in Review/Flashcards.
@@ -61,7 +61,7 @@
    Do instead: real `' '` text node after punct/`« »`; keep `œ` inside words.
 
 8. **[2026-07-24] Thin DB lesson stubs shadowed rich Module 1**
-   Do instead: `resolveLessonContent` prefers bundled `MODULE1_LESSONS` over incomplete DB stubs.
+   Do instead: `resolveLessonContent` prefers bundled `MODULE1_LESSONS` over incomplete DB stubs. Pathway titles/lists = `supabase/seed.sql` `modules`/`chapters`; playable content = `MODULE1_CHAPTER_IDS` + `MODULE1_LESSONS`. Expand UI chapters in seed + TS IDs; `HomeClient` only maps rows.
 
 9. **[2026-07-24] Typed answers must ignore case**
    Do instead: grade via `normalizeFrenchInput` (lowercase + strip accents/trailing punct).

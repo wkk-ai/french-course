@@ -10,6 +10,7 @@ import { staggerReviewDates } from '../src/lib/local-vocab-vault'
 import { resolveLessonContent } from '../src/lib/lesson-content'
 import { calculateLessonScoreLegacy } from '../src/lib/lesson-score'
 import { MODULE1_CHAPTER_IDS, MODULE1_LESSONS } from '../src/lib/module1-content'
+import { MODULE01_SUBCHAPTERS, mergeModule01Chapters, unitsForModule01 } from '../src/lib/pathway/module01'
 import { deriveChapterStatus } from '../src/lib/progression'
 import { buildFlashcardDeck, flashcardQuality } from '../src/lib/review/flashcards'
 import { lemmaIdsForChapter, lessonLabelForLemma } from '../src/lib/review/lemmas'
@@ -155,7 +156,25 @@ test('Module 1.1 ships enough lemmas for review backfill', () => {
   assert.ok(ids.length >= 35)
   assert.ok(!ids.includes('42a8a816-c56b-4e67-8549-bdfbc98e9b60')) // Marc proper noun
   const label = lessonLabelForLemma('32a8a816-c56b-4e67-8549-bdfbc98e9b60')
-  assert.ok(label?.startsWith('Lesson 1.1'))
+  assert.ok(label?.startsWith('1.U1.A'))
+})
+
+test('Module 01 Grand Pathway has 5 units × 3 sub-chapters', () => {
+  assert.equal(MODULE01_SUBCHAPTERS.length, 15)
+  assert.equal(unitsForModule01().length, 5)
+  const merged = mergeModule01Chapters([
+    {
+      id: '22222222-0000-0000-0000-000000000101',
+      module_id: '11111111-0000-0000-0000-000000000001',
+      title: 'old',
+      description: 'old',
+      order_index: 1,
+      lesson_content: { brief: { title: 'x', body: 'y', ruleSlugs: [] }, reading: [{ id: 'r', tokens: [] }], exercises: [{ id: 'e' }] },
+    },
+  ])
+  assert.equal(merged.filter((c) => c.module_id === '11111111-0000-0000-0000-000000000001').length, 15)
+  assert.equal(merged.find((c) => c.id.endsWith('0101'))?.title, 'First meetings')
+  assert.equal(merged.find((c) => c.id.endsWith('0153'))?.order_index, 15)
 })
 
 test('story-memory and character-fact exercises are rejected', () => {

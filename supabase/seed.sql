@@ -1,9 +1,9 @@
 INSERT INTO modules (id, title, description, cefr_level, order_index)
-VALUES ('11111111-0000-0000-0000-000000000001', 'Les Fondamentaux', 'Alphabet, pronunciation rules, être/avoir, gender, singular/plural.', 'A1', 1)
+VALUES ('11111111-0000-0000-0000-000000000001', 'Les Fondamentaux', 'Grand Pathway M01 · 5 units × Learn/Apply/Integrate. Identity, numbers, café, family, sounds — A1.1 foundation.', 'A1', 1)
 ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, description = EXCLUDED.description, cefr_level = EXCLUDED.cefr_level, order_index = EXCLUDED.order_index;
 
 INSERT INTO chapters (id, module_id, title, description, order_index, grammar_focus, new_lemmas_count, lesson_content)
-VALUES ('22222222-0000-0000-0000-000000000101', '11111111-0000-0000-0000-000000000001', 'Bonjour, je m''appelle…', 'Greetings and introductions', 1, ARRAY['Subject pronouns', 'present être', 'c''est vs il/elle est'], 65, '{
+VALUES ('22222222-0000-0000-0000-000000000101', '11111111-0000-0000-0000-000000000001', 'First meetings', 'Introduce yourself; greetings; tu/vous', 1, ARRAY['Subject pronouns', 'present être', 'c''est vs il/elle est'], 70, '{
      "tokens": [
        {"id": "t1", "text": "Bonjour", "syntax": "none", "translation": "Hello", "lemmaId": "32a8a816-c56b-4e67-8549-bdfbc98e9b60"},
        {"id": "t2", "text": ",", "syntax": "none"},
@@ -16,15 +16,59 @@ VALUES ('22222222-0000-0000-0000-000000000101', '11111111-0000-0000-0000-0000000
 ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, description = EXCLUDED.description, order_index = EXCLUDED.order_index, grammar_focus = EXCLUDED.grammar_focus, new_lemmas_count = EXCLUDED.new_lemmas_count;
 
 INSERT INTO chapters (id, module_id, title, description, order_index, grammar_focus, new_lemmas_count, lesson_content)
-VALUES ('22222222-0000-0000-0000-000000000102', '11111111-0000-0000-0000-000000000001', 'Les chiffres et le calendrier', 'Numbers 0–100; days, months', 2, ARRAY['Numbers 0–100', 'days, months', 'il y a (age)'], 55, '{}')
+VALUES ('22222222-0000-0000-0000-000000000111', '11111111-0000-0000-0000-000000000001', 'Nationality & origin', 'Nationality adjectives; habiter; countries', 2, ARRAY['être + nationality', 'habiter'], 50, '{}')
 ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, description = EXCLUDED.description, order_index = EXCLUDED.order_index, grammar_focus = EXCLUDED.grammar_focus, new_lemmas_count = EXCLUDED.new_lemmas_count;
 
 INSERT INTO chapters (id, module_id, title, description, order_index, grammar_focus, new_lemmas_count, lesson_content)
-VALUES ('22222222-0000-0000-0000-000000000103', '11111111-0000-0000-0000-000000000001', 'Au café', 'Present -ER verbs', 3, ARRAY['Present -ER verbs', 'articles le/la/les', 'un/une/des'], 70, '{}')
+VALUES ('22222222-0000-0000-0000-000000000112', '11111111-0000-0000-0000-000000000001', 'Checkpoint: trois présentations', 'Mixed practice — three introduction scenes', 3, ARRAY['Unit 1 spiral'], 30, '{}')
 ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, description = EXCLUDED.description, order_index = EXCLUDED.order_index, grammar_focus = EXCLUDED.grammar_focus, new_lemmas_count = EXCLUDED.new_lemmas_count;
 
 INSERT INTO chapters (id, module_id, title, description, order_index, grammar_focus, new_lemmas_count, lesson_content)
-VALUES ('22222222-0000-0000-0000-000000000104', '11111111-0000-0000-0000-000000000001', 'Ma famille', 'Possessives & family vocabulary', 4, ARRAY['Possessives mon/ma/mes', 'family nouns', 'avoir + noun'], 60, '{}')
+VALUES ('22222222-0000-0000-0000-000000000102', '11111111-0000-0000-0000-000000000001', 'Age & dates', 'Numbers, days, age with avoir', 4, ARRAY['Numbers 0–100', 'days', 'avoir for age'], 70, '{}')
+ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, description = EXCLUDED.description, order_index = EXCLUDED.order_index, grammar_focus = EXCLUDED.grammar_focus, new_lemmas_count = EXCLUDED.new_lemmas_count;
+
+INSERT INTO chapters (id, module_id, title, description, order_index, grammar_focus, new_lemmas_count, lesson_content)
+VALUES ('22222222-0000-0000-0000-000000000121', '11111111-0000-0000-0000-000000000001', 'Planning the week', 'Schedules; aujourd''hui / demain / hier', 5, ARRAY['Days', 'time adverbs'], 50, '{}')
+ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, description = EXCLUDED.description, order_index = EXCLUDED.order_index, grammar_focus = EXCLUDED.grammar_focus, new_lemmas_count = EXCLUDED.new_lemmas_count;
+
+INSERT INTO chapters (id, module_id, title, description, order_index, grammar_focus, new_lemmas_count, lesson_content)
+VALUES ('22222222-0000-0000-0000-000000000122', '11111111-0000-0000-0000-000000000001', 'Checkpoint: un agenda', 'Mixed practice — a full week agenda', 6, ARRAY['Unit 2 spiral'], 30, '{}')
+ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, description = EXCLUDED.description, order_index = EXCLUDED.order_index, grammar_focus = EXCLUDED.grammar_focus, new_lemmas_count = EXCLUDED.new_lemmas_count;
+
+INSERT INTO chapters (id, module_id, title, description, order_index, grammar_focus, new_lemmas_count, lesson_content)
+VALUES ('22222222-0000-0000-0000-000000000103', '11111111-0000-0000-0000-000000000001', 'Ordering', 'Order drinks and food; partitives', 7, ARRAY['prendre/vouloir/aimer/payer', 'articles & partitives'], 70, '{}')
+ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, description = EXCLUDED.description, order_index = EXCLUDED.order_index, grammar_focus = EXCLUDED.grammar_focus, new_lemmas_count = EXCLUDED.new_lemmas_count;
+
+INSERT INTO chapters (id, module_id, title, description, order_index, grammar_focus, new_lemmas_count, lesson_content)
+VALUES ('22222222-0000-0000-0000-000000000131', '11111111-0000-0000-0000-000000000001', 'Bill & politeness', 'L''addition; s''il vous plaît; café verbs', 8, ARRAY['Politeness', 'payer'], 50, '{}')
+ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, description = EXCLUDED.description, order_index = EXCLUDED.order_index, grammar_focus = EXCLUDED.grammar_focus, new_lemmas_count = EXCLUDED.new_lemmas_count;
+
+INSERT INTO chapters (id, module_id, title, description, order_index, grammar_focus, new_lemmas_count, lesson_content)
+VALUES ('22222222-0000-0000-0000-000000000132', '11111111-0000-0000-0000-000000000001', 'Checkpoint: une terrasse', 'Mixed practice — terrace scene', 9, ARRAY['Unit 3 spiral'], 30, '{}')
+ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, description = EXCLUDED.description, order_index = EXCLUDED.order_index, grammar_focus = EXCLUDED.grammar_focus, new_lemmas_count = EXCLUDED.new_lemmas_count;
+
+INSERT INTO chapters (id, module_id, title, description, order_index, grammar_focus, new_lemmas_count, lesson_content)
+VALUES ('22222222-0000-0000-0000-000000000104', '11111111-0000-0000-0000-000000000001', 'Close family', 'mon/ma/mes; parents, siblings', 10, ARRAY['Possessives mon/ma/mes', 'family nouns', 'avoir + people'], 70, '{}')
+ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, description = EXCLUDED.description, order_index = EXCLUDED.order_index, grammar_focus = EXCLUDED.grammar_focus, new_lemmas_count = EXCLUDED.new_lemmas_count;
+
+INSERT INTO chapters (id, module_id, title, description, order_index, grammar_focus, new_lemmas_count, lesson_content)
+VALUES ('22222222-0000-0000-0000-000000000141', '11111111-0000-0000-0000-000000000001', 'Descriptions with être', 'Family descriptions; agreement', 11, ARRAY['être + adjectives', 'agreement'], 50, '{}')
+ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, description = EXCLUDED.description, order_index = EXCLUDED.order_index, grammar_focus = EXCLUDED.grammar_focus, new_lemmas_count = EXCLUDED.new_lemmas_count;
+
+INSERT INTO chapters (id, module_id, title, description, order_index, grammar_focus, new_lemmas_count, lesson_content)
+VALUES ('22222222-0000-0000-0000-000000000142', '11111111-0000-0000-0000-000000000001', 'Checkpoint: arbre généalogique', 'Mixed practice — family tree', 12, ARRAY['Unit 4 spiral'], 30, '{}')
+ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, description = EXCLUDED.description, order_index = EXCLUDED.order_index, grammar_focus = EXCLUDED.grammar_focus, new_lemmas_count = EXCLUDED.new_lemmas_count;
+
+INSERT INTO chapters (id, module_id, title, description, order_index, grammar_focus, new_lemmas_count, lesson_content)
+VALUES ('22222222-0000-0000-0000-000000000151', '11111111-0000-0000-0000-000000000001', 'Alphabet & accents', 'French alphabet; acute, grave, circumflex', 13, ARRAY['Alphabet', 'accents'], 40, '{}')
+ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, description = EXCLUDED.description, order_index = EXCLUDED.order_index, grammar_focus = EXCLUDED.grammar_focus, new_lemmas_count = EXCLUDED.new_lemmas_count;
+
+INSERT INTO chapters (id, module_id, title, description, order_index, grammar_focus, new_lemmas_count, lesson_content)
+VALUES ('22222222-0000-0000-0000-000000000152', '11111111-0000-0000-0000-000000000001', 'Silent letters', 'Final consonants; liaison awareness', 14, ARRAY['Silent finals', 'liaison'], 40, '{}')
+ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, description = EXCLUDED.description, order_index = EXCLUDED.order_index, grammar_focus = EXCLUDED.grammar_focus, new_lemmas_count = EXCLUDED.new_lemmas_count;
+
+INSERT INTO chapters (id, module_id, title, description, order_index, grammar_focus, new_lemmas_count, lesson_content)
+VALUES ('22222222-0000-0000-0000-000000000153', '11111111-0000-0000-0000-000000000001', 'Checkpoint: noms propres', 'Mixed practice — spelling names aloud', 15, ARRAY['Unit 5 spiral'], 25, '{}')
 ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, description = EXCLUDED.description, order_index = EXCLUDED.order_index, grammar_focus = EXCLUDED.grammar_focus, new_lemmas_count = EXCLUDED.new_lemmas_count;
 
 INSERT INTO modules (id, title, description, cefr_level, order_index)

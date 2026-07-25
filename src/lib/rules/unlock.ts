@@ -1,12 +1,6 @@
 import { MODULE1_CHAPTER_IDS, MODULE1_LESSONS } from '@/lib/module1-content'
+import { MODULE01_BY_ID, pathwayLabel } from '@/lib/pathway/module01'
 import type { GrammarRuleDocument } from '@/lib/rules/types'
-
-const CHAPTER_TITLES: Record<string, string> = {
-  '22222222-0000-0000-0000-000000000101': "Bonjour, je m'appelle…",
-  '22222222-0000-0000-0000-000000000102': 'Les chiffres et le calendrier',
-  '22222222-0000-0000-0000-000000000103': 'Au café',
-  '22222222-0000-0000-0000-000000000104': 'Ma famille',
-}
 
 /** Map rule slug → chapter IDs that teach it (from brief.ruleSlugs). */
 export function unlockChaptersForSlug(slug: string): string[] {
@@ -19,10 +13,10 @@ export function unlockChaptersForSlug(slug: string): string[] {
 }
 
 export function lessonLabelForChapter(chapterId: string): string {
+  const pathway = MODULE01_BY_ID.get(chapterId)
+  if (pathway) return pathwayLabel(pathway)
   const index = (MODULE1_CHAPTER_IDS as readonly string[]).indexOf(chapterId)
-  const title = CHAPTER_TITLES[chapterId]
-  const label = index >= 0 ? `Lesson 1.${index + 1}` : 'Lesson'
-  return title ? `${label} · ${title}` : label
+  return index >= 0 ? `Lesson 1.${index + 1}` : 'Lesson'
 }
 
 export function isRuleUnlocked(rule: GrammarRuleDocument, completedChapterIds: Set<string>): boolean {

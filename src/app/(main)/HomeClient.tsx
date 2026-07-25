@@ -4,6 +4,12 @@ import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { Check, Lock, Play, Star } from 'lucide-react'
 import { hasLessonContent } from '@/lib/course'
+import {
+  MODULE01_BY_ID,
+  MODULE01_ID,
+  pathwayLabel,
+  unitsForModule01,
+} from '@/lib/pathway/module01'
 import { deriveChapterStatus } from '@/lib/progression'
 import { createClient } from '@/utils/supabase/client'
 
@@ -26,6 +32,59 @@ type Chapter = {
 
 type Progress = { chapter_id: string; status: 'locked' | 'active' | 'completed' }
 
+function ChapterCard({
+  chapter,
+  moduleOrder,
+  status,
+}: {
+  chapter: Chapter
+  moduleOrder: number
+  status: ReturnType<typeof deriveChapterStatus>
+}) {
+  const pathway = MODULE01_BY_ID.get(chapter.id)
+  const label = pathway
+    ? pathwayLabel(pathway)
+    : `${moduleOrder}.${chapter.order_index} ${chapter.title}`
+  const statusContent = {
+    completed: { label: 'Completed', icon: <Star className="size-6 fill-success text-success" />, tone: 'text-success' },
+    active: { label: 'Up next', icon: <Play className="size-6 fill-primary text-primary" />, tone: 'text-primary' },
+    locked: { label: 'Locked', icon: <Lock className="size-6 text-on-surface-variant" />, tone: 'text-on-surface-variant' },
+    'coming-soon': { label: 'Coming soon', icon: <Check className="size-6 text-on-surface-variant" />, tone: 'text-on-surface-variant' },
+  }[status]
+
+  const card = (
+    <div
+      className={`tactile-card flex items-center gap-4 p-4 ${status === 'active' ? 'border-b-primary' : ''} ${
+        status === 'locked' || status === 'coming-soon' ? 'bg-surface-container-low opacity-75' : ''
+      }`}
+    >
+      <div className="flex size-14 shrink-0 items-center justify-center rounded-full border-[5px] border-surface-container-high bg-surface-container-lowest">
+        {statusContent.icon}
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <p className={`text-label-caps ${statusContent.tone}`}>{statusContent.label}</p>
+          {pathway && (
+            <span className="rounded-full bg-surface-container-high px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-on-surface-variant">
+              {pathway.roleLabel}
+            </span>
+          )}
+        </div>
+        <h3 className="mt-1 text-body-ui font-bold">{label}</h3>
+        <p className="mt-1 text-sm text-on-surface-variant">{chapter.description}</p>
+      </div>
+    </div>
+  )
+
+  return status === 'active' || status === 'completed' ? (
+    <Link href={`/lesson/${chapter.id}/`} className="outline-none transition-opacity hover:opacity-90">
+      {card}
+    </Link>
+  ) : (
+    <div>{card}</div>
+  )
+}
+
 export default function HomeClient({
   modules: courseModules,
   chapters: courseChapters,
@@ -40,7 +99,9 @@ export default function HomeClient({
     let cancelled = false
     ;(async () => {
       const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
       if (!user || cancelled) return
 
       const now = new Date()
@@ -73,9 +134,11 @@ export default function HomeClient({
   const mastery = firstModuleChapters.length ? Math.round((completedInFirstModule / firstModuleChapters.length) * 100) : 0
   const completedIds = useMemo(
     () => new Set([...progressByChapter].filter(([, status]) => status === 'completed').map(([id]) => id)),
-    [progressByChapter]
+    [progressByChapter],
   )
   const authoredIds = useMemo(() => authoredChapters.map((item) => item.id), [authoredChapters])
+  const chaptersById = useMemo(() => new Map(courseChapters.map((chapter) => [chapter.id, chapter])), [courseChapters])
+  const module01Units = useMemo(() => unitsForModule01(), [])
 
   return (
     <div className="flex flex-col gap-8 pb-8">
@@ -84,12 +147,16 @@ export default function HomeClient({
         <div className="mt-2 flex items-end justify-between gap-4">
           <div>
             <h1 className="text-headline-md">Bienvenue</h1>
-            <p className="mt-1 text-body-ui text-on-surface-variant">{wordsRead} / 300 words read today</p>
+            <p className="mt-1 text-body-ui text-on-surface-variant">
+              {wordsRead} / 300 words read today
+            </p>
           </div>
           <div className="text-right">
             <p className="text-label-caps text-on-surface-variant">MODULE 1</p>
             <p className="text-headline-lg text-success">{mastery}%</p>
-            <p className="text-xs text-on-surface-variant">{completedInFirstModule}/{firstModuleChapters.length || 0} chapters</p>
+            <p className="text-xs text-on-surface-variant">
+              {completedInFirstModule}/{firstModuleChapters.length || 0} playable
+            </p>
           </div>
         </div>
         <div className="mt-4 space-y-2">
@@ -102,51 +169,84 @@ export default function HomeClient({
           <div>
             <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-on-surface-variant">Daily reading goal</p>
             <div className="h-2 overflow-hidden rounded-full bg-surface-container-high">
-              <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${Math.min(100, Math.round((wordsRead / 300) * 100))}%` }} />
+              <div
+                className="h-full rounded-full bg-primary transition-all"
+                style={{ width: `${Math.min(100, Math.round((wordsRead / 300) * 100))}%` }}
+              />
             </div>
           </div>
         </div>
       </section>
 
       <section className="flex flex-col gap-8">
-        {courseModules.map((module) => (
-          <div key={module.id} className="flex flex-col gap-4">
-            <header className="border-b-2 border-surface-container-high pb-3">
-              <p className="text-label-caps text-primary">MODULE {module.order_index} · {module.cefr_level}</p>
-              <h2 className="text-headline-md">{module.title}</h2>
-              <p className="mt-1 text-sm text-on-surface-variant">{module.description}</p>
-            </header>
+        {courseModules.map((module) => {
+          if (module.id === MODULE01_ID) {
+            return (
+              <div key={module.id} className="flex flex-col gap-6">
+                <header className="border-b-2 border-surface-container-high pb-3">
+                  <p className="text-label-caps text-primary">
+                    MODULE {module.order_index} · {module.cefr_level} · 5 UNITS · 15 SUB-CHAPTERS
+                  </p>
+                  <h2 className="text-headline-md">{module.title}</h2>
+                  <p className="mt-1 text-sm text-on-surface-variant">{module.description}</p>
+                </header>
 
-            {courseChapters
-              .filter((chapter) => chapter.module_id === module.id)
-              .sort((a, b) => a.order_index - b.order_index)
-              .map((chapter) => {
-              const status = deriveChapterStatus(chapter.id, authoredIds, completedIds)
-              const label = `${module.order_index}.${chapter.order_index} ${chapter.title}`
-              const statusContent = {
-                completed: { label: 'Completed', icon: <Star className="size-6 fill-success text-success" />, tone: 'text-success' },
-                active: { label: 'Up next', icon: <Play className="size-6 fill-primary text-primary" />, tone: 'text-primary' },
-                locked: { label: 'Locked', icon: <Lock className="size-6 text-on-surface-variant" />, tone: 'text-on-surface-variant' },
-                'coming-soon': { label: 'Coming soon', icon: <Check className="size-6 text-on-surface-variant" />, tone: 'text-on-surface-variant' },
-              }[status]
-              const card = (
-                <div className={`tactile-card flex items-center gap-4 p-4 ${status === 'active' ? 'border-b-primary' : ''} ${status === 'locked' || status === 'coming-soon' ? 'bg-surface-container-low opacity-75' : ''}`}>
-                  <div className="flex size-14 shrink-0 items-center justify-center rounded-full border-[5px] border-surface-container-high bg-surface-container-lowest">
-                    {statusContent.icon}
+                {module01Units.map((unit) => (
+                  <div key={unit.unitIndex} className="flex flex-col gap-3">
+                    <div className="px-1">
+                      <p className="text-label-caps text-primary">
+                        UNIT {unit.unitIndex} · {unit.unitTitle}
+                      </p>
+                      <p className="mt-1 text-xs text-on-surface-variant">{unit.unitGrammar}</p>
+                    </div>
+                    <div className="flex flex-col gap-3">
+                      {unit.chapters.map((sub) => {
+                        const chapter = chaptersById.get(sub.id)
+                        if (!chapter) return null
+                        const status = deriveChapterStatus(chapter.id, authoredIds, completedIds)
+                        return (
+                          <ChapterCard
+                            key={chapter.id}
+                            chapter={chapter}
+                            moduleOrder={module.order_index}
+                            status={status}
+                          />
+                        )
+                      })}
+                    </div>
                   </div>
-                  <div>
-                    <p className={`text-label-caps ${statusContent.tone}`}>{statusContent.label}</p>
-                    <h3 className="mt-1 text-body-ui font-bold">{label}</h3>
-                    <p className="mt-1 text-sm text-on-surface-variant">{chapter.description}</p>
-                  </div>
-                </div>
-              )
-              return status === 'active' || status === 'completed'
-                ? <Link key={chapter.id} href={`/lesson/${chapter.id}/`} className="outline-none transition-opacity hover:opacity-90">{card}</Link>
-                : <div key={chapter.id}>{card}</div>
-            })}
-          </div>
-        ))}
+                ))}
+              </div>
+            )
+          }
+
+          return (
+            <div key={module.id} className="flex flex-col gap-4">
+              <header className="border-b-2 border-surface-container-high pb-3">
+                <p className="text-label-caps text-primary">
+                  MODULE {module.order_index} · {module.cefr_level}
+                </p>
+                <h2 className="text-headline-md">{module.title}</h2>
+                <p className="mt-1 text-sm text-on-surface-variant">{module.description}</p>
+              </header>
+
+              {courseChapters
+                .filter((chapter) => chapter.module_id === module.id)
+                .sort((a, b) => a.order_index - b.order_index)
+                .map((chapter) => {
+                  const status = deriveChapterStatus(chapter.id, authoredIds, completedIds)
+                  return (
+                    <ChapterCard
+                      key={chapter.id}
+                      chapter={chapter}
+                      moduleOrder={module.order_index}
+                      status={status}
+                    />
+                  )
+                })}
+            </div>
+          )
+        })}
       </section>
     </div>
   )
