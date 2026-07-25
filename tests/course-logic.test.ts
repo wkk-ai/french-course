@@ -159,8 +159,8 @@ test('Module 1.1 ships enough lemmas for review backfill', () => {
   assert.ok(label?.startsWith('1.U1.A'))
 })
 
-test('Module 01 Grand Pathway has 5 units × 3 sub-chapters', () => {
-  assert.equal(MODULE01_SUBCHAPTERS.length, 15)
+test('Module 01 Grand Pathway has 5 units × 4 sub-chapters', () => {
+  assert.equal(MODULE01_SUBCHAPTERS.length, 20)
   assert.equal(unitsForModule01().length, 5)
   const merged = mergeModule01Chapters([
     {
@@ -172,21 +172,22 @@ test('Module 01 Grand Pathway has 5 units × 3 sub-chapters', () => {
       lesson_content: { brief: { title: 'x', body: 'y', ruleSlugs: [] }, reading: [{ id: 'r', tokens: [] }], exercises: [{ id: 'e' }] },
     },
   ])
-  assert.equal(merged.filter((c) => c.module_id === '11111111-0000-0000-0000-000000000001').length, 15)
+  assert.equal(merged.filter((c) => c.module_id === '11111111-0000-0000-0000-000000000001').length, 20)
   assert.equal(merged.find((c) => c.id.endsWith('0101'))?.title, 'First meetings')
-  assert.equal(merged.find((c) => c.id.endsWith('0153'))?.order_index, 15)
+  assert.equal(merged.find((c) => c.id.endsWith('015d'))?.order_index, 20)
 })
 
-test('Grand Pathway catalog covers 36 modules; Phase I is playable', async () => {
+test('Grand Pathway catalog covers 36 modules; all A/B/C/D playable', async () => {
   const { PATHWAY_MODULES, mergePathwayChapters } = await import('../src/lib/pathway/catalog')
   const { BUNDLED_CHAPTER_IDS, BUNDLED_LESSONS } = await import('../src/lib/bundled-lessons')
   assert.equal(PATHWAY_MODULES.length, 36)
   assert.equal(PATHWAY_MODULES.filter((m) => m.status === 'playable').length, 36)
-  assert.equal(BUNDLED_CHAPTER_IDS.length, 540)
+  assert.equal(BUNDLED_CHAPTER_IDS.length, 720)
   assert.ok(BUNDLED_LESSONS['22222222-0000-0000-0000-000000000201']?.brief)
-  assert.ok(BUNDLED_LESSONS['22222222-0000-0000-0000-000000003605']?.brief)
+  assert.ok(BUNDLED_LESSONS['22222222-0000-0000-0000-00000000011d']?.brief)
+  assert.ok(BUNDLED_LESSONS['22222222-0000-0000-0000-00000000365d']?.brief)
   const merged = mergePathwayChapters([])
-  assert.equal(merged.length, 36 * 15)
+  assert.equal(merged.length, 36 * 20)
   const m2 = resolveLessonContent('22222222-0000-0000-0000-000000000201', {})
   assert.ok(m2?.reading?.length)
   assert.ok((m2?.exercises?.length ?? 0) >= 20)

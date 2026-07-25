@@ -36,8 +36,14 @@ export function resolveVocabulary(lemmaIds: string[], fromDb: VocabularyWord[]):
     const existing = byId.get(word.id)
     byId.set(word.id, existing ? { ...word, ...existing } : word)
   }
-  if (BUNDLED_VOCABULARY.some((word) => lemmaIds.includes(word.id))) return [...byId.values()]
-  return lemmaIds.map((id) => byId.get(id)).filter((word): word is VocabularyWord => Boolean(word))
+  // Prefer bundled rows for requested lemmas; keep multiword helpers that share surface forms.
+  const requested = new Set(lemmaIds)
+  const resolved = lemmaIds.map((id) => byId.get(id)).filter((word): word is VocabularyWord => Boolean(word))
+  // Also include any bundled idiom/multiword whose id was requested indirectly via reading tokens.
+  for (const word of BUNDLED_VOCABULARY) {
+    if (requested.has(word.id) && !resolved.some((item) => item.id === word.id)) resolved.push(word)
+  }
+  return resolved.length ? resolved : lemmaIds.map((id) => byId.get(id)).filter((word): word is VocabularyWord => Boolean(word))
 }
 
 export function resolveConjugations(lemmaIds: string[], fromDb: VerbConjugation[]): VerbConjugation[] {

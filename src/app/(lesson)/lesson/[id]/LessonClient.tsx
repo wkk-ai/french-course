@@ -339,15 +339,8 @@ export default function LessonClient({
   )
 
   const enqueueLessonVocabulary = async (_userId: string) => {
-    const lemmaIds = [
-      ...new Set([
-        ...lemmaIdsForChapter(chapterId),
-        ...[...readingParagraphs, ...conversationLines.flatMap((line) => [{ tokens: line.tokens }])]
-          .flatMap((paragraph) => paragraph.tokens)
-          .map((token) => token.lemmaId)
-          .filter((lemmaId): lemmaId is string => Boolean(lemmaId)),
-      ]),
-    ]
+    // Reviewable lemmas only — never enqueue proper nouns / plot names.
+    const lemmaIds = lemmaIdsForChapter(chapterId)
     if (!lemmaIds.length) return
 
     // Always seed the local infinite loop first — remote FK/RLS must not leave Review empty.

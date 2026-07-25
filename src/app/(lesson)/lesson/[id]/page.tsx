@@ -55,11 +55,14 @@ export default async function LessonPage({ params }: { params: Promise<{ id: str
   }
 
   const lemmaIds = [
-    ...new Set(
-      content.reading?.flatMap((paragraph) =>
+    ...new Set([
+      ...(content.reading?.flatMap((paragraph) =>
         paragraph.tokens.map((token) => token.lemmaId).filter((lemmaId): lemmaId is string => Boolean(lemmaId)),
-      ) ?? [],
-    ),
+      ) ?? []),
+      ...(content.conversation?.lines?.flatMap((line) =>
+        (line.tokens ?? []).map((token) => token.lemmaId).filter((lemmaId): lemmaId is string => Boolean(lemmaId)),
+      ) ?? []),
+    ]),
   ]
   const ruleSlugs = content.brief?.ruleSlugs ?? []
   const [{ data: vocabulary }, { data: conjugations }, { data: rules }] = await Promise.all([

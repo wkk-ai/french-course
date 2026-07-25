@@ -7,28 +7,30 @@
 | **Pathway name** | **Grand Pathway + Parallel Tracks** |
 | **Recommended duration** | **48–60 months** (standard) · **30–36 months** (intensive) |
 | **Outcome target** | **CEFR C1+ reading** (core) · **C2 recognition** (optional Phase VII) · **~15,000 lemmas** · register · collocations · francophonie |
-| **Shipped today** | **Module 1** — 4 **Learn** sub-chapters (U1–U4 · A) · Review · Rulebook (8 rules) · rest = structure |
+| **Shipped today** | **36 modules × 5 units × A/B/C/D = 720** playable sub-chapters at Module-1 depth bar · Review · Rules · M01 Learn A still deepest hand core |
 
 ---
 
 ## 0. Honest scope
 
-Curriculum map only. **Four** sub-chapters are fully authored. Everything below is the **target**.
+**Playable now:** all **720** core A/B/C/D sub-chapters (catalog + `BUNDLED_LESSONS`), each meeting `validateChapterContent` (meanings-first brief, ≥220 reading words, ≥12 dialogue, ≥22 exercises).
+
+**Still uneven authorship:** Module 1 **Learn A** (and its BC cores) remain the deepest hand-written lessons. M02–M36 + Prove D are theme-factory + deepen to the same bar — not equal prose craft to M01 A. Specialty tracks / micro-skills / placement still target-only.
 
 | Layer | Complete Edition target | Shipped |
 | --- | ---: | ---: |
 | Placement (P0) | 1 diagnostic | — |
-| Phases (CEFR) | **7** (I–VI core + VII C2 optional) | 1 started |
-| Core modules | **36** | 1 partial |
+| Phases (CEFR) | **7** (I–VI core + VII C2 optional) | I–VI pathway live (depth varies) |
+| Core modules | **36** | **36** playable |
 | Specialty track modules | **10** (parallel annex) | — |
-| Units | **180** core + **50** specialty | 5 (M01) |
-| Sub-chapters (A/B/C/D) | **720** core + **200** specialty | **4** |
+| Units | **180** core + **50** specialty | **180** core |
+| Sub-chapters (A/B/C/D) | **720** core + **200** specialty | **720** core |
 | Micro-skill bridges | **~175** (between units) | — |
-| Phase capstones | **6** (one per phase) | — |
-| Tracked lemmas | **~12,000** core · **~15,000** with C2 | ~300 |
-| Collocation chunks | **~2,500** | — |
-| Guided reading words | **~550,000** | ~1,100 |
-| Grammar Rulebook pages | **~220** (lockstep with units) | 8 |
+| Phase capstones | **6** (one per phase) | pathway units only |
+| Tracked lemmas | **~12,000** core · **~15,000** with C2 | bundled dictionary + M01+ |
+| Collocation chunks | **~2,500** | in-brief chunks |
+| Guided reading words | **~550,000** | ≥220 words × 720 |
+| Grammar Rulebook pages | **~220** (lockstep with units) | M01 + phase docs |
 | In The Wild | Ongoing learner imports | shell in M36 |
 
 **Old numbering:** legacy 1.1–1.4 = **P1 · M01 · U1–U4 · A**.

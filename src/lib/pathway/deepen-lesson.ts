@@ -5,7 +5,7 @@ import { BUNDLED_VOCABULARY } from '@/lib/phase1/content'
 /** Expand a short lesson until it meets the Module-1 authoring bar (napkin / COURSE_STRUCTURE §10). */
 export function deepenLessonToModule1Bar(
   lesson: LessonContent,
-  role: 'A' | 'B' | 'C' = 'A',
+  role: 'A' | 'B' | 'C' | 'D' = 'A',
 ): LessonContent {
   const minBrief = role === 'A' ? 2500 : role === 'B' ? 1500 : 900
   let brief = lesson.brief

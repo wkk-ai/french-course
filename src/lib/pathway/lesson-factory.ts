@@ -3,7 +3,7 @@ import { conversationLine, readingParagraphs } from '@/lib/lesson-text'
 import type { Phase1Theme } from '@/lib/phase1/theme-bank'
 
 export type DeepTheme = Phase1Theme & {
-  role?: 'A' | 'B' | 'C'
+  role?: 'A' | 'B' | 'C' | 'D'
   moduleTitle?: string
   unitTitle?: string
   /** Fixed chunks (FR = EN). */
@@ -18,14 +18,15 @@ export type DeepTheme = Phase1Theme & {
   theorySections?: Array<{ heading: string; body: string }>
 }
 
-function roleOf(theme: DeepTheme): 'A' | 'B' | 'C' {
+function roleOf(theme: DeepTheme): 'A' | 'B' | 'C' | 'D' {
   if (theme.role) return theme.role
+  if (/prove/i.test(theme.title)) return 'D'
   if (/checkpoint|integrate/i.test(theme.title)) return 'C'
   if (/apply/i.test(theme.title)) return 'B'
   return 'A'
 }
 
-function briefMinChars(role: 'A' | 'B' | 'C'): number {
+function briefMinChars(role: 'A' | 'B' | 'C' | 'D'): number {
   if (role === 'A') return 2500
   if (role === 'B') return 1500
   return 900
@@ -61,7 +62,7 @@ function buildBrief(theme: DeepTheme): NonNullable<LessonContent['brief']> {
     `What this lesson is for: ${theme.grammar}.` +
     (theme.moduleTitle ? ` Module: ${theme.moduleTitle}.` : '') +
     (theme.unitTitle ? ` Unit: ${theme.unitTitle}.` : '') +
-    ` Role: ${role === 'A' ? 'Learn' : role === 'B' ? 'Apply' : 'Integrate'}.\n\n` +
+    ` Role: ${role === 'A' ? 'Learn' : role === 'B' ? 'Apply' : role === 'C' ? 'Integrate' : 'Prove'}.\n\n` +
     `**1. Words to learn first (meanings)**\n` +
     `Before any grammar example, learn these with English meanings. Do not skip this list.\n\n` +
     `${meaningsBlock(theme.meanings)}\n\n` +
@@ -261,7 +262,7 @@ function topicExercises(theme: DeepTheme, prefix: string): LessonExercise[] {
     },
     {
       id: `${prefix}-g3`,
-      category: 'chunks',
+      category: 'vocab-meaning',
       prompt: 'Useful chunks should be learned as:',
       options: ['Whole phrases', 'Isolated letters only', 'Plot spoilers'],
       answer: 0,

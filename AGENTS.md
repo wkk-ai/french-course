@@ -25,8 +25,8 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Keep `œ` inside words (*sœur*); split glued punct (`Moi,`); prefer `tokenizeFrench` / `readingParagraphs` over hand tokens.
 
 ## Content + Review
-- Bundled `BUNDLED_LESSONS` (all 36 modules × A/B/C = 540) **wins** over thin DB stubs in `resolveLessonContent`.
-- Pathway UI: `src/lib/pathway/catalog.ts`. Every module playable at **Module-1 depth bar** (`validateChapterContent`).
+- Bundled `BUNDLED_LESSONS` (all 36 modules × A/B/C/D = 720) **wins** over thin DB stubs in `resolveLessonContent`.
+- Pathway UI: `src/lib/pathway/catalog.ts`. Every module playable at **Module-1 depth bar** (`validateChapterContent`). Prove (D) is mandatory per unit.
 - Lesson complete must enqueue lemmas for Review (remote and/or local vault); wrong answers → `user_mistakes`.
 - Before done: check missing lemmas after enrich, conjugate on infinitives, spacing, Review queue after complete, depth CI on all bundled lessons.
 

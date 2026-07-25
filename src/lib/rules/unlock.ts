@@ -20,15 +20,25 @@ export function lessonLabelForChapter(chapterId: string): string {
 }
 
 export function isRuleUnlocked(rule: GrammarRuleDocument, completedChapterIds: Set<string>): boolean {
-  if (!rule.unlockChapterIds.length) return true
-  return rule.unlockChapterIds.some((id) => completedChapterIds.has(id))
+  // Prefer chapters that actually teach this slug in their brief; fall back to document unlock ids.
+  const fromBriefs = unlockChaptersForSlug(rule.slug)
+  const unlockIds = fromBriefs.length ? fromBriefs : rule.unlockChapterIds
+  if (!unlockIds.length) return true
+  return unlockIds.some((id) => completedChapterIds.has(id))
 }
 
-/** First unlock chapter for teaser copy. */
+/** First unlock chapter for teaser copy — never spoil locked titles in UI that shows this. */
 export function unlockTeaser(rule: GrammarRuleDocument): string {
-  const first = rule.unlockChapterIds[0]
+  const fromBriefs = unlockChaptersForSlug(rule.slug)
+  const first = fromBriefs[0] ?? rule.unlockChapterIds[0]
   if (!first) return 'Available now'
   return `Unlock in ${lessonLabelForChapter(first)}`
+}
+
+/** Resolved unlock chapter ids (brief.ruleSlugs wins). */
+export function resolvedUnlockChapterIds(rule: GrammarRuleDocument): string[] {
+  const fromBriefs = unlockChaptersForSlug(rule.slug)
+  return fromBriefs.length ? fromBriefs : rule.unlockChapterIds
 }
 
 export type RuleMasteryStage = 'locked' | 'introduced' | 'practiced' | 'solid'

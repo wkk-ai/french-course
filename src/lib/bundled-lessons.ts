@@ -4,9 +4,10 @@ import { FACTORY_CHAPTER_IDS, FACTORY_LESSONS, PHASE1_CHAPTER_IDS, PHASE1_LESSON
 import { PATHWAY_BY_CHAPTER_ID, PATHWAY_MODULES } from '@/lib/pathway/catalog'
 import { deepenLessonToModule1Bar } from '@/lib/pathway/deepen-lesson'
 
-function roleFor(chapterId: string, title?: string): 'A' | 'B' | 'C' {
+function roleFor(chapterId: string, title?: string): 'A' | 'B' | 'C' | 'D' {
   const hit = PATHWAY_BY_CHAPTER_ID.get(chapterId)
   if (hit?.sub.role) return hit.sub.role
+  if (title && /prove/i.test(title)) return 'D'
   if (title && /checkpoint|integrate/i.test(title)) return 'C'
   if (title && /apply/i.test(title)) return 'B'
   return 'A'

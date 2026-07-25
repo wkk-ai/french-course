@@ -8,7 +8,6 @@ import type { ExerciseAnswer } from '@/lib/exercises/types'
 import type { GrammarRuleDocument, RuleTable } from '@/lib/rules/types'
 import {
   isRuleUnlocked,
-  lessonLabelForChapter,
   masteryLabel,
   masteryStage,
   type RuleMasteryStage,
@@ -117,23 +116,15 @@ export function RuleDetailClient({ rule }: { rule: GrammarRuleDocument }) {
   }
 
   if (!unlocked) {
-    const first = rule.unlockChapterIds[0]
     return (
       <div className="tactile-card mt-6 space-y-4 p-6">
-        <h1 className="text-headline-lg">Rule not available yet</h1>
+        <h1 className="text-headline-lg">Not available yet</h1>
         <p className="text-body-reading text-on-surface-variant">
-          Finish {first ? lessonLabelForChapter(first) : 'the related lesson'} first. Locked rules stay hidden in the rulebook until then.
+          This grammar page unlocks after you finish the lesson that teaches it. Keep learning — it will appear in your rulebook when ready.
         </p>
-        <div className="flex flex-wrap gap-3">
-          <Link href="/rules/" className="tactile-button inline-flex rounded-lg border-2 border-surface-variant bg-surface-container-low px-4 py-2 text-sm font-bold text-on-surface">
-            Back to rulebook
-          </Link>
-          {first && (
-            <Link href={`/lesson/${first}/`} className="tactile-button inline-flex rounded-lg border-primary-container bg-primary px-4 py-2 text-sm font-bold text-on-primary">
-              Go to lesson
-            </Link>
-          )}
-        </div>
+        <Link href="/rules/" className="tactile-button inline-flex rounded-lg border-2 border-surface-variant bg-surface-container-low px-4 py-2 text-sm font-bold text-on-surface">
+          Back to rulebook
+        </Link>
       </div>
     )
   }

@@ -16,7 +16,7 @@ function readingWordCount(lesson: LessonContent): number {
  */
 export function validateChapterContent(
   lesson: LessonContent,
-  options?: { role?: 'A' | 'B' | 'C' },
+  options?: { role?: 'A' | 'B' | 'C' | 'D' },
 ): { ok: true } | { ok: false; reason: string } {
   const role = options?.role ?? 'A'
   const brief = lesson.brief?.body ?? ''

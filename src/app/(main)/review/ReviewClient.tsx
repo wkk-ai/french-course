@@ -125,12 +125,16 @@ export default function ReviewClient() {
     const authoredCompleted = completedIds.filter((id) => BUNDLED_CHAPTER_IDS.includes(id))
     const remoteIds = new Set(remote.map((item) => item.vocab_id))
     let localItems = getAllLocalVocabulary()
+    const localIds = new Set(localItems.map((item) => item.vocab_id))
+    const knownIds = new Set([...remoteIds, ...localIds])
 
-    if (remote.length === 0 && localItems.length === 0 && authoredCompleted.length > 0) {
-      const lemmaIds = [...new Set(authoredCompleted.flatMap((id) => lemmaIdsForChapter(id)))]
-      if (lemmaIds.length) {
-        enqueueLocalVocabulary(lemmaIds)
-        const rows = vocabularyRowsForLemmas(lemmaIds).map((word) => ({
+    // Backfill any missing reviewable lemmas from completed authored chapters (not only empty pools).
+    if (authoredCompleted.length > 0) {
+      const needed = [...new Set(authoredCompleted.flatMap((id) => lemmaIdsForChapter(id)))]
+      const missing = needed.filter((id) => !knownIds.has(id))
+      if (missing.length) {
+        enqueueLocalVocabulary(missing)
+        const rows = vocabularyRowsForLemmas(missing).map((word) => ({
           id: word.id,
           word: word.word,
           base_translation: word.base_translation,
@@ -144,7 +148,7 @@ export default function ReviewClient() {
         }))
         const { error: rpcError } = await supabase.rpc('enqueue_lesson_vocabulary', {
           p_vocab_rows: rows,
-          p_lemma_ids: lemmaIds,
+          p_lemma_ids: missing,
         })
         if (!rpcError) {
           const refreshed = await supabase
