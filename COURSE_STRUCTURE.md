@@ -73,7 +73,7 @@ Course — Complete Edition (~48–60 months)
 | **C** | **Integrate** | 20% spiral; mixed drills; checkpoint reading | 45–75 min |
 | **D** | **Prove** | Timed mixed quiz; short cold reading; “explain the rule” | 10–15 min |
 
-**Prove (D) is mandatory** to mark a unit complete. Failing D reopens B/C remediation — not a full replay of A.
+**Prove (D) is mandatory** to mark a unit complete. Pass requires **≥70%** with **no hints**. Failing D does not mark the unit done — remediate B/C, then retry Prove.
 
 **Naming:** `P1.M03.U2.B` = Phase 1, Module 3, Unit 2, Apply.
 

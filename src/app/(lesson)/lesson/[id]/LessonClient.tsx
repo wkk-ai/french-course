@@ -12,13 +12,17 @@ import { RichText } from '@/components/RichText'
 import { enrichTokens, isPunctuationToken, tokenizeFrench } from '@/lib/clickable-text'
 import { CONJUGATION_TENSES, conjugationsForWord, isConjugableVerb } from '@/lib/french-conjugations'
 import { isCanonicalChapterId } from '@/lib/course-catalog'
-import { calculateLessonScore } from '@/lib/lesson-score'
+import { calculateLessonScore, didPassProve, PROVE_PASS_SCORE } from '@/lib/lesson-score'
 import { resolveLessonContent } from '@/lib/lesson-content'
 import { createClient } from '@/utils/supabase/client'
+import { BUNDLED_CHAPTER_IDS } from '@/lib/bundled-lessons'
 import { bumpLocalMistakeCount, enqueueLocalVocabulary } from '@/lib/local-vocab-vault'
+import { markLocalChapterCompleted, mergeCompletedChapterIds } from '@/lib/local-progress'
 import { BUNDLED_VOCABULARY } from '@/lib/phase1/content'
+import { PATHWAY_BY_CHAPTER_ID } from '@/lib/pathway/catalog'
 import { lemmaIdsForChapter, vocabularyRowsForLemmas } from '@/lib/review/lemmas'
 import type { LessonExercise } from '@/lib/exercises/types'
+
 
 function lemmaIdFromExercise(exercise: LessonExercise): string | null {
   const candidates: string[] = []
@@ -103,9 +107,8 @@ export default function LessonClient({
         return
       }
 
-      const [{ data: progress }, { data: authored }, { data: mistakes }] = await Promise.all([
+      const [{ data: progress }, { data: mistakes }] = await Promise.all([
         supabase.from('user_chapter_progress').select('chapter_id, status').eq('user_id', user.id),
-        supabase.from('chapters').select('id, lesson_content, order_index, module:modules(order_index)'),
         supabase.from('user_mistakes').select('grammar_category').eq('user_id', user.id).eq('is_resolved', false),
       ])
 
@@ -115,16 +118,11 @@ export default function LessonClient({
         ])
       }
 
-      const orderedAuthored = (authored ?? [])
-        .filter((item) => isCanonicalChapterId(item.id) && resolveLessonContent(item.id, item.lesson_content))
-        .sort((left, right) => {
-          const leftModule = Array.isArray(left.module) ? left.module[0] : left.module
-          const rightModule = Array.isArray(right.module) ? right.module[0] : right.module
-          return (leftModule?.order_index ?? 0) - (rightModule?.order_index ?? 0) || left.order_index - right.order_index
-        })
-
-      const completed = new Set((progress ?? []).filter((item) => item.status === 'completed').map((item) => item.chapter_id))
-      const firstIncomplete = orderedAuthored.find((item) => !completed.has(item.id))?.id
+      const completed = mergeCompletedChapterIds(
+        (progress ?? []).filter((item) => item.status === 'completed').map((item) => item.chapter_id),
+      )
+      const orderedAuthored = BUNDLED_CHAPTER_IDS.filter((id) => isCanonicalChapterId(id) && resolveLessonContent(id, {}))
+      const firstIncomplete = orderedAuthored.find((id) => !completed.has(id))
       const allowed = completed.has(chapterId) || firstIncomplete === chapterId || orderedAuthored.length === 0
 
       if (!allowed) {
@@ -167,7 +165,10 @@ export default function LessonClient({
     const existingIds = new Set(base.map((exercise) => exercise.id))
     return [...base, ...remediation.filter((exercise) => !existingIds.has(exercise.id))]
   }, [content.exercises, remediationCategories])
+  const isProve = PATHWAY_BY_CHAPTER_ID.get(chapterId)?.sub.role === 'D'
   const answeredAll = exercises.length > 0 && exercises.every((exercise) => isExerciseAnswered(exercise, answers[exercise.id]))
+  const liveScore = useMemo(() => calculateLessonScore(answers, exercises), [answers, exercises])
+  const provePassed = !isProve || (answeredAll && didPassProve(liveScore))
   const progress = stage === 'brief' ? 20 : stage === 'reading' ? 45 : stage === 'conversation' ? 70 : 90
 
   const syntaxClass = (token: WordToken) => {
@@ -440,6 +441,12 @@ export default function LessonClient({
 
   const completeLesson = async () => {
     if (!answeredAll) return
+    if (isProve && !didPassProve(liveScore)) {
+      setError(
+        `Prove needs ${PROVE_PASS_SCORE}%+. You scored ${liveScore}%. Go back to Apply/Integrate, then retry Prove.`,
+      )
+      return
+    }
     setLoading(true)
     setError(null)
     const grammarResults = exercises.map((exercise) => ({
@@ -454,6 +461,21 @@ export default function LessonClient({
 
       const score = calculateLessonScore(answers, exercises)
       const wordsRead = wordsReadInLesson
+      const pathway = PATHWAY_BY_CHAPTER_ID.get(chapterId)
+      if (pathway) {
+        await supabase.rpc('ensure_chapter_row', {
+          p_chapter_id: chapterId,
+          p_module_id: pathway.module.id,
+          p_title: pathway.sub.title,
+          p_description: pathway.sub.description,
+          p_order_index: pathway.sub.orderIndex,
+          p_module_title: pathway.module.title,
+          p_module_description: pathway.module.description,
+          p_cefr: pathway.module.cefr,
+          p_module_order: pathway.module.orderIndex,
+        })
+      }
+
       // Words are recorded client-side (local date) so the home card updates even if RPC is stale.
       // Pass 0 here to avoid double-counting when complete_chapter also upserts daily stats.
       const { error: rpcError } = await supabase.rpc('complete_chapter', {
@@ -465,6 +487,7 @@ export default function LessonClient({
 
       await enqueueLessonVocabulary(user.id)
       await recordDailyReading(user.id, wordsRead)
+      markLocalChapterCompleted(chapterId)
 
       if (rpcError) {
         const { error: progressError } = await supabase.from('user_chapter_progress').upsert({
@@ -474,7 +497,10 @@ export default function LessonClient({
           score,
           completed_at: new Date().toISOString(),
         }, { onConflict: 'user_id,chapter_id' })
-        if (progressError) throw rpcError
+        if (progressError) {
+          // Local mark already saved — home unlock still advances offline.
+          console.warn('complete_chapter fallback failed', progressError.message)
+        }
 
         // Fallback path: still push wrong answers into Review.
         await Promise.all(
@@ -489,6 +515,7 @@ export default function LessonClient({
       router.push('/')
       router.refresh()
     } catch (caughtError) {
+      markLocalChapterCompleted(chapterId)
       setError(caughtError instanceof Error ? caughtError.message : 'We could not save this lesson. Please try again.')
     } finally {
       setLoading(false)
@@ -511,8 +538,8 @@ export default function LessonClient({
         <div className="flex items-center gap-1 rounded-full bg-surface-container px-3 py-1"><Flame className="size-4 fill-warning/20 text-warning" /><span className="text-sm font-bold">Lesson</span></div>
       </header>
 
-      <main className="flex-1 p-4 pb-28">
-        <p className="text-label-caps text-primary">MODULE LESSON</p>
+      <main className="flex-1 p-4 pb-[calc(7rem+env(safe-area-inset-bottom))]">
+        <p className="text-label-caps text-primary">{isProve ? 'PROVE GATE · NO HINTS' : 'MODULE LESSON'}</p>
         <h1 className="mt-1 text-headline-md">{title}</h1>
 
         {stage === 'brief' && content.brief && (
@@ -631,8 +658,15 @@ export default function LessonClient({
         {stage === 'exercise' && (
           <section className="mt-8 space-y-5">
             <p className="text-body-reading text-on-surface-variant">
-              Mixed drills: multiple choice, fill-in, matching, word order, and more. Answer each once — wrong answers feed Review.
+              {isProve
+                ? `Prove gate: no hints. Score at least ${PROVE_PASS_SCORE}% to pass. Fail → remediate Apply/Integrate, then retry.`
+                : 'Mixed drills: multiple choice, fill-in, matching, word order, and more. Answer each once — wrong answers feed Review.'}
             </p>
+            {isProve && answeredAll && (
+              <p className={`rounded-lg p-3 text-sm ${provePassed ? 'bg-success/15 text-tertiary' : 'bg-error-container text-on-error-container'}`}>
+                Score {liveScore}% {provePassed ? '· pass' : `· need ${PROVE_PASS_SCORE}%+`}
+              </p>
+            )}
             {exercises.map((exercise, exerciseIndex) => (
               <ExerciseCard
                 key={exercise.id}
@@ -640,6 +674,7 @@ export default function LessonClient({
                 index={exerciseIndex}
                 total={exercises.length}
                 answer={answers[exercise.id]}
+                allowHints={!isProve}
                 onAnswer={(value) => setAnswers((current) => ({ ...current, [exercise.id]: value }))}
                 onMistake={() =>
                   void recordMistake(
@@ -657,11 +692,11 @@ export default function LessonClient({
               </button>
               <button
                 type="button"
-                disabled={!answeredAll || loading}
+                disabled={!answeredAll || loading || (isProve && !provePassed)}
                 onClick={completeLesson}
                 className="tactile-button flex-[2] rounded-xl border-[#46a302] bg-success py-4 font-bold text-on-primary disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {loading ? 'SAVING…' : 'COMPLETE LESSON'}
+                {loading ? 'SAVING…' : isProve ? 'PASS PROVE' : 'COMPLETE LESSON'}
               </button>
             </div>
           </section>

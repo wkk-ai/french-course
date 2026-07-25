@@ -489,3 +489,21 @@ test('rules unlock only after the teaching chapter is completed', () => {
   assert.equal(isRuleUnlocked(articles, new Set(['22222222-0000-0000-0000-000000000101'])), false)
   assert.equal(isRuleUnlocked(articles, new Set(['22222222-0000-0000-0000-000000000103'])), true)
 })
+
+test('Prove pass bar and etre rem alias', async () => {
+  const { didPassProve, PROVE_PASS_SCORE } = await import('../src/lib/lesson-score')
+  const { buildRemediationExercises } = await import('../src/lib/exercises/enrich')
+  const { BUNDLED_CHAPTER_IDS, BUNDLED_LESSONS } = await import('../src/lib/bundled-lessons')
+  const { PATHWAY_BY_CHAPTER_ID } = await import('../src/lib/pathway/catalog')
+  assert.equal(PROVE_PASS_SCORE, 70)
+  assert.equal(didPassProve(69), false)
+  assert.equal(didPassProve(70), true)
+  assert.ok(buildRemediationExercises(['etre-present']).length > 0)
+  assert.ok(buildRemediationExercises(['être-present']).length > 0)
+  const proveId = BUNDLED_CHAPTER_IDS.find((id) => PATHWAY_BY_CHAPTER_ID.get(id)?.sub.role === 'D')
+  assert.ok(proveId)
+  assert.ok(BUNDLED_LESSONS[proveId!]?.brief?.title)
+  // Unlock order: first incomplete after A is B, not a DB-only hole
+  assert.equal(BUNDLED_CHAPTER_IDS[0].endsWith('0101'), true)
+  assert.equal(PATHWAY_BY_CHAPTER_ID.get(BUNDLED_CHAPTER_IDS[3])?.sub.role, 'D')
+})

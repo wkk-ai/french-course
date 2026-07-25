@@ -4,7 +4,6 @@ import { enrichLessonExercises } from '@/lib/exercises/enrich'
 import {
   MODULE1_CONJUGATIONS,
   MODULE1_RULES,
-  MODULE1_VOCABULARY,
 } from '@/lib/module1-content'
 import { BUNDLED_VOCABULARY } from '@/lib/phase1/content'
 
@@ -46,12 +45,22 @@ export function resolveVocabulary(lemmaIds: string[], fromDb: VocabularyWord[]):
   return resolved.length ? resolved : lemmaIds.map((id) => byId.get(id)).filter((word): word is VocabularyWord => Boolean(word))
 }
 
+/** Lesson page: linked lemmas + full bundled bank so surface lookup can attach missing lemmaIds. */
+export function resolveVocabularyForLesson(lemmaIds: string[], fromDb: VocabularyWord[]): VocabularyWord[] {
+  const linked = resolveVocabulary(lemmaIds, fromDb)
+  const byId = new Map(BUNDLED_VOCABULARY.map((word) => [word.id, word]))
+  for (const word of linked) byId.set(word.id, word)
+  return [...byId.values()]
+}
+
 export function resolveConjugations(lemmaIds: string[], fromDb: VerbConjugation[]): VerbConjugation[] {
   const byId = new Map(MODULE1_CONJUGATIONS.map((item) => [item.id, item]))
   for (const item of fromDb) byId.set(item.id, item)
-  const lemmaSet = new Set(lemmaIds.length ? lemmaIds : MODULE1_VOCABULARY.map((word) => word.id))
-  if (MODULE1_CONJUGATIONS.some((item) => lemmaSet.has(item.vocab_id))) {
-    return [...byId.values()].sort((left, right) => left.order_index - right.order_index || left.id.localeCompare(right.id))
+  const lemmaSet = new Set(lemmaIds)
+  if (!lemmaSet.size) return fromDb
+  const filtered = [...byId.values()].filter((item) => lemmaSet.has(item.vocab_id))
+  if (filtered.length) {
+    return filtered.sort((left, right) => left.order_index - right.order_index || left.id.localeCompare(right.id))
   }
   return fromDb
 }

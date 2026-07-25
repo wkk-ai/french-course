@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import type { GrammarRule, VerbConjugation, VocabularyWord } from '@/lib/course'
 import { BUNDLED_CHAPTER_IDS } from '@/lib/bundled-lessons'
 import { isCanonicalChapterId } from '@/lib/course-catalog'
-import { resolveConjugations, resolveLessonContent, resolveRules, resolveVocabulary } from '@/lib/lesson-content'
+import { resolveConjugations, resolveLessonContent, resolveRules, resolveVocabularyForLesson } from '@/lib/lesson-content'
 import { PATHWAY_BY_CHAPTER_ID } from '@/lib/pathway/catalog'
 import { createStaticClient } from '@/utils/supabase/static'
 import LessonClient from './LessonClient'
@@ -73,12 +73,15 @@ export default async function LessonPage({ params }: { params: Promise<{ id: str
     ruleSlugs.length ? supabase.from('grammar_rules').select('*').in('slug', ruleSlugs) : Promise.resolve({ data: [] }),
   ])
 
+  // Full bundled dictionary so surface lookup can link words missing lemmaId on tokens.
+  const resolvedVocabulary = resolveVocabularyForLesson(lemmaIds, (vocabulary ?? []) as VocabularyWord[])
+
   return (
     <LessonClient
       chapterId={chapter.id}
       title={chapter.title}
       content={content}
-      vocabulary={resolveVocabulary(lemmaIds, (vocabulary ?? []) as VocabularyWord[])}
+      vocabulary={resolvedVocabulary}
       conjugations={resolveConjugations(lemmaIds, (conjugations ?? []) as VerbConjugation[])}
       rules={resolveRules(ruleSlugs, (rules ?? []) as GrammarRule[])}
     />

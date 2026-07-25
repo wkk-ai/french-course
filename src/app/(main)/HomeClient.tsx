@@ -12,6 +12,8 @@ import {
   type PathwaySubChapter,
 } from '@/lib/pathway/catalog'
 import { deriveChapterStatus } from '@/lib/progression'
+import { BUNDLED_CHAPTER_IDS } from '@/lib/bundled-lessons'
+import { mergeCompletedChapterIds } from '@/lib/local-progress'
 import { createClient } from '@/utils/supabase/client'
 
 type Module = {
@@ -113,7 +115,14 @@ export default function HomeClient({
         supabase.from('user_daily_reading_stats').select('words_read').eq('user_id', user.id).eq('date', today).maybeSingle(),
       ])
       if (cancelled) return
-      setProgressByChapter(new Map((progress as Progress[] | null)?.map((item) => [item.chapter_id, item.status]) ?? []))
+      const remoteCompleted = (progress as Progress[] | null)?.filter((item) => item.status === 'completed').map((item) => item.chapter_id) ?? []
+      const merged = mergeCompletedChapterIds(remoteCompleted)
+      const map = new Map<string, Progress['status']>()
+      for (const [id, status] of (progress as Progress[] | null)?.map((item) => [item.chapter_id, item.status] as const) ?? []) {
+        map.set(id, status)
+      }
+      for (const id of merged) map.set(id, 'completed')
+      setProgressByChapter(map)
       setWordsRead(todayStats?.words_read ?? 0)
     })().catch(() => {})
     return () => {
@@ -131,22 +140,20 @@ export default function HomeClient({
   }, [courseChapters, courseModules])
 
   const DAILY_GOAL = 300
-  const firstModule = courseModules[0]
-  const pathwayIds = useMemo(() => {
-    const pathway = firstModule ? PATHWAY_BY_MODULE_ID.get(firstModule.id) : undefined
-    return pathway?.subchapters.map((sub) => sub.id) ?? []
-  }, [firstModule])
+  const authoredIds = useMemo(() => {
+    // Prefer bundled pathway order so Home matches lesson unlock (incl. Prove D).
+    const fromBundle = BUNDLED_CHAPTER_IDS.filter((id) => courseChapters.some((c) => c.id === id && hasLessonContent(c.lesson_content)))
+    return fromBundle.length ? fromBundle : authoredChapters.map((item) => item.id)
+  }, [authoredChapters, courseChapters])
   const completedIds = useMemo(
     () => new Set([...progressByChapter].filter(([, status]) => status === 'completed').map(([id]) => id)),
     [progressByChapter],
   )
-  const completedInPathway = pathwayIds.filter((id) => completedIds.has(id)).length
-  const pathwayTotal = pathwayIds.length || authoredChapters.filter((c) => c.module_id === firstModule?.id).length
-  const mastery = pathwayTotal ? Math.round((completedInPathway / pathwayTotal) * 100) : 0
-  const authoredIds = useMemo(() => authoredChapters.map((item) => item.id), [authoredChapters])
+  const completedPlayable = authoredIds.filter((id) => completedIds.has(id)).length
+  const mastery = authoredIds.length ? Math.round((completedPlayable / authoredIds.length) * 100) : 0
   const chaptersById = useMemo(() => new Map(courseChapters.map((chapter) => [chapter.id, chapter])), [courseChapters])
-  const authoredTotal = authoredChapters.length
-  const authoredDone = authoredChapters.filter((c) => completedIds.has(c.id)).length
+  const authoredTotal = authoredIds.length
+  const authoredDone = completedPlayable
   const dailyPct = Math.min(100, Math.round((wordsRead / DAILY_GOAL) * 100))
   const dailyLabel =
     wordsRead >= DAILY_GOAL
@@ -166,13 +173,13 @@ export default function HomeClient({
             <p className="text-label-caps text-on-surface-variant">PATHWAY</p>
             <p className="text-headline-lg text-success">{mastery}%</p>
             <p className="text-xs text-on-surface-variant">
-              {authoredDone}/{authoredTotal || 0} playable · M1 {completedInPathway}/{pathwayTotal || 0}
+              {authoredDone}/{authoredTotal || 0} playable
             </p>
           </div>
         </div>
         <div className="mt-4 space-y-2">
           <div>
-            <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-on-surface-variant">Module 1 progress</p>
+            <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-on-surface-variant">Pathway progress</p>
             <div className="h-2 overflow-hidden rounded-full bg-surface-container-high">
               <div className="h-full rounded-full bg-success transition-all" style={{ width: `${mastery}%` }} />
             </div>
@@ -190,7 +197,6 @@ export default function HomeClient({
         {courseModules.map((module) => {
           const pathwayModule = PATHWAY_BY_MODULE_ID.get(module.id)
           const units = pathwayModule ? unitsForModule(pathwayModule) : []
-          const outlined = false
           const playableCount = pathwayModule
             ? pathwayModule.subchapters.filter((sub) => hasLessonContent(chaptersById.get(sub.id)?.lesson_content)).length
             : courseChapters.filter((c) => c.module_id === module.id && hasLessonContent(c.lesson_content)).length
@@ -200,7 +206,7 @@ export default function HomeClient({
               <header className="border-b-2 border-surface-container-high pb-3">
                 <p className="text-label-caps text-primary">
                   MODULE {module.order_index} · {module.cefr_level}
-                  {pathwayModule ? ' · 5 UNITS · 15 SUB-CHAPTERS' : ''}
+                  {pathwayModule ? ' · 5 UNITS · 20 SUB-CHAPTERS' : ''}
                   {playableCount ? ` · ${playableCount} PLAYABLE` : ''}
                 </p>
                 <h2 className="text-headline-md">{module.title}</h2>
@@ -210,24 +216,23 @@ export default function HomeClient({
               {units.length > 0 ? (
                 units.map((unit) => (
                   <div key={unit.unitIndex} className="flex flex-col gap-3">
-                    <div className="px-1">
-                      <p className="text-label-caps text-primary">
+                    <div>
+                      <p className="text-label-caps text-on-surface-variant">
                         UNIT {unit.unitIndex} · {unit.unitTitle}
                       </p>
-                      <p className="mt-1 text-xs text-on-surface-variant">{unit.unitGrammar}</p>
+                      <p className="text-sm text-on-surface-variant">{unit.unitGrammar}</p>
                     </div>
                     <div className="flex flex-col gap-3">
                       {unit.chapters.map((sub) => {
                         const chapter = chaptersById.get(sub.id)
                         if (!chapter) return null
-                        const status = deriveChapterStatus(chapter.id, authoredIds, completedIds)
                         return (
                           <ChapterCard
-                            key={chapter.id}
+                            key={sub.id}
                             chapter={chapter}
                             moduleOrder={module.order_index}
-                            status={status}
-                            pathway={sub}
+                            status={deriveChapterStatus(chapter.id, authoredIds, completedIds)}
+                            pathway={PATHWAY_BY_CHAPTER_ID.get(chapter.id)?.sub}
                           />
                         )
                       })}
@@ -238,18 +243,15 @@ export default function HomeClient({
                 courseChapters
                   .filter((chapter) => chapter.module_id === module.id)
                   .sort((a, b) => a.order_index - b.order_index)
-                  .map((chapter) => {
-                    const status = deriveChapterStatus(chapter.id, authoredIds, completedIds)
-                    return (
-                      <ChapterCard
-                        key={chapter.id}
-                        chapter={chapter}
-                        moduleOrder={module.order_index}
-                        status={status}
-                        pathway={PATHWAY_BY_CHAPTER_ID.get(chapter.id)?.sub}
-                      />
-                    )
-                  })
+                  .map((chapter) => (
+                    <ChapterCard
+                      key={chapter.id}
+                      chapter={chapter}
+                      moduleOrder={module.order_index}
+                      status={deriveChapterStatus(chapter.id, authoredIds, completedIds)}
+                      pathway={PATHWAY_BY_CHAPTER_ID.get(chapter.id)?.sub}
+                    />
+                  ))
               )}
             </div>
           )

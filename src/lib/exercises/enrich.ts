@@ -464,9 +464,23 @@ export function buildRemediationExercises(categories: string[]): LessonExercise[
 
   const seen = new Set<string>()
   const result: LessonExercise[] = []
+  const aliases: Record<string, string> = {
+    'etre-present': 'être-present',
+    etre: 'être-present',
+    'être': 'être-present',
+    subjectPronouns: 'subject-pronouns',
+    'subject_pronouns': 'subject-pronouns',
+    'avoir-age': 'avoir-age',
+    'numbers-and-age': 'numbers-and-age',
+  }
+  // Mirror accented keys under ASCII so lesson slug mismatches still remediate.
+  if (templates['être-present'] && !templates['etre-present']) {
+    templates['etre-present'] = { ...templates['être-present'], category: 'etre-present' }
+  }
   for (const category of categories) {
     if (seen.has(category)) continue
-    const template = templates[category]
+    const key = aliases[category] ?? category
+    const template = templates[key] ?? templates[category]
     if (!template) continue
     seen.add(category)
     result.push({ ...template, id: `${template.id}-${result.length}` })

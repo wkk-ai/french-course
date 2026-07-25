@@ -92,7 +92,7 @@ export default function ReviewClient() {
         .select('vocab_id, repetition_count, ease_factor, interval_days, total_encounters, mistake_count, next_review_at, last_reviewed_at, vocabulary(word, base_translation, part_of_speech, register)')
         .eq('user_id', user.id)
         .order('next_review_at')
-        .limit(500),
+        .limit(2500),
       supabase
         .from('user_chapter_progress')
         .select('chapter_id')
@@ -156,7 +156,7 @@ export default function ReviewClient() {
             .select('vocab_id, repetition_count, ease_factor, interval_days, total_encounters, mistake_count, next_review_at, last_reviewed_at, vocabulary(word, base_translation, part_of_speech, register)')
             .eq('user_id', user.id)
             .order('next_review_at')
-            .limit(500)
+            .limit(2500)
           remote = (refreshed.data ?? []).map((row) => {
             const vocabulary = Array.isArray(row.vocabulary) ? row.vocabulary[0] : row.vocabulary
             return enrichPoolItem(

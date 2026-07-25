@@ -48,6 +48,7 @@ export function ExerciseCard({
   answer,
   onAnswer,
   onMistake,
+  allowHints = true,
 }: {
   exercise: LessonExercise
   index: number
@@ -55,6 +56,8 @@ export function ExerciseCard({
   answer: ExerciseAnswer | undefined
   onAnswer: (value: ExerciseAnswer) => void
   onMistake: () => void
+  /** Prove (D) turns hints off. */
+  allowHints?: boolean
 }) {
   const locked = answer !== undefined
   const correct = locked && isExerciseCorrect(exercise, answer)
@@ -369,12 +372,12 @@ export function ExerciseCard({
         </div>
       )}
 
-      {!locked && exercise.hint && !hintShown && (
+      {!locked && allowHints && exercise.hint && !hintShown && (
         <button type="button" onClick={() => setHintShown(true)} className="mt-3 text-xs font-bold text-primary underline">
           Show hint
         </button>
       )}
-      {!locked && hintShown && exercise.hint && (
+      {!locked && allowHints && hintShown && exercise.hint && (
         <p className="mt-3 rounded-lg bg-primary-fixed/20 p-3 text-sm text-on-surface-variant">{exercise.hint}</p>
       )}
 

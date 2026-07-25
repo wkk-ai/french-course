@@ -1,6 +1,13 @@
 import type { ExerciseAnswer, LessonExercise } from '@/lib/exercises/types'
 import { isExerciseCorrect } from '@/lib/exercises/grading'
 
+/** Prove (D) pass bar — fail keeps unit incomplete. */
+export const PROVE_PASS_SCORE = 70
+
+export function didPassProve(score: number): boolean {
+  return score >= PROVE_PASS_SCORE
+}
+
 export function calculateLessonScore(answers: Record<string, ExerciseAnswer>, exercises: LessonExercise[]) {
   if (exercises.length === 0) return 100
   const correct = exercises.filter((exercise) => isExerciseCorrect(exercise, answers[exercise.id])).length

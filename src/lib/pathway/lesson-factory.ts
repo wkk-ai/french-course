@@ -213,35 +213,66 @@ function topicExercises(theme: DeepTheme, prefix: string): LessonExercise[] {
     pairs: left.map((_, index) => [index, index] as [number, number]),
   }
 
-  const trueFalse: LessonExercise[] = [
-    {
-      id: `${prefix}-tf1`,
-      type: 'true-false',
-      category: 'true-false',
-      prompt: 'True or false',
-      statement: `“${theme.meanings[0]?.[0] ?? 'bonjour'}” means “${theme.meanings[0]?.[1] ?? 'hello'}”.`,
-      answer: true,
-      explanation: 'From the meanings list',
-    },
-    {
-      id: `${prefix}-tf2`,
-      type: 'true-false',
-      category: 'true-false',
-      prompt: 'True or false',
-      statement: 'Exercises should test French forms and meanings, not story plot memory.',
-      answer: true,
-      explanation: 'Quiz French only',
-    },
-    {
-      id: `${prefix}-tf3`,
-      type: 'true-false',
-      category: 'true-false',
-      prompt: 'True or false',
-      statement: 'You should learn English meanings before studying grammar examples that use those words.',
-      answer: true,
-      explanation: 'Theory First',
-    },
-  ]
+  const trueFalse: LessonExercise[] =
+    roleOf(theme) === 'D'
+      ? [
+          {
+            id: `${prefix}-tf1`,
+            type: 'true-false',
+            category: 'true-false',
+            prompt: 'True or false',
+            statement: `“${theme.meanings[0]?.[0] ?? 'bonjour'}” means “${theme.meanings[0]?.[1] ?? 'hello'}”.`,
+            answer: true,
+            explanation: 'From the meanings list',
+          },
+          {
+            id: `${prefix}-tf2`,
+            type: 'true-false',
+            category: theme.ruleSlugs[0] ?? 'grammar',
+            prompt: 'True or false',
+            statement: `A correct focus line for this unit is: “${theme.focus[0] ?? 'Je pratique.'}”.`,
+            answer: true,
+            explanation: theme.focus[0] ?? 'Focus line',
+          },
+          {
+            id: `${prefix}-tf3`,
+            type: 'true-false',
+            category: 'true-false',
+            prompt: 'True or false',
+            statement: `“${theme.meanings[1]?.[0] ?? theme.meanings[0]?.[0] ?? 'merci'}” means “${theme.meanings[1]?.[1] ?? theme.meanings[0]?.[1] ?? 'thank you'}”.`,
+            answer: true,
+            explanation: 'From the meanings list',
+          },
+        ]
+      : [
+          {
+            id: `${prefix}-tf1`,
+            type: 'true-false',
+            category: 'true-false',
+            prompt: 'True or false',
+            statement: `“${theme.meanings[0]?.[0] ?? 'bonjour'}” means “${theme.meanings[0]?.[1] ?? 'hello'}”.`,
+            answer: true,
+            explanation: 'From the meanings list',
+          },
+          {
+            id: `${prefix}-tf2`,
+            type: 'true-false',
+            category: 'true-false',
+            prompt: 'True or false',
+            statement: 'Exercises should test French forms and meanings, not story plot memory.',
+            answer: true,
+            explanation: 'Quiz French only',
+          },
+          {
+            id: `${prefix}-tf3`,
+            type: 'true-false',
+            category: 'true-false',
+            prompt: 'True or false',
+            statement: 'You should learn English meanings before studying grammar examples that use those words.',
+            answer: true,
+            explanation: 'Theory First',
+          },
+        ]
 
   const grammarCore: LessonExercise[] = [
     {
