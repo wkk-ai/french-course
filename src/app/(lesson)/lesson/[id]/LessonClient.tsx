@@ -15,8 +15,26 @@ import { isCanonicalChapterId } from '@/lib/course-catalog'
 import { calculateLessonScore } from '@/lib/lesson-score'
 import { resolveLessonContent } from '@/lib/lesson-content'
 import { createClient } from '@/utils/supabase/client'
-import { enqueueLocalVocabulary } from '@/lib/local-vocab-vault'
+import { bumpLocalMistakeCount, enqueueLocalVocabulary } from '@/lib/local-vocab-vault'
+import { MODULE1_VOCABULARY } from '@/lib/module1-content'
 import { lemmaIdsForChapter, vocabularyRowsForLemmas } from '@/lib/review/lemmas'
+import type { LessonExercise } from '@/lib/exercises/types'
+
+function lemmaIdFromExercise(exercise: LessonExercise): string | null {
+  const candidates: string[] = []
+  if ('answers' in exercise && Array.isArray(exercise.answers)) {
+    candidates.push(...exercise.answers)
+  }
+  if ('verb' in exercise && typeof exercise.verb === 'string') {
+    candidates.push(exercise.verb)
+  }
+  for (const candidate of candidates) {
+    const normalized = candidate.toLowerCase().trim()
+    const match = MODULE1_VOCABULARY.find((word) => word.word.toLowerCase() === normalized)
+    if (match) return match.id
+  }
+  return null
+}
 
 type Stage = 'brief' | 'reading' | 'conversation' | 'exercise'
 
@@ -160,7 +178,33 @@ export default function LessonClient({
     return ''
   }
 
-  const recordMistake = async (category: string, context: string) => {
+  const recordMistake = async (category: string, context: string, vocabId?: string | null) => {
+    // Always bump local/remote vocab miss counts when we can resolve a lemma.
+    if (vocabId) {
+      bumpLocalMistakeCount(vocabId)
+      try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          const { data: progress } = await supabase
+            .from('user_vocab_progress')
+            .select('mistake_count')
+            .eq('user_id', user.id)
+            .eq('vocab_id', vocabId)
+            .maybeSingle()
+          if (progress) {
+            await supabase
+              .from('user_vocab_progress')
+              .update({ mistake_count: (progress.mistake_count ?? 0) + 1 })
+              .eq('user_id', user.id)
+              .eq('vocab_id', vocabId)
+          }
+        }
+      } catch {
+        // Local vault already bumped.
+      }
+    }
+
     try {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
@@ -184,6 +228,7 @@ export default function LessonClient({
         user_id: user.id,
         grammar_category: category,
         error_context: context,
+        vocab_id: vocabId ?? null,
       })
     } catch {
       // Review logging is best-effort; do not block answering.
@@ -442,7 +487,9 @@ export default function LessonClient({
         await Promise.all(
           exercises
             .filter((exercise) => !isExerciseCorrect(exercise, answers[exercise.id]))
-            .map((exercise) => recordMistake(exercise.category, `Lesson exercise: ${exercise.prompt}`)),
+            .map((exercise) =>
+              recordMistake(exercise.category, `Lesson exercise: ${exercise.prompt}`, lemmaIdFromExercise(exercise)),
+            ),
         )
       }
 
@@ -601,7 +648,13 @@ export default function LessonClient({
                 total={exercises.length}
                 answer={answers[exercise.id]}
                 onAnswer={(value) => setAnswers((current) => ({ ...current, [exercise.id]: value }))}
-                onMistake={() => void recordMistake(exercise.category, `Lesson exercise: ${exercise.prompt}`)}
+                onMistake={() =>
+                  void recordMistake(
+                    exercise.category,
+                    `Lesson exercise: ${exercise.prompt}`,
+                    lemmaIdFromExercise(exercise),
+                  )
+                }
               />
             ))}
             {error && <p role="alert" className="rounded-lg bg-error-container p-3 text-sm text-on-error-container">{error}</p>}

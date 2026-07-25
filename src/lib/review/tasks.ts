@@ -1,7 +1,7 @@
-import type { LessonExercise } from '@/lib/exercises/types'
-import { buildRemediationExercises } from '@/lib/exercises/enrich'
+import { validateLessonExercise } from '@/lib/exercises/validate'
 import { lessonLabelForLemma } from '@/lib/review/lemmas'
-import type { ReviewMistake, ReviewPoolItem, ReviewTask, ReviewTaskKind } from '@/lib/review/types'
+import type { ReviewPoolItem, ReviewTask, ReviewTaskKind } from '@/lib/review/types'
+import type { LessonExercise } from '@/lib/exercises/types'
 import { MODULE1_VOCABULARY } from '@/lib/module1-content'
 
 function bundledWord(vocabId: string) {
@@ -44,7 +44,7 @@ function clozeFromExample(french: string, word: string): { text: string; answers
 }
 
 /** Build a retrieval exercise for one vocab item in the infinite loop. */
-export function taskFromPoolItem(item: ReviewPoolItem, kind: ReviewTaskKind, modalityIndex = 0): ReviewTask {
+export function taskFromPoolItem(item: ReviewPoolItem, kind: ReviewTaskKind, modalityIndex = 0): ReviewTask | null {
   const bundled = bundledWord(item.vocab_id)
   const word = item.word ?? bundled?.word ?? 'mot'
   const translation = item.base_translation ?? bundled?.base_translation ?? 'word'
@@ -104,7 +104,10 @@ export function taskFromPoolItem(item: ReviewPoolItem, kind: ReviewTaskKind, mod
     hint: `Part of speech: ${item.part_of_speech ?? bundled?.part_of_speech ?? 'word'}`,
   })
 
-  const exercise = modalities[modalityIndex % modalities.length]
+  const valid = modalities.filter((modality) => validateLessonExercise(modality).ok)
+  if (!valid.length) return null
+
+  const exercise = valid[modalityIndex % valid.length]
   return {
     id: `${kind}-${exercise.id}-${modalityIndex}`,
     kind,
@@ -113,75 +116,4 @@ export function taskFromPoolItem(item: ReviewPoolItem, kind: ReviewTaskKind, mod
     poolItem: item,
     lessonLabel: lessonLabelForLemma(item.vocab_id),
   }
-}
-
-/** Repair drills from unresolved mistakes — require a correct attempt to resolve. */
-export function tasksFromMistakes(mistakes: ReviewMistake[]): ReviewTask[] {
-  const tasks: ReviewTask[] = []
-  for (const mistake of mistakes) {
-    if (mistake.grammar_category) {
-      const remediation = buildRemediationExercises([mistake.grammar_category])
-      if (remediation[0]) {
-        tasks.push({
-          id: `repair-${mistake.id}`,
-          kind: 'repair',
-          mistakeId: mistake.id,
-          vocabId: mistake.vocab_id ?? undefined,
-          lessonLabel: lessonLabelForLemma(mistake.vocab_id) ?? 'From a lesson mistake',
-          exercise: {
-            ...remediation[0],
-            id: `repair-ex-${mistake.id}`,
-            source: 'remediation',
-            prompt: remediation[0].prompt.replace('Extra practice from your mistakes:', 'Repair:'),
-            explanation: `${remediation[0].explanation}${mistake.error_context ? ` (You missed: ${mistake.error_context})` : ''}`,
-          },
-        })
-        continue
-      }
-    }
-
-    if (mistake.word && mistake.base_translation) {
-      const options = shuffleStable(
-        [mistake.base_translation, ...distractorsFor(mistake.base_translation, MODULE1_VOCABULARY.map((w) => w.base_translation), 3)],
-        mistake.id,
-      )
-      tasks.push({
-        id: `repair-vocab-${mistake.id}`,
-        kind: 'repair',
-        mistakeId: mistake.id,
-        vocabId: mistake.vocab_id ?? undefined,
-        lessonLabel: lessonLabelForLemma(mistake.vocab_id) ?? 'From a lesson mistake',
-        exercise: {
-          id: `repair-vocab-ex-${mistake.id}`,
-          type: 'mcq',
-          category: mistake.grammar_category ?? 'vocab-repair',
-          source: 'remediation',
-          prompt: `Repair: what does “${mistake.word}” mean?`,
-          options,
-          answer: Math.max(0, options.findIndex((option) => option === mistake.base_translation)),
-          explanation: mistake.error_context ?? `${mistake.word} — ${mistake.base_translation}`,
-        },
-      })
-      continue
-    }
-
-    // Generic grammar fallback from context
-    tasks.push({
-      id: `repair-generic-${mistake.id}`,
-      kind: 'repair',
-      mistakeId: mistake.id,
-      lessonLabel: 'From a lesson mistake',
-      exercise: {
-        id: `repair-generic-ex-${mistake.id}`,
-        type: 'true-false',
-        category: mistake.grammar_category ?? 'review',
-        source: 'remediation',
-        prompt: 'Repair: confirm you understand this miss.',
-        statement: mistake.error_context ?? `Review the pattern: ${mistake.grammar_category ?? 'grammar'}`,
-        answer: true,
-        explanation: 'Mark true once you have re-read the rule, then keep practicing in lessons.',
-      },
-    })
-  }
-  return tasks
 }

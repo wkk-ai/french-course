@@ -1,6 +1,5 @@
-import { taskFromPoolItem, tasksFromMistakes } from '@/lib/review/tasks'
+import { taskFromPoolItem } from '@/lib/review/tasks'
 import type {
-  ReviewMistake,
   ReviewPoolItem,
   ReviewSessionPlan,
   ReviewTask,
@@ -30,7 +29,7 @@ function interleaveTasks(tasks: ReviewTask[]): ReviewTask[] {
     list.push(task)
     buckets.set(key, list)
   }
-  const order: Array<ReviewTask['kind']> = ['repair', 'overdue', 'due', 'weak', 'soon', 'spiral']
+  const order: Array<ReviewTask['kind']> = ['overdue', 'due', 'weak', 'soon', 'spiral']
   const result: ReviewTask[] = []
   let added = true
   while (added) {
@@ -52,7 +51,6 @@ function interleaveTasks(tasks: ReviewTask[]): ReviewTask[] {
  */
 export function buildReviewSession(
   pool: ReviewPoolItem[],
-  mistakes: ReviewMistake[],
   mode: SessionMode,
   options?: { size?: number; excludeTaskIds?: string[] },
 ): ReviewSessionPlan {
@@ -66,7 +64,6 @@ export function buildReviewSession(
   const weak = [...pool].sort((a, b) => b.mistake_count - a.mistake_count || a.next_review_at.localeCompare(b.next_review_at))
   const spiral = [...pool].sort((a, b) => (a.last_reviewed_at ?? '').localeCompare(b.last_reviewed_at ?? '') || a.vocab_id.localeCompare(b.vocab_id))
 
-  const repairTasks = tasksFromMistakes(mistakes).filter((task) => !exclude.has(task.id))
   const tasks: ReviewTask[] = []
   const usedVocab = new Set<string>()
 
@@ -76,7 +73,7 @@ export function buildReviewSession(
       if (added >= limit) break
       if (usedVocab.has(item.vocab_id) && kind !== 'spiral') continue
       const task = taskFromPoolItem(item, kind, modalityOffset + added)
-      if (exclude.has(task.id)) continue
+      if (!task || exclude.has(task.id)) continue
       tasks.push(task)
       usedVocab.add(item.vocab_id)
       added += 1
@@ -84,34 +81,28 @@ export function buildReviewSession(
   }
 
   if (mode === 'daily') {
-    // Priority fill: repair → overdue → due → weak → soon → spiral
-    const repairSlots = Math.min(3, repairTasks.length)
-    tasks.push(...repairTasks.slice(0, repairSlots))
     pushFrom(overdue, 'overdue', 4)
     pushFrom(due, 'due', 5)
-    pushFrom(weak.filter((item) => item.mistake_count > 0), 'weak', 2, 1)
+    pushFrom(weak.filter((item) => item.mistake_count > 0), 'weak', 3, 1)
     pushFrom(soon, 'soon', 3, 1)
     pushFrom(spiral, 'spiral', size, 2)
   } else {
-    // Continue / infinite: spiral + weak + soon + remaining repairs
-    tasks.push(...repairTasks.slice(0, 2))
-    pushFrom(weak.filter((item) => item.mistake_count > 0), 'weak', 3, 1)
+    pushFrom(weak.filter((item) => item.mistake_count > 0), 'weak', 4, 1)
     pushFrom(soon, 'soon', 3, 1)
     pushFrom(due, 'due', 3)
     pushFrom(spiral, 'spiral', size, Math.floor(Date.now() / DAY_MS) % 3)
   }
 
-  // Keep filling until we hit size whenever the pool is non-empty
   let pass = 0
   while (tasks.length < size && pool.length > 0 && pass < 5) {
     pushFrom(spiral, 'spiral', size - tasks.length, pass + 3)
     pass += 1
   }
 
-  // Allow same vocab with different modality if still short (infinite overlearning)
   while (tasks.length < size && pool.length > 0) {
     const item = pool[tasks.length % pool.length]
     const task = taskFromPoolItem(item, 'spiral', tasks.length)
+    if (!task) break
     task.id = `${task.id}-extra-${tasks.length}`
     if (!exclude.has(task.id)) tasks.push(task)
     else break
@@ -119,12 +110,13 @@ export function buildReviewSession(
 
   const mixed = interleaveTasks(tasks).slice(0, size)
   const dueCount = overdue.length + due.length
+  const weakCount = pool.filter((item) => item.mistake_count > 0).length
   return {
     mode,
     tasks: mixed,
     poolSize: pool.length,
     dueCount,
-    repairCount: mistakes.length,
+    weakCount,
     estimatedMinutes: Math.max(5, Math.round(mixed.length * 0.8)),
   }
 }

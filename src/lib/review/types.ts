@@ -11,6 +11,7 @@ export type ReviewPoolItem = LocalVaultItem & {
   example_english?: string | null
 }
 
+/** Kept for lesson analytics; no longer drives review session cards. */
 export type ReviewMistake = {
   id: string
   error_count: number
@@ -21,14 +22,13 @@ export type ReviewMistake = {
   base_translation?: string | null
 }
 
-export type ReviewTaskKind = 'due' | 'overdue' | 'soon' | 'spiral' | 'weak' | 'repair'
+export type ReviewTaskKind = 'due' | 'overdue' | 'soon' | 'spiral' | 'weak'
 
 export type ReviewTask = {
   id: string
   kind: ReviewTaskKind
   exercise: LessonExercise
   vocabId?: string
-  mistakeId?: string
   poolItem?: ReviewPoolItem
   /** e.g. "Lesson 1.1 · Bonjour, je m'appelle…" */
   lessonLabel?: string | null
@@ -41,6 +41,18 @@ export type ReviewSessionPlan = {
   tasks: ReviewTask[]
   poolSize: number
   dueCount: number
-  repairCount: number
+  weakCount: number
   estimatedMinutes: number
+}
+
+export type FlashcardPosFilter = 'all' | 'verb' | 'noun' | 'adjective' | 'adverb' | 'pronoun'
+
+export type FlashcardItem = ReviewPoolItem & {
+  word: string
+  base_translation: string
+}
+
+export type FlashcardDeck = {
+  cards: FlashcardItem[]
+  posFilter: FlashcardPosFilter
 }

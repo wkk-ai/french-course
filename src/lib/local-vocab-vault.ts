@@ -111,6 +111,23 @@ export function scoreLocalVocabulary(vocabId: string, quality: number) {
   writeStore(store)
 }
 
+/** Bump miss count without advancing SRS (lesson wrong answers). */
+export function bumpLocalMistakeCount(vocabId: string) {
+  const store = readStore()
+  const item = store[vocabId]
+  if (!item) {
+    enqueueLocalVocabulary([vocabId], { stagger: false })
+    const refreshed = readStore()
+    if (refreshed[vocabId]) {
+      refreshed[vocabId].mistake_count += 1
+      writeStore(refreshed)
+    }
+    return
+  }
+  store[vocabId] = { ...item, mistake_count: item.mistake_count + 1 }
+  writeStore(store)
+}
+
 export function resolveVaultWord(vocabId: string, vocabulary: VocabularyWord[]) {
   return vocabulary.find((word) => word.id === vocabId) ?? null
 }

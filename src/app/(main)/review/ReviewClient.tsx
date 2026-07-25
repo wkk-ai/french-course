@@ -1,15 +1,24 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { CheckCircle2, ChevronRight, Infinity as InfinityIcon, Play, RotateCcw } from 'lucide-react'
+import { CheckCircle2, ChevronRight, Infinity as InfinityIcon, Layers, Play } from 'lucide-react'
 import { ExerciseCard } from '@/components/lesson/ExerciseCard'
+import { VocabFlashcard } from '@/components/review/VocabFlashcard'
 import type { ExerciseAnswer } from '@/lib/exercises/types'
 import { isExerciseCorrect } from '@/lib/exercises/grading'
 import { MODULE1_CHAPTER_IDS, MODULE1_VOCABULARY } from '@/lib/module1-content'
 import { getAllLocalVocabulary, enqueueLocalVocabulary, scoreLocalVocabulary } from '@/lib/local-vocab-vault'
+import { buildFlashcardDeck, countPoolByFilter, FLASHCARD_FILTERS, flashcardQuality } from '@/lib/review/flashcards'
 import { buildReviewSession, emptySessionMessage } from '@/lib/review/session'
 import { lemmaIdsForChapter, vocabularyRowsForLemmas } from '@/lib/review/lemmas'
-import type { ReviewMistake, ReviewPoolItem, ReviewSessionPlan, ReviewTask, SessionMode } from '@/lib/review/types'
+import type {
+  FlashcardDeck,
+  FlashcardPosFilter,
+  ReviewPoolItem,
+  ReviewSessionPlan,
+  ReviewTask,
+  SessionMode,
+} from '@/lib/review/types'
 import { calculateSrsSchedule } from '@/lib/srs'
 import { createClient } from '@/utils/supabase/client'
 
@@ -32,7 +41,6 @@ function enrichPoolItem(item: Omit<ReviewPoolItem, 'source'> & { source?: 'remot
 }
 
 const KIND_LABEL: Record<ReviewTask['kind'], string> = {
-  repair: 'Repair',
   overdue: 'Overdue',
   due: 'Due',
   soon: 'Coming up',
@@ -40,10 +48,14 @@ const KIND_LABEL: Record<ReviewTask['kind'], string> = {
   weak: 'Weak spot',
 }
 
+type HubMode = 'exercises' | 'flashcards'
+
 export default function ReviewClient() {
   const [pool, setPool] = useState<ReviewPoolItem[]>([])
-  const [mistakes, setMistakes] = useState<ReviewMistake[]>([])
   const [session, setSession] = useState<ReviewSessionPlan | null>(null)
+  const [flashDeck, setFlashDeck] = useState<FlashcardDeck | null>(null)
+  const [hubMode, setHubMode] = useState<HubMode>('exercises')
+  const [posFilter, setPosFilter] = useState<FlashcardPosFilter>('all')
   const [index, setIndex] = useState(0)
   const [answers, setAnswers] = useState<Record<string, ExerciseAnswer>>({})
   const [loading, setLoading] = useState(false)
@@ -54,6 +66,15 @@ export default function ReviewClient() {
   const [pendingQuality, setPendingQuality] = useState<number | null>(null)
 
   const task = session?.tasks[index]
+  const flashCard = flashDeck?.cards[index]
+  const weakCount = useMemo(() => pool.filter((item) => item.mistake_count > 0).length, [pool])
+  const missByVocab = useMemo(() => {
+    const map = new Map<string, number>()
+    for (const item of pool) {
+      if (item.mistake_count > 0) map.set(item.vocab_id, item.mistake_count)
+    }
+    return map
+  }, [pool])
 
   const loadPool = useCallback(async () => {
     const supabase = createClient()
@@ -61,24 +82,16 @@ export default function ReviewClient() {
     if (!user) {
       const local = getAllLocalVocabulary().map((item) => enrichPoolItem(item, 'local'))
       setPool(local)
-      setMistakes([])
       return
     }
 
-    const [progressResult, mistakesResult, completedResult] = await Promise.all([
+    const [progressResult, completedResult] = await Promise.all([
       supabase
         .from('user_vocab_progress')
         .select('vocab_id, repetition_count, ease_factor, interval_days, total_encounters, mistake_count, next_review_at, last_reviewed_at, vocabulary(word, base_translation, part_of_speech, register)')
         .eq('user_id', user.id)
         .order('next_review_at')
         .limit(500),
-      supabase
-        .from('user_mistakes')
-        .select('id, error_count, grammar_category, error_context, vocab_id, vocabulary(word, base_translation)')
-        .eq('user_id', user.id)
-        .eq('is_resolved', false)
-        .order('last_error_at', { ascending: false })
-        .limit(30),
       supabase
         .from('user_chapter_progress')
         .select('chapter_id')
@@ -107,7 +120,6 @@ export default function ReviewClient() {
       )
     })
 
-    // Backfill: completed Module 1 chapters with empty vocab pool (e.g. finished before enqueue worked).
     const completedIds = (completedResult.data ?? []).map((row) => row.chapter_id)
     const module1Completed = completedIds.filter((id) => (MODULE1_CHAPTER_IDS as readonly string[]).includes(id))
     const remoteIds = new Set(remote.map((item) => item.vocab_id))
@@ -170,20 +182,6 @@ export default function ReviewClient() {
       .map((item) => enrichPoolItem(item, 'local'))
 
     setPool([...remote, ...local])
-    setMistakes(
-      (mistakesResult.data ?? []).map((row) => {
-        const vocabulary = Array.isArray(row.vocabulary) ? row.vocabulary[0] : row.vocabulary
-        return {
-          id: row.id,
-          error_count: row.error_count ?? 1,
-          grammar_category: row.grammar_category,
-          error_context: row.error_context,
-          vocab_id: row.vocab_id,
-          word: vocabulary?.word ?? null,
-          base_translation: vocabulary?.base_translation ?? null,
-        }
-      }),
-    )
   }, [])
 
   useEffect(() => {
@@ -205,80 +203,47 @@ export default function ReviewClient() {
   }, [loadPool])
 
   const preview = useMemo(() => {
-    if (!pool.length && !mistakes.length) return null
-    return buildReviewSession(pool, mistakes, 'daily', { size: 15 })
-  }, [pool, mistakes])
+    if (!pool.length) return null
+    return buildReviewSession(pool, 'daily', { size: 15 })
+  }, [pool])
 
-  const startSession = (mode: SessionMode) => {
-    const plan = buildReviewSession(pool, mistakes, mode, {
-      size: mode === 'daily' ? 15 : 12,
-      excludeTaskIds: mode === 'continue' ? seenTaskIds : [],
-    })
-    if (!plan.tasks.length) {
-      setError(emptySessionMessage(pool.length))
-      return
-    }
-    setSession(plan)
-    setIndex(0)
-    setAnswers({})
-    setPendingQuality(null)
-    setCompletedInSession(0)
-    setError(null)
-    if (mode === 'daily') setSeenTaskIds([])
-  }
-
-  const goToNextCard = (current: ReviewTask, quality: number) => {
-    setCompletedInSession((value) => value + 1)
-    setSeenTaskIds((ids) => [...ids, current.id])
-    setPendingQuality(null)
-    setPool((currentPool) =>
-      currentPool.map((item) => {
-        if (item.vocab_id !== current.vocabId) return item
-        const schedule = calculateSrsSchedule(
-          {
-            repetitionCount: item.repetition_count,
-            easeFactor: item.ease_factor,
-            intervalDays: item.interval_days,
-          },
-          quality,
-        )
-        return {
-          ...item,
-          repetition_count: schedule.repetitionCount,
-          ease_factor: schedule.easeFactor,
-          interval_days: schedule.intervalDays,
-          next_review_at: schedule.nextReview.toISOString(),
-          last_reviewed_at: new Date().toISOString(),
-          total_encounters: item.total_encounters + 1,
-          mistake_count: item.mistake_count + (quality < 3 ? 1 : 0),
-        }
-      }),
+  const applyScoreToPool = (vocabId: string, quality: number, previous: ReviewPoolItem) => {
+    const schedule = calculateSrsSchedule(
+      {
+        repetitionCount: previous.repetition_count,
+        easeFactor: previous.ease_factor,
+        intervalDays: previous.interval_days,
+      },
+      quality,
     )
-
-    if (session && index + 1 < session.tasks.length) {
-      setIndex((value) => value + 1)
-      return
+    return {
+      ...previous,
+      repetition_count: schedule.repetitionCount,
+      ease_factor: schedule.easeFactor,
+      interval_days: schedule.intervalDays,
+      next_review_at: schedule.nextReview.toISOString(),
+      last_reviewed_at: new Date().toISOString(),
+      total_encounters: previous.total_encounters + 1,
+      mistake_count: previous.mistake_count + (quality < 3 ? 1 : 0),
     }
-    setIndex(session?.tasks.length ?? 0)
   }
 
-  const persistVocabScore = async (current: ReviewTask, quality: number) => {
-    if (!current.vocabId || !current.poolItem) return
-    if (current.poolItem.source === 'local') {
-      scoreLocalVocabulary(current.vocabId, quality)
+  const persistVocabScore = async (item: ReviewPoolItem, quality: number) => {
+    if (item.source === 'local') {
+      scoreLocalVocabulary(item.vocab_id, quality)
       return
     }
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
-      scoreLocalVocabulary(current.vocabId, quality)
+      scoreLocalVocabulary(item.vocab_id, quality)
       return
     }
     const schedule = calculateSrsSchedule(
       {
-        repetitionCount: current.poolItem.repetition_count,
-        easeFactor: current.poolItem.ease_factor,
-        intervalDays: current.poolItem.interval_days,
+        repetitionCount: item.repetition_count,
+        easeFactor: item.ease_factor,
+        intervalDays: item.interval_days,
       },
       quality,
     )
@@ -290,18 +255,62 @@ export default function ReviewClient() {
         interval_days: schedule.intervalDays,
         next_review_at: schedule.nextReview.toISOString(),
         last_reviewed_at: new Date().toISOString(),
-        total_encounters: current.poolItem.total_encounters + 1,
-        mistake_count: current.poolItem.mistake_count + (quality < 3 ? 1 : 0),
+        total_encounters: item.total_encounters + 1,
+        mistake_count: item.mistake_count + (quality < 3 ? 1 : 0),
       })
       .eq('user_id', user.id)
-      .eq('vocab_id', current.vocabId)
-    if (updateError) scoreLocalVocabulary(current.vocabId, quality)
+      .eq('vocab_id', item.vocab_id)
+    if (updateError) scoreLocalVocabulary(item.vocab_id, quality)
   }
 
-  const resolveMistake = async (mistakeId: string) => {
-    const supabase = createClient()
-    await supabase.from('user_mistakes').update({ is_resolved: true, resolved_at: new Date().toISOString() }).eq('id', mistakeId)
-    setMistakes((items) => items.filter((item) => item.id !== mistakeId))
+  const startSession = (mode: SessionMode) => {
+    const plan = buildReviewSession(pool, mode, {
+      size: mode === 'daily' ? 15 : 12,
+      excludeTaskIds: mode === 'continue' ? seenTaskIds : [],
+    })
+    if (!plan.tasks.length) {
+      setError(emptySessionMessage(pool.length))
+      return
+    }
+    setHubMode('exercises')
+    setFlashDeck(null)
+    setSession(plan)
+    setIndex(0)
+    setAnswers({})
+    setPendingQuality(null)
+    setCompletedInSession(0)
+    setError(null)
+    if (mode === 'daily') setSeenTaskIds([])
+  }
+
+  const startFlashcards = () => {
+    const deck = buildFlashcardDeck(pool, { posFilter, size: 20 })
+    if (!deck.cards.length) {
+      setError('No words match this filter yet. Finish a lesson or pick All.')
+      return
+    }
+    setHubMode('flashcards')
+    setSession(null)
+    setFlashDeck(deck)
+    setIndex(0)
+    setCompletedInSession(0)
+    setError(null)
+  }
+
+  const goToNextExercise = (current: ReviewTask, quality: number) => {
+    setCompletedInSession((value) => value + 1)
+    setSeenTaskIds((ids) => [...ids, current.id])
+    setPendingQuality(null)
+    if (current.vocabId) {
+      setPool((currentPool) =>
+        currentPool.map((item) => (item.vocab_id === current.vocabId ? applyScoreToPool(current.vocabId!, quality, item) : item)),
+      )
+    }
+    if (session && index + 1 < session.tasks.length) {
+      setIndex((value) => value + 1)
+      return
+    }
+    setIndex(session?.tasks.length ?? 0)
   }
 
   const onCardAnswer = async (answer: ExerciseAnswer) => {
@@ -312,10 +321,8 @@ export default function ReviewClient() {
     setLoading(true)
     setError(null)
     try {
-      if (task.kind === 'repair' && task.mistakeId) {
-        if (correct) await resolveMistake(task.mistakeId)
-      } else if (task.vocabId) {
-        await persistVocabScore(task, quality)
+      if (task.vocabId && task.poolItem) {
+        await persistVocabScore(task.poolItem, quality)
       }
       setPendingQuality(quality)
     } catch (caughtError) {
@@ -324,6 +331,42 @@ export default function ReviewClient() {
       setLoading(false)
     }
   }
+
+  const onFlashRate = async (rating: 'again' | 'easy' | 'hard') => {
+    if (!flashCard || loading) return
+    const quality = flashcardQuality(rating)
+    setLoading(true)
+    setError(null)
+    try {
+      await persistVocabScore(flashCard, quality)
+      setPool((currentPool) =>
+        currentPool.map((item) => (item.vocab_id === flashCard.vocab_id ? applyScoreToPool(flashCard.vocab_id, quality, item) : item)),
+      )
+      setCompletedInSession((value) => value + 1)
+      if (flashDeck && index + 1 < flashDeck.cards.length) {
+        setIndex((value) => value + 1)
+      } else {
+        setIndex(flashDeck?.cards.length ?? 0)
+      }
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : 'Unable to save this flashcard.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const backToHub = () => {
+    setSession(null)
+    setFlashDeck(null)
+    setIndex(0)
+    setPendingQuality(null)
+  }
+
+  const inExerciseSession = Boolean(session)
+  const inFlashSession = Boolean(flashDeck)
+  const exerciseDone = inExerciseSession && !task
+  const flashDone = inFlashSession && !flashCard
+  const showHub = !inExerciseSession && !inFlashSession
 
   if (booting) {
     return (
@@ -339,33 +382,31 @@ export default function ReviewClient() {
         <p className="text-label-caps text-primary">INFINITE LOOP</p>
         <h1 className="text-headline-lg">Review</h1>
         <p className="mt-2 text-body-reading text-on-surface-variant">
-          Everything you learn joins one perpetual loop. New lessons add words; mistakes become repair drills; old chapters spiral back forever.
+          Everything you learn joins one perpetual loop. Practice with mixed exercises or train meanings with flashcards.
         </p>
       </header>
 
-      {!session && (
+      {showHub && (
         <section className="tactile-card space-y-4 p-6">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-label-caps text-on-surface-variant">YOUR LOOP</p>
               <h2 className="text-headline-md">{pool.length} words in the pool</h2>
               <p className="mt-1 text-sm text-on-surface-variant">
-                Due now: {preview?.dueCount ?? 0} · Repairs: {mistakes.length} · ~{preview?.estimatedMinutes ?? 0} min session
+                Due now: {preview?.dueCount ?? 0} · Weak spots: {weakCount} · ~{preview?.estimatedMinutes ?? 0} min session
               </p>
             </div>
             <InfinityIcon className="size-8 text-primary" aria-hidden />
           </div>
 
-          {pool.length === 0 && mistakes.length === 0 ? (
+          {pool.length === 0 ? (
             <p className="rounded-lg bg-surface-container-low p-4 text-sm text-on-surface-variant">
               {emptySessionMessage(0)}
             </p>
           ) : (
             <>
               <p className="text-sm text-on-surface-variant">
-                {pool.length === 0
-                  ? 'Your word pool is empty, but repair drills are ready — start a session to practice them. Completing lessons also backfills words into the loop.'
-                  : 'Your loop never empties once you have learned something. Start a mixed session, or keep reviewing forever from spiral + weak spots.'}
+                Your loop never empties once you have learned something. Start a mixed session, or keep reviewing forever from spiral + weak spots.
               </p>
               <div className="grid gap-3 sm:grid-cols-2">
                 <button
@@ -378,7 +419,7 @@ export default function ReviewClient() {
                 <button
                   type="button"
                   onClick={() => startSession('continue')}
-                  disabled={pool.length === 0 && mistakes.length === 0}
+                  disabled={pool.length === 0}
                   className="tactile-button flex items-center justify-center gap-2 rounded-xl border-2 border-surface-variant bg-surface-container-lowest py-4 font-bold text-on-surface disabled:opacity-50"
                 >
                   <InfinityIcon className="size-5" /> Keep reviewing
@@ -392,16 +433,20 @@ export default function ReviewClient() {
         </section>
       )}
 
-      {session && !task && (
+      {(exerciseDone || flashDone) && (
         <section className="tactile-card space-y-4 p-6 text-center">
           <CheckCircle2 className="mx-auto size-10 text-success" />
           <h2 className="text-headline-md">Session complete</h2>
           <p className="text-on-surface-variant">{completedInSession} cards done. The loop continues — keep reviewing?</p>
           <div className="grid gap-3 sm:grid-cols-2">
-            <button type="button" onClick={() => startSession('continue')} className="tactile-button rounded-xl border-primary-container bg-primary py-4 font-bold text-on-primary">
+            <button
+              type="button"
+              onClick={() => (hubMode === 'flashcards' ? startFlashcards() : startSession('continue'))}
+              className="tactile-button rounded-xl border-primary-container bg-primary py-4 font-bold text-on-primary"
+            >
               Keep reviewing
             </button>
-            <button type="button" onClick={() => setSession(null)} className="tactile-button rounded-xl border-2 border-surface-variant bg-surface-container-lowest py-4 font-bold text-on-surface">
+            <button type="button" onClick={backToHub} className="tactile-button rounded-xl border-2 border-surface-variant bg-surface-container-lowest py-4 font-bold text-on-surface">
               Back to hub
             </button>
           </div>
@@ -413,6 +458,9 @@ export default function ReviewClient() {
           <div className="flex flex-wrap items-center justify-between gap-2 text-label-caps text-on-surface-variant">
             <span>
               {index + 1} OF {session.tasks.length} · {KIND_LABEL[task.kind]}
+              {task.vocabId && (missByVocab.get(task.vocabId) ?? 0) > 0
+                ? ` · Missed ${missByVocab.get(task.vocabId)}×`
+                : ''}
             </span>
             <span>{session.mode === 'daily' ? 'DAILY MIX' : 'KEEP GOING'}</span>
           </div>
@@ -439,7 +487,7 @@ export default function ReviewClient() {
           {pendingQuality !== null && !loading && (
             <button
               type="button"
-              onClick={() => goToNextCard(task, pendingQuality)}
+              onClick={() => goToNextExercise(task, pendingQuality)}
               className="tactile-button flex w-full items-center justify-center gap-2 rounded-xl border-primary-container bg-primary py-4 font-bold text-on-primary"
             >
               {index + 1 < session.tasks.length ? 'Next' : 'Finish session'}
@@ -449,29 +497,59 @@ export default function ReviewClient() {
         </section>
       )}
 
-      <section>
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-label-caps text-secondary">REPAIR LANE</p>
-            <h2 className="text-headline-md">Needs another look</h2>
-            <p className="mt-1 text-sm text-on-surface-variant">Mistakes enter the next session as real drills. Correct answers resolve them — no passive “mastered”.</p>
+      {flashDeck && flashCard && (
+        <VocabFlashcard
+          key={flashCard.vocab_id + index}
+          card={flashCard}
+          index={index}
+          total={flashDeck.cards.length}
+          onRate={(rating) => void onFlashRate(rating)}
+          disabled={loading}
+        />
+      )}
+
+      {showHub && (
+        <section>
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-label-caps text-secondary">VOCABULARY FLASHCARDS</p>
+              <h2 className="text-headline-md">Train meanings</h2>
+              <p className="mt-1 text-sm text-on-surface-variant">
+                Flip cards from your pool. Rate Again · Easy · Hard — Easy words come back less often.
+              </p>
+            </div>
+            <Layers className="text-secondary" />
           </div>
-          <RotateCcw className="text-secondary" />
-        </div>
-        {mistakes.length ? (
-          <div className="mt-4 grid gap-3">
-            {mistakes.slice(0, 8).map((mistake) => (
-              <article key={mistake.id} className="tactile-card p-4">
-                <h3 className="font-bold">{mistake.word ?? mistake.grammar_category ?? 'Grammar item'}</h3>
-                <p className="mt-1 text-sm text-on-surface-variant">{mistake.base_translation ?? mistake.error_context ?? 'Queued for repair drills.'}</p>
-                <p className="mt-1 text-label-caps text-secondary">{mistake.error_count} MISSED · IN LOOP</p>
-              </article>
-            ))}
+          <div className="mt-4 flex flex-wrap gap-2">
+            {FLASHCARD_FILTERS.map((filter) => {
+              const count = countPoolByFilter(pool, filter.id)
+              const active = posFilter === filter.id
+              return (
+                <button
+                  key={filter.id}
+                  type="button"
+                  onClick={() => setPosFilter(filter.id)}
+                  className={`rounded-full px-3 py-1.5 text-sm font-bold ${
+                    active
+                      ? 'bg-primary text-on-primary'
+                      : 'bg-surface-container-high text-on-surface-variant'
+                  }`}
+                >
+                  {filter.label} ({count})
+                </button>
+              )
+            })}
           </div>
-        ) : (
-          <p className="mt-3 text-on-surface-variant">No open repairs. Keep reading — wrong answers feed this lane automatically.</p>
-        )}
-      </section>
+          <button
+            type="button"
+            onClick={startFlashcards}
+            disabled={pool.length === 0}
+            className="tactile-button mt-4 flex w-full items-center justify-center gap-2 rounded-xl border-primary-container bg-primary py-4 font-bold text-on-primary disabled:opacity-50"
+          >
+            <Layers className="size-5" /> Start flashcards · 20 cards
+          </button>
+        </section>
+      )}
 
       {error && <p role="alert" className="rounded-lg bg-error-container p-3 text-sm text-on-error-container">{error}</p>}
     </div>

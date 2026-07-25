@@ -60,6 +60,11 @@
 10. **[2026-07-25] Home “Today’s Reading” stuck at 0 words / empty bar**
     Do instead: record `user_daily_reading_stats` **client-side** on lesson complete (local date); home bar for module % ≠ daily words — show both; never rely only on `complete_chapter` for daily words.
 
+## Review & Flashcards
+
+1. **[2026-07-25] Repair lane made nonsense True/False cards**
+   Do instead: no repair session lane; show `Missed N×` from `mistake_count`; flashcards with Again/Easy/Hard (Easy=5); validate exercises so T/F statements cannot be questions; every content category needs remediation or GRAMMAR_ONLY allowlist.
+
 ## Shell & Command Reliability
 
 1. **[2026-07-24] Assumed `gh` on PATH**
