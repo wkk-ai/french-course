@@ -5,11 +5,11 @@ import { filterCourseCatalog, LEGACY_MODULE_ID } from '../src/lib/course-catalog
 import { CHAPTER_EXERCISE_EXTRAS } from '../src/lib/exercises/chapter-extras'
 import { buildRemediationExercises } from '../src/lib/exercises/enrich'
 import { isExerciseCorrect } from '../src/lib/exercises/grading'
-import { GRAMMAR_ONLY_CATEGORIES, validateLessonExercise } from '../src/lib/exercises/validate'
+import { GRAMMAR_ONLY_CATEGORIES, isStoryMemoryExercise, validateLessonExercise } from '../src/lib/exercises/validate'
 import { staggerReviewDates } from '../src/lib/local-vocab-vault'
 import { resolveLessonContent } from '../src/lib/lesson-content'
 import { calculateLessonScoreLegacy } from '../src/lib/lesson-score'
-import { MODULE1_CHAPTER_IDS } from '../src/lib/module1-content'
+import { MODULE1_CHAPTER_IDS, MODULE1_LESSONS } from '../src/lib/module1-content'
 import { deriveChapterStatus } from '../src/lib/progression'
 import { buildFlashcardDeck, flashcardQuality } from '../src/lib/review/flashcards'
 import { lemmaIdsForChapter, lessonLabelForLemma } from '../src/lib/review/lemmas'
@@ -159,27 +159,45 @@ test('Module 1.1 ships enough lemmas for review backfill', () => {
 })
 
 test('story-memory and character-fact exercises are rejected', () => {
-  const story = validateLessonExercise({
-    id: 'story',
-    type: 'reading',
-    category: 'reading',
-    prompt: 'According to the reading, where does Marie live?',
-    options: ['Paris', 'Lyon', 'London'],
-    answer: 1,
-    explanation: 'x',
-  })
-  assert.equal(story.ok, false)
+  const banned = [
+    'According to the reading, where does Marie live?',
+    "Where do Marc's parents live?",
+    'Marie orders…',
+    'Marc asks for milk with…',
+    'Marc and Marie sit on the…',
+    "Marie's birthday is on…",
+    "Marie's mother is…",
+    "Marc's sister is named…",
+    'How many cousins does Marc have?',
+    'Marc and Marie meet on…',
+  ]
+  for (const prompt of banned) {
+    assert.equal(isStoryMemoryExercise({ prompt }), true, `should ban: ${prompt}`)
+    assert.equal(
+      validateLessonExercise({
+        id: 'banned',
+        type: 'mcq',
+        category: 'reading',
+        prompt,
+        options: ['a', 'b', 'c'],
+        answer: 0,
+        explanation: 'x',
+      }).ok,
+      false,
+      `should reject: ${prompt}`,
+    )
+  }
 
-  const character = validateLessonExercise({
-    id: 'char',
-    type: 'mcq',
-    category: 'reading',
-    prompt: "Where do Marc's parents live?",
-    options: ['Paris', 'Lyon', 'Londres'],
-    answer: 1,
-    explanation: 'x',
-  })
-  assert.equal(character.ok, false)
+  const allowed = [
+    'How do you say “She lives in Lyon”?',
+    'How do you order tea and water politely?',
+    'Marie says "Moi aussi!" — she means…',
+    'Marc ___ l\'addition.',
+    'How do you say “I have three cousins”?',
+  ]
+  for (const prompt of allowed) {
+    assert.equal(isStoryMemoryExercise({ prompt }), false, `should allow: ${prompt}`)
+  }
 
   const linguistic = validateLessonExercise({
     id: 'ok',
@@ -191,6 +209,20 @@ test('story-memory and character-fact exercises are rejected', () => {
     explanation: 'x',
   })
   assert.equal(linguistic.ok, true)
+})
+
+test('Module 1 raw authored exercises never rely on silent story-memory stripping', () => {
+  for (const chapterId of MODULE1_CHAPTER_IDS) {
+    for (const exercise of MODULE1_LESSONS[chapterId]?.exercises ?? []) {
+      assert.equal(
+        isStoryMemoryExercise(exercise),
+        false,
+        `raw ${chapterId} ${exercise.id}: ${exercise.prompt}`,
+      )
+      const result = validateLessonExercise(exercise)
+      assert.equal(result.ok, true, `raw ${chapterId} ${exercise.id}: ${!result.ok ? result.reason : ''}`)
+    }
+  }
 })
 
 test('flashcards and review never include proper nouns', () => {

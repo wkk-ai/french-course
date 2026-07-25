@@ -626,8 +626,8 @@ export const MODULE1_LESSONS: Record<string, LessonContent> = {
           },
           {
                 "id": "c1-e24",
-                "category": "conversation",
-                "prompt": "How does Marc ask if Marie is French?",
+                "category": "tu-vous",
+                "prompt": "How do you ask (informal) if someone is French?",
                 "options": [
                       "Tu es française ?",
                       "C'est française ?",
@@ -760,15 +760,15 @@ export const MODULE1_LESSONS: Record<string, LessonContent> = {
           },
           {
                 "id": "c2-e8",
-                "category": "conversation",
-                "prompt": "Marie's birthday is on…",
+                "category": "days",
+                "prompt": "How do you say “My birthday is on Friday”?",
                 "options": [
-                      "lundi",
-                      "vendredi",
-                      "dimanche"
+                      "Mon anniversaire est lundi.",
+                      "Mon anniversaire est vendredi.",
+                      "Mon anniversaire est dimanche."
                 ],
                 "answer": 1,
-                "explanation": "Mon anniversaire est vendredi."
+                "explanation": "Vendredi = Friday."
           },
           {
                 "id": "c2-e9",
@@ -880,15 +880,15 @@ export const MODULE1_LESSONS: Record<string, LessonContent> = {
           },
           {
                 "id": "c2-e18",
-                "category": "conversation",
-                "prompt": "Marc and Marie meet on…",
+                "category": "days",
+                "prompt": "How do you say “See you on Saturday”?",
                 "options": [
-                      "vendredi",
-                      "samedi",
-                      "lundi"
+                      "On se voit vendredi.",
+                      "On se voit samedi.",
+                      "On se voit lundi."
                 ],
                 "answer": 1,
-                "explanation": "On se voit samedi."
+                "explanation": "Samedi = Saturday."
           },
           {
                 "id": "c2-e19",
@@ -1098,15 +1098,15 @@ export const MODULE1_LESSONS: Record<string, LessonContent> = {
           },
           {
                 "id": "c3-e9",
-                "category": "conversation",
-                "prompt": "Marie orders…",
+                "category": "articles-partitives",
+                "prompt": "How do you order tea and water politely?",
                 "options": [
                       "un café et un croissant",
                       "un thé et de l'eau",
                       "du sucre seulement"
                 ],
                 "answer": 1,
-                "explanation": "She asks for tea and water."
+                "explanation": "Un thé (countable cup) + de l'eau (some water)."
           },
           {
                 "id": "c3-e10",
@@ -1194,15 +1194,15 @@ export const MODULE1_LESSONS: Record<string, LessonContent> = {
           },
           {
                 "id": "c3-e17",
-                "category": "reading",
-                "prompt": "Marc and Marie sit on the…",
+                "category": "café-vocab",
+                "prompt": "Where do you sit outside at a café?",
                 "options": [
-                      "terrasse",
-                      "rue",
-                      "école"
+                      "à la terrasse",
+                      "à la rue",
+                      "à l'école"
                 ],
                 "answer": 0,
-                "explanation": "Ils s'installent à la terrasse."
+                "explanation": "À la terrasse = on the terrace / patio."
           },
           {
                 "id": "c3-e18",
@@ -1278,15 +1278,15 @@ export const MODULE1_LESSONS: Record<string, LessonContent> = {
           },
           {
                 "id": "c3-e24",
-                "category": "conversation",
-                "prompt": "Marc asks for milk with…",
+                "category": "politeness",
+                "prompt": "When asking for milk at a café, add…",
                 "options": [
                       "s'il vous plaît",
                       "salut",
                       "pardon seulement"
                 ],
                 "answer": 0,
-                "explanation": "Et du lait, s'il vous plaît."
+                "explanation": "S'il vous plaît is the polite please."
           }
     ],
     wordCount: 289,
@@ -1522,15 +1522,15 @@ export const MODULE1_LESSONS: Record<string, LessonContent> = {
           },
           {
                 "id": "c4-e17",
-                "category": "reading",
-                "prompt": "How many cousins does Marc have?",
+                "category": "family",
+                "prompt": "How do you say “I have three cousins”?",
                 "options": [
-                      "two",
-                      "three",
-                      "four"
+                      "J'ai deux cousins.",
+                      "J'ai trois cousins.",
+                      "J'ai quatre cousins."
                 ],
                 "answer": 1,
-                "explanation": "J'ai trois cousins."
+                "explanation": "J'ai + number + cousins."
           },
           {
                 "id": "c4-e18",
@@ -1570,12 +1570,12 @@ export const MODULE1_LESSONS: Record<string, LessonContent> = {
           },
           {
                 "id": "c4-e21",
-                "category": "reading",
-                "prompt": "Marie's mother is…",
+                "category": "être-present",
+                "prompt": "How do you say “His/her mother is English”?",
                 "options": [
-                      "French only",
-                      "English",
-                      "Spanish"
+                      "Sa mère est française.",
+                      "Sa mère est anglaise.",
+                      "Sa mère est espagnole."
                 ],
                 "answer": 1,
                 "explanation": "Sa mère est anglaise."
@@ -1594,15 +1594,15 @@ export const MODULE1_LESSONS: Record<string, LessonContent> = {
           },
           {
                 "id": "c4-e23",
-                "category": "conversation",
-                "prompt": "Marc's sister is named…",
+                "category": "family",
+                "prompt": "How do you say “My sister is called Sophie”?",
                 "options": [
-                      "Marie",
-                      "Sophie",
-                      "Emma"
+                      "Ma sœur s'appelle Marie.",
+                      "Ma sœur s'appelle Sophie.",
+                      "Ma sœur s'appelle Emma."
                 ],
                 "answer": 1,
-                "explanation": "Ma sœur s'appelle Sophie."
+                "explanation": "Ma sœur s'appelle + name."
           },
           {
                 "id": "c4-e24",

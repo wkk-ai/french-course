@@ -20,8 +20,8 @@
 4. **[2026-07-24] Shipped 1-minute “lessons”**
    Do instead: enforce chapter bar — ~30–60+ min, 220+ reading words, 22+ exercises, 60–100 lemmas, 12+ dialogue turns. Never ship snack demos as chapters.
 
-5. **[2026-07-25] Story-memory + proper-name quizzes shipped**
-   Do instead: exercises quiz **French** (vocab/grammar), never “where does Marie live?” plot recall; never flashcard/review **proper nouns**; enforce via `isStoryMemoryExercise` + `isReviewablePartOfSpeech` + CI.
+5. **[2026-07-25] Story-memory + proper-name quizzes shipped (incl. “Marie orders…”)**
+   Do instead: quiz **French** only — ban Name+plot (`Marie orders…`, `Marc asks for…`, `Marc and Marie sit…`, `Name's birthday/mother…`, `How many … does Marc…`) plus reading-recall phrasing; never flashcard **proper nouns**; CI must validate **raw** `MODULE1_LESSONS` (not only enriched) so bad items cannot hide behind silent strip.
 
 6. **[2026-07-25] Grammar rules were one-paragraph stubs, always unlocked**
    Do instead: deep `GrammarRuleDocument` (quick/deep/examples/try tabs); unlock via completed `ruleSlugs` chapters; `validateGrammarRule` authoring bar (≥600 words, ≥8 examples, tables, drills).
@@ -40,7 +40,7 @@
 ## Domain Behavior Guardrails
 
 1. **[2026-07-25] Quiz French, not the story / not proper names**
-   Do instead: ban story-memory prompts (`according to the reading`, `Where does Marie…`); exclude `proper noun` from review pool, flashcards, and lemma enqueue; replace with habiter/c'est/family/vocab drills. Validate in `validate.ts`; strip invalid in `enrichLessonExercises`.
+   Do instead: ban plot prompts (reading-recall **and** `Name orders/asks/sits…`, possessives, how-many-about-Name); exclude `proper noun` from review/flashcards/enqueue; rewrite to grammar/vocab drills. Guard in `isStoryMemoryExercise`; strip in enrich; **fail CI on raw Module 1** if any slip through.
 
 2. **[2026-07-25] Repair lane made nonsense True/False cards**
    Do instead: no repair session lane; show `Missed N×` from `mistake_count`; flashcards Again/Easy/Hard (Easy=5); T/F statements cannot be questions.

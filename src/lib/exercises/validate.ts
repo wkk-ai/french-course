@@ -4,11 +4,39 @@ const QUESTION_STARTERS = /^(who|what|when|where|why|how|which|is|are|do|does|di
 
 /** Story / character recall — learner must remember the text, not French. */
 const STORY_MEMORY_RE =
-  /\b(according to (the )?reading|in the reading|per the reading|chapter reading|appear in the (chapter )?reading|from the reading|in the (chapter )?story)\b/i
+  /\b(according to (the )?reading|in the reading|per the reading|chapter reading|appear in the (chapter )?reading|from the reading|in the (chapter )?story|in the (chapter )?text)\b/i
+
+/** Proper names used as characters in Module 1 readings (not generic “you”). */
+const CAST_NAME =
+  'Marc|Marie|Sophie|Paul|Pierre|Claire|Jeanne|Lucie|Lucas|Emma|Henri|Anne'
+
+/**
+ * “Marie orders…” / “Marc asks for milk…” — plot recall framed as a statement.
+ * Intentionally excludes says/means/is (phrase-meaning and cloze prompts).
+ */
+const NAME_PLOT_ACTION = new RegExp(
+  `\\b(${CAST_NAME})\\s+(orders?|asks(?:\\s+for)?(?!\\s+about)|sits?(?:\\s+on)?|lives?(?:\\s+in)?|wants?|goes?(?:\\s+to)?|meets?|drinks?|eats?|buys?|pays?|takes?|chooses?)\\b`,
+  'i',
+)
+
+/** “Marc and Marie sit on the…” */
+const NAME_AND_NAME_PLOT = new RegExp(
+  `\\b(${CAST_NAME})\\s+and\\s+(${CAST_NAME})\\s+(sit|sits|order|orders|meet|meets|live|lives|go|goes)\\b`,
+  'i',
+)
+
+/** “Marie's birthday is…” / “Marc's sister is named…” */
+const NAME_POSSESSIVE_FACT = new RegExp(
+  `\\b(${CAST_NAME})'s\\s+(birthday|parents?|cousins?|sister|brother|mother|father|friend|family|name)\\b`,
+  'i',
+)
+
+/** “How many cousins does Marc have?” */
+const HOW_MANY_ABOUT_NAME = new RegExp(`\\bhow many\\b[\\s\\S]{0,40}\\b(${CAST_NAME})\\b`, 'i')
 
 /** “Where does Marie live?”-style character quizzes (capitalized name after question). */
 function hasCharacterFactPrompt(blob: string): boolean {
-  const match = blob.match(/\b(where does|where do|who is|who are|what does)\s+(\S+)/i)
+  const match = blob.match(/\b(where does|where do|who is|who are|what does|when does|when do)\s+(\S+)/i)
   if (!match) return false
   // Require a real capitalised name — not "you" / "we" ( /i would make [A-Z] match lowercase).
   return /^[A-ZÀÂÄÉÈÊËÏÎÔÙÛÜÇ]/.test(match[2])
@@ -27,6 +55,10 @@ export function isStoryMemoryExercise(exercise: Pick<LessonExercise, 'prompt'> &
   const blob = `${exercise.prompt} ${'context' in exercise && typeof exercise.context === 'string' ? exercise.context : ''}`
   if (STORY_MEMORY_RE.test(blob)) return true
   if (hasCharacterFactPrompt(blob)) return true
+  if (NAME_PLOT_ACTION.test(blob)) return true
+  if (NAME_AND_NAME_PLOT.test(blob)) return true
+  if (NAME_POSSESSIVE_FACT.test(blob)) return true
+  if (HOW_MANY_ABOUT_NAME.test(blob)) return true
   if (/\bwhat family members appear\b/i.test(blob)) return true
   if (/\bhow many weeks are in a year\b/i.test(blob) && /\breading\b/i.test(blob)) return true
   return false

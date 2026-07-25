@@ -500,7 +500,7 @@ export const CHAPTER_EXERCISE_EXTRAS: Record<string, LessonExercise[]> = {
       type: 'dialogue',
       category: 'conversation',
       source: 'dialogue',
-      context: 'Sophie asks about your family. You have one sister. You say…',
+      context: 'A friend asks about your family. You have one sister. You say…',
       options: ['J\'ai une sœur.', 'J\'ai un sœur.', 'Je suis une sœur.'],
       answer: 0,
       prompt: 'Choose the correct line.',
