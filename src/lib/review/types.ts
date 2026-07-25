@@ -30,6 +30,8 @@ export type ReviewTask = {
   vocabId?: string
   mistakeId?: string
   poolItem?: ReviewPoolItem
+  /** e.g. "Lesson 1.1 · Bonjour, je m'appelle…" */
+  lessonLabel?: string | null
 }
 
 export type SessionMode = 'daily' | 'continue'

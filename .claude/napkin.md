@@ -57,6 +57,9 @@
 9. **[2026-07-24] Review was recognition-only “caught up”**
    Do instead: `buildReviewSession` + ExerciseCard modalities (meaning/cloze/produce/repair); hub shows pool size + Start session / Keep reviewing.
 
+10. **[2026-07-25] Review auto-advanced past feedback**
+    Do instead: after answer, keep feedback visible until user taps **Next**; show **From Lesson X.X · title** on each card.
+
 ## Shell & Command Reliability
 
 1. **[2026-07-24] Assumed `gh` on PATH**

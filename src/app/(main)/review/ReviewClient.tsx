@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { CheckCircle2, Infinity as InfinityIcon, Play, RotateCcw } from 'lucide-react'
+import { CheckCircle2, ChevronRight, Infinity as InfinityIcon, Play, RotateCcw } from 'lucide-react'
 import { ExerciseCard } from '@/components/lesson/ExerciseCard'
 import type { ExerciseAnswer } from '@/lib/exercises/types'
 import { isExerciseCorrect } from '@/lib/exercises/grading'
@@ -51,6 +51,7 @@ export default function ReviewClient() {
   const [error, setError] = useState<string | null>(null)
   const [completedInSession, setCompletedInSession] = useState(0)
   const [seenTaskIds, setSeenTaskIds] = useState<string[]>([])
+  const [pendingQuality, setPendingQuality] = useState<number | null>(null)
 
   const task = session?.tasks[index]
 
@@ -220,14 +221,16 @@ export default function ReviewClient() {
     setSession(plan)
     setIndex(0)
     setAnswers({})
+    setPendingQuality(null)
     setCompletedInSession(0)
     setError(null)
     if (mode === 'daily') setSeenTaskIds([])
   }
 
-  const advanceAfterCard = (current: ReviewTask, quality: number) => {
+  const goToNextCard = (current: ReviewTask, quality: number) => {
     setCompletedInSession((value) => value + 1)
     setSeenTaskIds((ids) => [...ids, current.id])
+    setPendingQuality(null)
     setPool((currentPool) =>
       currentPool.map((item) => {
         if (item.vocab_id !== current.vocabId) return item
@@ -256,7 +259,6 @@ export default function ReviewClient() {
       setIndex((value) => value + 1)
       return
     }
-    // Keep session object so the “session complete → keep reviewing” screen can show.
     setIndex(session?.tasks.length ?? 0)
   }
 
@@ -303,7 +305,7 @@ export default function ReviewClient() {
   }
 
   const onCardAnswer = async (answer: ExerciseAnswer) => {
-    if (!task) return
+    if (!task || pendingQuality !== null) return
     setAnswers((current) => ({ ...current, [task.id]: answer }))
     const correct = isExerciseCorrect(task.exercise, answer)
     const quality = correct ? 4 : 1
@@ -315,9 +317,7 @@ export default function ReviewClient() {
       } else if (task.vocabId) {
         await persistVocabScore(task, quality)
       }
-      // Brief pause so feedback is visible
-      await new Promise((resolve) => setTimeout(resolve, correct ? 450 : 900))
-      advanceAfterCard(task, quality)
+      setPendingQuality(quality)
     } catch (caughtError) {
       setError(caughtError instanceof Error ? caughtError.message : 'Unable to save this review.')
     } finally {
@@ -416,6 +416,11 @@ export default function ReviewClient() {
             </span>
             <span>{session.mode === 'daily' ? 'DAILY MIX' : 'KEEP GOING'}</span>
           </div>
+          {task.lessonLabel && (
+            <p className="rounded-lg border border-primary/20 bg-primary-fixed/20 px-3 py-2 text-sm font-semibold text-primary">
+              From {task.lessonLabel}
+            </p>
+          )}
           <ExerciseCard
             key={task.id}
             exercise={task.exercise}
@@ -423,7 +428,7 @@ export default function ReviewClient() {
             total={session.tasks.length}
             answer={answers[task.id]}
             onAnswer={(value) => {
-              if (answers[task.id] || loading) return
+              if (answers[task.id] || loading || pendingQuality !== null) return
               void onCardAnswer(value)
             }}
             onMistake={() => {
@@ -431,6 +436,16 @@ export default function ReviewClient() {
             }}
           />
           {loading && <p className="text-center text-sm text-on-surface-variant">Saving…</p>}
+          {pendingQuality !== null && !loading && (
+            <button
+              type="button"
+              onClick={() => goToNextCard(task, pendingQuality)}
+              className="tactile-button flex w-full items-center justify-center gap-2 rounded-xl border-primary-container bg-primary py-4 font-bold text-on-primary"
+            >
+              {index + 1 < session.tasks.length ? 'Next' : 'Finish session'}
+              <ChevronRight className="size-5" />
+            </button>
+          )}
         </section>
       )}
 

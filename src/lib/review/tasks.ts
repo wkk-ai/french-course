@@ -1,5 +1,6 @@
 import type { LessonExercise } from '@/lib/exercises/types'
 import { buildRemediationExercises } from '@/lib/exercises/enrich'
+import { lessonLabelForLemma } from '@/lib/review/lemmas'
 import type { ReviewMistake, ReviewPoolItem, ReviewTask, ReviewTaskKind } from '@/lib/review/types'
 import { MODULE1_VOCABULARY } from '@/lib/module1-content'
 
@@ -110,6 +111,7 @@ export function taskFromPoolItem(item: ReviewPoolItem, kind: ReviewTaskKind, mod
     exercise,
     vocabId: item.vocab_id,
     poolItem: item,
+    lessonLabel: lessonLabelForLemma(item.vocab_id),
   }
 }
 
@@ -125,6 +127,7 @@ export function tasksFromMistakes(mistakes: ReviewMistake[]): ReviewTask[] {
           kind: 'repair',
           mistakeId: mistake.id,
           vocabId: mistake.vocab_id ?? undefined,
+          lessonLabel: lessonLabelForLemma(mistake.vocab_id) ?? 'From a lesson mistake',
           exercise: {
             ...remediation[0],
             id: `repair-ex-${mistake.id}`,
@@ -147,6 +150,7 @@ export function tasksFromMistakes(mistakes: ReviewMistake[]): ReviewTask[] {
         kind: 'repair',
         mistakeId: mistake.id,
         vocabId: mistake.vocab_id ?? undefined,
+        lessonLabel: lessonLabelForLemma(mistake.vocab_id) ?? 'From a lesson mistake',
         exercise: {
           id: `repair-vocab-ex-${mistake.id}`,
           type: 'mcq',
@@ -166,6 +170,7 @@ export function tasksFromMistakes(mistakes: ReviewMistake[]): ReviewTask[] {
       id: `repair-generic-${mistake.id}`,
       kind: 'repair',
       mistakeId: mistake.id,
+      lessonLabel: 'From a lesson mistake',
       exercise: {
         id: `repair-generic-ex-${mistake.id}`,
         type: 'true-false',
