@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { BookOpen, ChevronRight, Eye, Flame, MessagesSquare, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import type { ExerciseAnswer, GrammarRule, LessonContent, VerbConjugation, VocabularyWord, WordToken } from '@/lib/course'
@@ -19,6 +19,17 @@ import { enqueueLocalVocabulary } from '@/lib/local-vocab-vault'
 import { lemmaIdsForChapter, vocabularyRowsForLemmas } from '@/lib/review/lemmas'
 
 type Stage = 'brief' | 'reading' | 'conversation' | 'exercise'
+
+const REGISTER_LABEL: Record<string, string> = {
+  Courant: 'Everyday',
+  Soutenu: 'Formal',
+  Familier: 'Casual',
+  Argot: 'Slang',
+}
+
+function registerDisplay(register: string) {
+  return REGISTER_LABEL[register] ?? register
+}
 
 export default function LessonClient({
   chapterId,
@@ -38,6 +49,7 @@ export default function LessonClient({
   const [stage, setStage] = useState<Stage>('brief')
   const [xRayEnabled, setXRayEnabled] = useState(false)
   const [activeWordId, setActiveWordId] = useState<string | null>(null)
+  const popupRef = useRef<HTMLDivElement | null>(null)
   const [conjugationWord, setConjugationWord] = useState<VocabularyWord | null>(null)
   const [conjugationTense, setConjugationTense] = useState<string>('Présent')
   const [answers, setAnswers] = useState<Record<string, ExerciseAnswer>>({})
@@ -47,6 +59,20 @@ export default function LessonClient({
   const [gate, setGate] = useState<'loading' | 'ready' | 'login' | 'locked'>('loading')
   const router = useRouter()
   const hasConversation = Boolean(content.conversation?.lines.length)
+
+  useEffect(() => {
+    if (!activeWordId) return
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target as Node | null
+      if (!target) return
+      if (popupRef.current?.contains(target)) return
+      // Allow clicking another word button to switch — those set activeWordId themselves.
+      if (target instanceof Element && target.closest('[data-dict-word]')) return
+      setActiveWordId(null)
+    }
+    document.addEventListener('pointerdown', onPointerDown)
+    return () => document.removeEventListener('pointerdown', onPointerDown)
+  }, [activeWordId])
 
   useEffect(() => {
     let cancelled = false
@@ -199,21 +225,37 @@ export default function LessonClient({
           <span key={token.id} className="relative inline">
             {spaceBefore ? ' ' : null}
             {word ? (
-              <button type="button" onClick={() => setActiveWordId(active ? null : token.id)} className={`transition-colors ${clickableClass} ${syntaxClass(token)} ${active ? 'bg-surface-container-high' : ''}`}>
+              <button
+                type="button"
+                data-dict-word
+                onClick={() => setActiveWordId(active ? null : token.id)}
+                className={`transition-colors ${clickableClass} ${syntaxClass(token)} ${active ? 'bg-surface-container-high' : ''}`}
+              >
                 {token.text}
               </button>
             ) : (
               <span className={syntaxClass(token)}>{token.text}</span>
             )}
             {active && word && (
-              <div className="absolute bottom-full left-1/2 z-30 mb-3 w-72 -translate-x-1/2 rounded-xl border-2 border-surface-variant bg-surface-container-lowest p-4 text-left shadow-lg">
+              <div
+                ref={popupRef}
+                role="dialog"
+                aria-label={`${word.word} definition`}
+                onPointerDown={(event) => event.stopPropagation()}
+                className="absolute bottom-full left-1/2 z-30 mb-3 w-72 -translate-x-1/2 rounded-xl border-2 border-surface-variant bg-surface-container-lowest p-4 text-left shadow-lg"
+              >
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <p className="font-bold">{word.word}</p>
                     {word.part_of_speech && <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wide text-on-surface-variant">{word.part_of_speech}{showConjugate ? ' · conjugable' : ''}</p>}
                     {word.ipa_pronunciation && <p className="mt-1 text-xs text-ink-medium">/{word.ipa_pronunciation}/</p>}
                   </div>
-                  <span className="rounded-full bg-primary px-2 py-1 text-[10px] font-bold text-on-primary">{word.register}</span>
+                  <span
+                    title={`Register: ${word.register} — how formal the word sounds`}
+                    className="rounded-full bg-primary px-2 py-1 text-[10px] font-bold text-on-primary"
+                  >
+                    {registerDisplay(word.register)}
+                  </span>
                 </div>
                 {meanings.length > 1 ? (
                   <ul className="mt-3 list-disc space-y-1 pl-4 text-sm text-on-surface-variant">
