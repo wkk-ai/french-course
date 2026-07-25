@@ -346,6 +346,60 @@ export default function LessonClient({
     }
   }
 
+  const wordsReadInLesson = useMemo(() => {
+    if (content.wordCount && content.wordCount > 0) return content.wordCount
+    const readingWords = readingParagraphs.reduce(
+      (sum, paragraph) => sum + paragraph.tokens.filter((token) => !isPunctuationToken(token.text)).length,
+      0,
+    )
+    const dialogueWords = conversationLines.reduce(
+      (sum, line) => sum + line.tokens.filter((token) => !isPunctuationToken(token.text)).length,
+      0,
+    )
+    return readingWords + dialogueWords
+  }, [content.wordCount, readingParagraphs, conversationLines])
+
+  const localDateString = () => {
+    const now = new Date()
+    const year = now.getFullYear()
+    const month = String(now.getMonth() + 1).padStart(2, '0')
+    const day = String(now.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+
+  const recordDailyReading = async (userId: string, words: number) => {
+    if (words <= 0) return
+    try {
+      const supabase = createClient()
+      const today = localDateString()
+      const { data: existing } = await supabase
+        .from('user_daily_reading_stats')
+        .select('words_read, articles_completed')
+        .eq('user_id', userId)
+        .eq('date', today)
+        .maybeSingle()
+      if (existing) {
+        await supabase
+          .from('user_daily_reading_stats')
+          .update({
+            words_read: (existing.words_read ?? 0) + words,
+            articles_completed: (existing.articles_completed ?? 0) + 1,
+          })
+          .eq('user_id', userId)
+          .eq('date', today)
+        return
+      }
+      await supabase.from('user_daily_reading_stats').insert({
+        user_id: userId,
+        date: today,
+        words_read: words,
+        articles_completed: 1,
+      })
+    } catch {
+      // Daily reading stats are best-effort.
+    }
+  }
+
   const completeLesson = async () => {
     if (!answeredAll) return
     setLoading(true)
@@ -361,14 +415,18 @@ export default function LessonClient({
       if (!user) throw new Error('Your session expired. Please sign in again.')
 
       const score = calculateLessonScore(answers, exercises)
+      const wordsRead = wordsReadInLesson
+      // Words are recorded client-side (local date) so the home card updates even if RPC is stale.
+      // Pass 0 here to avoid double-counting when complete_chapter also upserts daily stats.
       const { error: rpcError } = await supabase.rpc('complete_chapter', {
         p_chapter_id: chapterId,
         p_score: score,
-        p_words_read: content.wordCount ?? 0,
+        p_words_read: 0,
         p_grammar_results: grammarResults,
       })
 
       await enqueueLessonVocabulary(user.id)
+      await recordDailyReading(user.id, wordsRead)
 
       if (rpcError) {
         const { error: progressError } = await supabase.from('user_chapter_progress').upsert({

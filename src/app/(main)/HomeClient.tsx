@@ -43,7 +43,8 @@ export default function HomeClient({
       const { data: { user } } = await supabase.auth.getUser()
       if (!user || cancelled) return
 
-      const today = new Date().toISOString().slice(0, 10)
+      const now = new Date()
+      const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
       const [{ data: progress }, { data: todayStats }] = await Promise.all([
         supabase.from('user_chapter_progress').select('chapter_id, status').eq('user_id', user.id),
         supabase.from('user_daily_reading_stats').select('words_read').eq('user_id', user.id).eq('date', today).maybeSingle(),
@@ -88,10 +89,22 @@ export default function HomeClient({
           <div className="text-right">
             <p className="text-label-caps text-on-surface-variant">MODULE 1</p>
             <p className="text-headline-lg text-success">{mastery}%</p>
+            <p className="text-xs text-on-surface-variant">{completedInFirstModule}/{firstModuleChapters.length || 0} chapters</p>
           </div>
         </div>
-        <div className="mt-4 h-2 overflow-hidden rounded-full bg-surface-container-high">
-          <div className="h-full rounded-full bg-success" style={{ width: `${Math.min(100, Math.round((wordsRead / 300) * 100))}%` }} />
+        <div className="mt-4 space-y-2">
+          <div>
+            <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-on-surface-variant">Module progress</p>
+            <div className="h-2 overflow-hidden rounded-full bg-surface-container-high">
+              <div className="h-full rounded-full bg-success transition-all" style={{ width: `${mastery}%` }} />
+            </div>
+          </div>
+          <div>
+            <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-on-surface-variant">Daily reading goal</p>
+            <div className="h-2 overflow-hidden rounded-full bg-surface-container-high">
+              <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${Math.min(100, Math.round((wordsRead / 300) * 100))}%` }} />
+            </div>
+          </div>
         </div>
       </section>
 

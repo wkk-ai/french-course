@@ -57,8 +57,8 @@
 9. **[2026-07-24] Review was recognition-only “caught up”**
    Do instead: `buildReviewSession` + ExerciseCard modalities (meaning/cloze/produce/repair); hub shows pool size + Start session / Keep reviewing.
 
-10. **[2026-07-25] Review auto-advanced past feedback**
-    Do instead: after answer, keep feedback visible until user taps **Next**; show **From Lesson X.X · title** on each card.
+10. **[2026-07-25] Home “Today’s Reading” stuck at 0 words / empty bar**
+    Do instead: record `user_daily_reading_stats` **client-side** on lesson complete (local date); home bar for module % ≠ daily words — show both; never rely only on `complete_chapter` for daily words.
 
 ## Shell & Command Reliability
 
