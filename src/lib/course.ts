@@ -67,15 +67,7 @@ export type VerbConjugation = {
   order_index: number
 }
 
-export type GrammarRule = {
-  id: string
-  slug: string
-  title: string
-  category: string
-  summary: string
-  full_explanation: string
-  examples: { french: string; english: string }[]
-}
+export type { GrammarRule, GrammarRuleDocument, GrammarRuleSummary } from '@/lib/rules/types'
 
 export function hasLessonContent(content: unknown): content is LessonContent {
   if (!content || typeof content !== 'object') return false

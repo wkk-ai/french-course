@@ -54,6 +54,10 @@ export function resolveConjugations(lemmaIds: string[], fromDb: VerbConjugation[
 
 export function resolveRules(slugs: string[], fromDb: GrammarRule[]): GrammarRule[] {
   const bySlug = new Map(MODULE1_RULES.map((rule) => [rule.slug, rule]))
-  for (const rule of fromDb) bySlug.set(rule.slug, rule)
+  for (const rule of fromDb) {
+    const existing = bySlug.get(rule.slug)
+    // Prefer rich bundled documents over thin DB stubs.
+    bySlug.set(rule.slug, existing ?? rule)
+  }
   return slugs.map((slug) => bySlug.get(slug)).filter((rule): rule is GrammarRule => Boolean(rule))
 }

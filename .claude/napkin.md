@@ -23,6 +23,9 @@
 5. **[2026-07-25] Story-memory + proper-name quizzes shipped**
    Do instead: exercises quiz **French** (vocab/grammar), never “where does Marie live?” plot recall; never flashcard/review **proper nouns**; enforce via `isStoryMemoryExercise` + `isReviewablePartOfSpeech` + CI.
 
+6. **[2026-07-25] Grammar rules were one-paragraph stubs, always unlocked**
+   Do instead: deep `GrammarRuleDocument` (quick/deep/examples/try tabs); unlock via completed `ruleSlugs` chapters; `validateGrammarRule` authoring bar (≥600 words, ≥8 examples, tables, drills).
+
 ## User Directives
 
 1. **[2026-07-24] Always commit + push when finished (this chat / this product)**

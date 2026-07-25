@@ -14,6 +14,9 @@ import { deriveChapterStatus } from '../src/lib/progression'
 import { buildFlashcardDeck, flashcardQuality } from '../src/lib/review/flashcards'
 import { lemmaIdsForChapter, lessonLabelForLemma } from '../src/lib/review/lemmas'
 import { buildReviewSession } from '../src/lib/review/session'
+import { MODULE1_RULES } from '../src/lib/rules/catalog'
+import { isRuleUnlocked } from '../src/lib/rules/unlock'
+import { validateGrammarRule } from '../src/lib/rules/validate'
 import { calculateSrsSchedule } from '../src/lib/srs'
 
 test('legacy Module 1 duplicates are filtered from the catalog', () => {
@@ -363,4 +366,24 @@ test('repair-style mistake context is never turned into a true-false review card
   const session = buildReviewSession(pool, 'daily', { size: 5 })
   assert.ok(session.tasks.every((task) => task.exercise.type !== 'true-false' || validateLessonExercise(task.exercise).ok))
   assert.ok(session.tasks.every((task) => !String(task.exercise.prompt).includes('Repair:')))
+})
+
+test('every Module 1 grammar rule meets the deep authoring bar', () => {
+  assert.equal(MODULE1_RULES.length, 8)
+  for (const rule of MODULE1_RULES) {
+    const result = validateGrammarRule(rule)
+    assert.equal(result.ok, true, `${rule.slug}: ${!result.ok ? result.reason : ''}`)
+    for (const drill of rule.drills) {
+      assert.equal(validateLessonExercise(drill.exercise).ok, true, `${rule.slug} drill ${drill.id}`)
+    }
+  }
+})
+
+test('rules unlock only after the teaching chapter is completed', () => {
+  const pronouns = MODULE1_RULES.find((rule) => rule.slug === 'subject-pronouns')!
+  assert.equal(isRuleUnlocked(pronouns, new Set()), false)
+  assert.equal(isRuleUnlocked(pronouns, new Set(['22222222-0000-0000-0000-000000000101'])), true)
+  const articles = MODULE1_RULES.find((rule) => rule.slug === 'articles-partitives')!
+  assert.equal(isRuleUnlocked(articles, new Set(['22222222-0000-0000-0000-000000000101'])), false)
+  assert.equal(isRuleUnlocked(articles, new Set(['22222222-0000-0000-0000-000000000103'])), true)
 })

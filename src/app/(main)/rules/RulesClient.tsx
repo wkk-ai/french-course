@@ -1,90 +1,112 @@
-'use client';
+'use client'
 
-import { useEffect, useState } from 'react';
-import { createClient } from '@/utils/supabase/client';
-import Link from 'next/link';
-import { Search, ChevronRight } from 'lucide-react';
-import type { GrammarRule } from '@/lib/course';
+import { useEffect, useState } from 'react'
+import Link from 'next/link'
+import { ChevronRight, Lock, Search } from 'lucide-react'
+import { createClient } from '@/utils/supabase/client'
+import type { GrammarRuleDocument } from '@/lib/rules/types'
+import { isRuleUnlocked, masteryLabel, masteryStage, unlockTeaser } from '@/lib/rules/unlock'
 
 const categoryColorMap: Record<string, string> = {
-  'Verbs': 'bg-syntax-verb',
-  'Nouns': 'bg-syntax-noun',
-  'Syntax': 'bg-syntax-adj',
-  'Phonetics': 'bg-primary',
-};
+  Verbs: 'bg-syntax-verb',
+  Nouns: 'bg-syntax-noun',
+  Syntax: 'bg-syntax-adj',
+  Phonetics: 'bg-primary',
+}
 
 type Mastery = {
-  grammar_category: string;
-  total_attempts: number;
-  correct_attempts: number;
-};
+  grammar_category: string
+  total_attempts: number
+  correct_attempts: number
+}
 
-export default function RulesClient({ rules }: { rules: GrammarRule[] }) {
-  const [activeCategory, setActiveCategory] = useState('All');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [mastery, setMastery] = useState<Mastery[]>([]);
+export default function RulesClient({ rules }: { rules: GrammarRuleDocument[] }) {
+  const [activeCategory, setActiveCategory] = useState('All')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [mastery, setMastery] = useState<Mastery[]>([])
+  const [completed, setCompleted] = useState<Set<string>>(new Set())
+  const [booting, setBooting] = useState(true)
 
   useEffect(() => {
     let cancelled = false
     ;(async () => {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user || cancelled) return
-      const { data } = await supabase
-        .from('user_grammar_mastery')
-        .select('grammar_category, total_attempts, correct_attempts')
-        .eq('user_id', user.id)
-      if (!cancelled) setMastery(data ?? [])
-    })().catch(() => {})
+      if (!user || cancelled) {
+        if (!cancelled) setBooting(false)
+        return
+      }
+      const [{ data: masteryData }, { data: progress }] = await Promise.all([
+        supabase.from('user_grammar_mastery').select('grammar_category, total_attempts, correct_attempts').eq('user_id', user.id),
+        supabase.from('user_chapter_progress').select('chapter_id').eq('user_id', user.id).eq('status', 'completed'),
+      ])
+      if (cancelled) return
+      setMastery(masteryData ?? [])
+      setCompleted(new Set((progress ?? []).map((row) => row.chapter_id)))
+      setBooting(false)
+    })().catch(() => {
+      if (!cancelled) setBooting(false)
+    })
     return () => {
       cancelled = true
     }
   }, [])
 
-  const categories = ['All', ...Array.from(new Set(rules.map(r => r.category)))];
+  const categories = ['All', ...Array.from(new Set(rules.map((rule) => rule.category)))]
 
-  const filteredRules = rules.filter(rule => {
-    const matchesCategory = activeCategory === 'All' || rule.category === activeCategory;
-    const matchesSearch = !searchQuery || 
+  const filteredRules = rules.filter((rule) => {
+    const matchesCategory = activeCategory === 'All' || rule.category === activeCategory
+    const matchesSearch =
+      !searchQuery ||
       rule.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      rule.summary.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+      rule.summary.toLowerCase().includes(searchQuery.toLowerCase())
+    return matchesCategory && matchesSearch
+  })
 
-  const getMastery = (category: string) => {
-    const m = mastery.find((item) => item.grammar_category === category);
-    return m && m.total_attempts > 0 ? Math.round((m.correct_attempts / m.total_attempts) * 100) : 0;
-  };
+  const getStage = (rule: GrammarRuleDocument) => {
+    const unlocked = isRuleUnlocked(rule, completed)
+    const rows = mastery.filter((item) => rule.masteryCategories.includes(item.grammar_category))
+    const total = rows.reduce((sum, row) => sum + (row.total_attempts ?? 0), 0)
+    const correct = rows.reduce((sum, row) => sum + (row.correct_attempts ?? 0), 0)
+    return masteryStage(unlocked, correct, total)
+  }
+
+  const unlockedCount = rules.filter((rule) => isRuleUnlocked(rule, completed)).length
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Search Bar */}
       <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-on-surface-variant" />
-        <input 
-          type="text" 
-          placeholder="Search grammar rules..." 
+        <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-on-surface-variant" />
+        <input
+          type="text"
+          placeholder="Search grammar rules..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full bg-surface-container-lowest border-2 border-surface-variant rounded-full py-3 pl-12 pr-4 text-body-ui text-on-surface outline-none focus:border-primary transition-colors"
+          onChange={(event) => setSearchQuery(event.target.value)}
+          className="w-full rounded-full border-2 border-surface-variant bg-surface-container-lowest py-3 pl-12 pr-4 text-body-ui text-on-surface outline-none transition-colors focus:border-primary"
         />
       </div>
 
-      {/* Title Block */}
       <div>
         <h1 className="text-headline-lg text-on-surface">Grammar Rulebook</h1>
-        <p className="text-body-reading text-on-surface-variant mt-2">Your complete reference guide to French structure.</p>
+        <p className="mt-2 text-body-reading text-on-surface-variant">
+          Deep reference pages unlock when you finish the lesson that teaches them.
+          {!booting && (
+            <span className="mt-1 block text-sm">
+              Unlocked: {unlockedCount}/{rules.length}
+            </span>
+          )}
+        </p>
       </div>
 
-      {/* Category Pills */}
-      <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 hide-scrollbar">
-        {categories.map(cat => (
-          <button 
+      <div className="hide-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 pb-2 md:mx-0 md:px-0">
+        {categories.map((cat) => (
+          <button
             key={cat}
+            type="button"
             onClick={() => setActiveCategory(cat)}
-            className={`whitespace-nowrap px-4 py-2 rounded-full text-label-caps font-bold transition-colors ${
-              activeCategory === cat 
-                ? 'bg-primary text-on-primary' 
+            className={`whitespace-nowrap rounded-full px-4 py-2 text-label-caps font-bold transition-colors ${
+              activeCategory === cat
+                ? 'bg-primary text-on-primary'
                 : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high'
             }`}
           >
@@ -93,44 +115,54 @@ export default function RulesClient({ rules }: { rules: GrammarRule[] }) {
         ))}
       </div>
 
-      {/* Rule Cards */}
       {filteredRules.length === 0 ? (
-        <div className="text-center py-12 text-on-surface-variant">
-          <p className="text-body-ui">No grammar rules found. Complete lessons to unlock rules!</p>
+        <div className="py-12 text-center text-on-surface-variant">
+          <p className="text-body-ui">No grammar rules match your search.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {filteredRules.map(rule => {
-            const masteryPct = getMastery(rule.slug);
-            const colorClass = categoryColorMap[rule.category] || 'bg-primary';
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {filteredRules.map((rule) => {
+            const unlocked = isRuleUnlocked(rule, completed)
+            const stage = getStage(rule)
+            const colorClass = categoryColorMap[rule.category] || 'bg-primary'
             return (
-              <Link href={`/rules/${rule.slug}`} key={rule.id} className="tactile-card p-4 flex flex-col hover:bg-surface-container-low cursor-pointer transition-colors group">
-                <div className="flex items-start justify-between mb-2">
-                  <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full text-on-primary ${colorClass}`}>
+              <Link
+                href={`/rules/${rule.slug}/`}
+                key={rule.id}
+                className={`tactile-card group flex cursor-pointer flex-col p-4 transition-colors hover:bg-surface-container-low ${
+                  unlocked ? '' : 'opacity-80'
+                }`}
+              >
+                <div className="mb-2 flex items-start justify-between">
+                  <span className={`rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-on-primary ${colorClass}`}>
                     {rule.category}
                   </span>
-                  <ChevronRight className="w-5 h-5 text-on-surface-variant group-hover:text-primary transition-colors" />
+                  {unlocked ? (
+                    <ChevronRight className="h-5 w-5 text-on-surface-variant transition-colors group-hover:text-primary" />
+                  ) : (
+                    <Lock className="h-5 w-5 text-on-surface-variant" />
+                  )}
                 </div>
-                <h3 className="text-body-ui font-bold text-on-surface mb-1">{rule.title}</h3>
-                <p className="text-body-ui text-on-surface-variant text-sm line-clamp-2 flex-1 mb-4">{rule.summary}</p>
-                
-                {/* Mastery Bar */}
-                <div className="flex items-center gap-2 mt-auto">
-                  <span className="text-label-caps text-on-surface-variant">MASTERY</span>
-                  <div className="flex-1 h-2 bg-surface-container-high rounded-full overflow-hidden">
-                    <div 
-                      className={`h-full rounded-full ${
-                        masteryPct >= 80 ? 'bg-success' : masteryPct > 30 ? 'bg-warning' : 'bg-surface-variant'
-                      }`} 
-                      style={{ width: `${Math.max(masteryPct, 5)}%` }} 
-                    />
-                  </div>
+                <h3 className="mb-1 text-body-ui font-bold text-on-surface">{rule.title}</h3>
+                <p className="mb-4 line-clamp-2 flex-1 text-sm text-body-ui text-on-surface-variant">{rule.summary}</p>
+                <div className="mt-auto flex items-center gap-2">
+                  <span className="text-label-caps text-on-surface-variant">{unlocked ? masteryLabel(stage) : unlockTeaser(rule)}</span>
+                  {unlocked && (
+                    <div className="h-2 flex-1 overflow-hidden rounded-full bg-surface-container-high">
+                      <div
+                        className={`h-full rounded-full ${
+                          stage === 'solid' ? 'bg-success' : stage === 'practiced' ? 'bg-warning' : 'bg-surface-variant'
+                        }`}
+                        style={{ width: stage === 'solid' ? '100%' : stage === 'practiced' ? '70%' : '35%' }}
+                      />
+                    </div>
+                  )}
                 </div>
               </Link>
-            );
+            )
           })}
         </div>
       )}
     </div>
-  );
+  )
 }
