@@ -1,11 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { ChevronRight, Lock, Search } from 'lucide-react'
+import { ChevronRight, Search } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 import type { GrammarRuleDocument } from '@/lib/rules/types'
-import { isRuleUnlocked, masteryLabel, masteryStage, unlockTeaser } from '@/lib/rules/unlock'
+import { isRuleUnlocked, masteryLabel, masteryStage } from '@/lib/rules/unlock'
 
 const categoryColorMap: Record<string, string> = {
   Verbs: 'bg-syntax-verb',
@@ -52,9 +52,17 @@ export default function RulesClient({ rules }: { rules: GrammarRuleDocument[] })
     }
   }, [])
 
-  const categories = ['All', ...Array.from(new Set(rules.map((rule) => rule.category)))]
+  const unlockedRules = useMemo(
+    () => (booting ? [] : rules.filter((rule) => isRuleUnlocked(rule, completed))),
+    [booting, rules, completed],
+  )
 
-  const filteredRules = rules.filter((rule) => {
+  const categories = useMemo(
+    () => ['All', ...Array.from(new Set(unlockedRules.map((rule) => rule.category)))],
+    [unlockedRules],
+  )
+
+  const filteredRules = unlockedRules.filter((rule) => {
     const matchesCategory = activeCategory === 'All' || rule.category === activeCategory
     const matchesSearch =
       !searchQuery ||
@@ -64,14 +72,11 @@ export default function RulesClient({ rules }: { rules: GrammarRuleDocument[] })
   })
 
   const getStage = (rule: GrammarRuleDocument) => {
-    const unlocked = isRuleUnlocked(rule, completed)
     const rows = mastery.filter((item) => rule.masteryCategories.includes(item.grammar_category))
     const total = rows.reduce((sum, row) => sum + (row.total_attempts ?? 0), 0)
     const correct = rows.reduce((sum, row) => sum + (row.correct_attempts ?? 0), 0)
-    return masteryStage(unlocked, correct, total)
+    return masteryStage(true, correct, total)
   }
-
-  const unlockedCount = rules.filter((rule) => isRuleUnlocked(rule, completed)).length
 
   return (
     <div className="flex flex-col gap-6">
@@ -89,74 +94,71 @@ export default function RulesClient({ rules }: { rules: GrammarRuleDocument[] })
       <div>
         <h1 className="text-headline-lg text-on-surface">Grammar Rulebook</h1>
         <p className="mt-2 text-body-reading text-on-surface-variant">
-          Deep reference pages unlock when you finish the lesson that teaches them.
-          {!booting && (
-            <span className="mt-1 block text-sm">
-              Unlocked: {unlockedCount}/{rules.length}
-            </span>
+          Rules appear here after you finish the lesson that teaches them.
+          {!booting && unlockedRules.length > 0 && (
+            <span className="mt-1 block text-sm">{unlockedRules.length} unlocked</span>
           )}
         </p>
       </div>
 
-      <div className="hide-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 pb-2 md:mx-0 md:px-0">
-        {categories.map((cat) => (
-          <button
-            key={cat}
-            type="button"
-            onClick={() => setActiveCategory(cat)}
-            className={`whitespace-nowrap rounded-full px-4 py-2 text-label-caps font-bold transition-colors ${
-              activeCategory === cat
-                ? 'bg-primary text-on-primary'
-                : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high'
-            }`}
-          >
-            {cat}
-          </button>
-        ))}
-      </div>
+      {!booting && unlockedRules.length > 0 && (
+        <div className="hide-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 pb-2 md:mx-0 md:px-0">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              type="button"
+              onClick={() => setActiveCategory(cat)}
+              className={`whitespace-nowrap rounded-full px-4 py-2 text-label-caps font-bold transition-colors ${
+                activeCategory === cat
+                  ? 'bg-primary text-on-primary'
+                  : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      )}
 
-      {filteredRules.length === 0 ? (
+      {booting ? (
+        <p className="py-8 text-center text-on-surface-variant">Loading rules…</p>
+      ) : filteredRules.length === 0 ? (
         <div className="py-12 text-center text-on-surface-variant">
-          <p className="text-body-ui">No grammar rules match your search.</p>
+          <p className="text-body-ui">
+            {unlockedRules.length === 0
+              ? 'No rules unlocked yet. Finish a lesson to open its grammar page here.'
+              : 'No grammar rules match your search.'}
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {filteredRules.map((rule) => {
-            const unlocked = isRuleUnlocked(rule, completed)
             const stage = getStage(rule)
             const colorClass = categoryColorMap[rule.category] || 'bg-primary'
             return (
               <Link
                 href={`/rules/${rule.slug}/`}
                 key={rule.id}
-                className={`tactile-card group flex cursor-pointer flex-col p-4 transition-colors hover:bg-surface-container-low ${
-                  unlocked ? '' : 'opacity-80'
-                }`}
+                className="tactile-card group flex cursor-pointer flex-col p-4 transition-colors hover:bg-surface-container-low"
               >
                 <div className="mb-2 flex items-start justify-between">
                   <span className={`rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-on-primary ${colorClass}`}>
                     {rule.category}
                   </span>
-                  {unlocked ? (
-                    <ChevronRight className="h-5 w-5 text-on-surface-variant transition-colors group-hover:text-primary" />
-                  ) : (
-                    <Lock className="h-5 w-5 text-on-surface-variant" />
-                  )}
+                  <ChevronRight className="h-5 w-5 text-on-surface-variant transition-colors group-hover:text-primary" />
                 </div>
                 <h3 className="mb-1 text-body-ui font-bold text-on-surface">{rule.title}</h3>
                 <p className="mb-4 line-clamp-2 flex-1 text-sm text-body-ui text-on-surface-variant">{rule.summary}</p>
                 <div className="mt-auto flex items-center gap-2">
-                  <span className="text-label-caps text-on-surface-variant">{unlocked ? masteryLabel(stage) : unlockTeaser(rule)}</span>
-                  {unlocked && (
-                    <div className="h-2 flex-1 overflow-hidden rounded-full bg-surface-container-high">
-                      <div
-                        className={`h-full rounded-full ${
-                          stage === 'solid' ? 'bg-success' : stage === 'practiced' ? 'bg-warning' : 'bg-surface-variant'
-                        }`}
-                        style={{ width: stage === 'solid' ? '100%' : stage === 'practiced' ? '70%' : '35%' }}
-                      />
-                    </div>
-                  )}
+                  <span className="text-label-caps text-on-surface-variant">{masteryLabel(stage)}</span>
+                  <div className="h-2 flex-1 overflow-hidden rounded-full bg-surface-container-high">
+                    <div
+                      className={`h-full rounded-full ${
+                        stage === 'solid' ? 'bg-success' : stage === 'practiced' ? 'bg-warning' : 'bg-surface-variant'
+                      }`}
+                      style={{ width: stage === 'solid' ? '100%' : stage === 'practiced' ? '70%' : '35%' }}
+                    />
+                  </div>
                 </div>
               </Link>
             )

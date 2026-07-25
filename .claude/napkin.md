@@ -23,8 +23,8 @@
 5. **[2026-07-25] Story-memory + proper-name quizzes shipped (incl. “Marie orders…”)**
    Do instead: quiz **French** only — ban Name+plot (`Marie orders…`, `Marc asks for…`, `Marc and Marie sit…`, `Name's birthday/mother…`, `How many … does Marc…`) plus reading-recall phrasing; never flashcard **proper nouns**; CI must validate **raw** `MODULE1_LESSONS` (not only enriched) so bad items cannot hide behind silent strip.
 
-6. **[2026-07-25] Grammar rules were one-paragraph stubs, always unlocked**
-   Do instead: deep `GrammarRuleDocument` (quick/deep/examples/try tabs); unlock via completed `ruleSlugs` chapters; `validateGrammarRule` authoring bar (≥600 words, ≥8 examples, tables, drills).
+6. **[2026-07-25] Grammar rules were stubs / locked rules shown as tease**
+   Do instead: deep `GrammarRuleDocument` + unlock by lesson; **hide locked rules** in the list (no lock cards / titles); detail URL for locked = generic “not available yet”, no spoilers.
 
 ## User Directives
 

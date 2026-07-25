@@ -120,16 +120,16 @@ export function RuleDetailClient({ rule }: { rule: GrammarRuleDocument }) {
     const first = rule.unlockChapterIds[0]
     return (
       <div className="tactile-card mt-6 space-y-4 p-6">
-        <p className="text-label-caps text-primary">{rule.category}</p>
-        <h1 className="text-headline-lg">{rule.title}</h1>
-        <p className="text-body-reading text-on-surface-variant">{rule.summary}</p>
-        <div className="rounded-xl border-2 border-dashed border-surface-variant bg-surface-container-low p-4">
-          <p className="font-bold text-on-surface">Locked</p>
-          <p className="mt-1 text-sm text-on-surface-variant">
-            Complete {first ? lessonLabelForChapter(first) : 'the related lesson'} to unlock the full rulebook page.
-          </p>
+        <h1 className="text-headline-lg">Rule not available yet</h1>
+        <p className="text-body-reading text-on-surface-variant">
+          Finish {first ? lessonLabelForChapter(first) : 'the related lesson'} first. Locked rules stay hidden in the rulebook until then.
+        </p>
+        <div className="flex flex-wrap gap-3">
+          <Link href="/rules/" className="tactile-button inline-flex rounded-lg border-2 border-surface-variant bg-surface-container-low px-4 py-2 text-sm font-bold text-on-surface">
+            Back to rulebook
+          </Link>
           {first && (
-            <Link href={`/lesson/${first}/`} className="tactile-button mt-4 inline-flex rounded-lg border-primary-container bg-primary px-4 py-2 text-sm font-bold text-on-primary">
+            <Link href={`/lesson/${first}/`} className="tactile-button inline-flex rounded-lg border-primary-container bg-primary px-4 py-2 text-sm font-bold text-on-primary">
               Go to lesson
             </Link>
           )}
