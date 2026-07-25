@@ -1,8 +1,9 @@
 import type { FlashcardDeck, FlashcardItem, FlashcardPosFilter, ReviewPoolItem } from '@/lib/review/types'
+import { isReviewablePartOfSpeech } from '@/lib/exercises/validate'
 
 const POS_MATCH: Record<Exclude<FlashcardPosFilter, 'all'>, string[]> = {
   verb: ['verb'],
-  noun: ['noun', 'proper noun'],
+  noun: ['noun'], // never proper nouns — names are not flashcard targets
   adjective: ['adjective'],
   adverb: ['adverb'],
   pronoun: ['pronoun'],
@@ -18,6 +19,7 @@ export const FLASHCARD_FILTERS: Array<{ id: FlashcardPosFilter; label: string }>
 ]
 
 export function matchesPosFilter(partOfSpeech: string | null | undefined, filter: FlashcardPosFilter): boolean {
+  if (!isReviewablePartOfSpeech(partOfSpeech)) return false
   if (filter === 'all') return true
   const normalized = (partOfSpeech ?? '').toLowerCase().trim()
   return POS_MATCH[filter].includes(normalized)

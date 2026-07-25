@@ -517,15 +517,15 @@ export const MODULE1_LESSONS: Record<string, LessonContent> = {
           },
           {
                 "id": "c1-e15",
-                "category": "reading",
-                "prompt": "Where does Marie live?",
+                "category": "habiter",
+                "prompt": "How do you say “She lives in Lyon”?",
                 "options": [
-                      "Paris",
-                      "Lyon",
-                      "Londres"
+                      "Elle habite à Lyon.",
+                      "Elle est à Lyon.",
+                      "Elle a Lyon."
                 ],
-                "answer": 1,
-                "explanation": "Marie habite à Lyon."
+                "answer": 0,
+                "explanation": "Habiter + à + city: Elle habite à Lyon."
           },
           {
                 "id": "c1-e16",
@@ -601,15 +601,15 @@ export const MODULE1_LESSONS: Record<string, LessonContent> = {
           },
           {
                 "id": "c1-e22",
-                "category": "reading",
-                "prompt": "What is \"very important\" in the reading about c'est vs il est?",
+                "category": "cest-versus-il-est",
+                "prompt": "Which sentence identifies someone by name?",
                 "options": [
-                      "the difference",
-                      "the weather",
-                      "the price"
+                      "C'est Marie.",
+                      "Elle est Marie.",
+                      "Il est Marie."
                 ],
                 "answer": 0,
-                "explanation": "C'est une différence très importante."
+                "explanation": "C'est + name. Il/elle est + adjective or nationality."
           },
           {
                 "id": "c1-e23",
@@ -1413,15 +1413,15 @@ export const MODULE1_LESSONS: Record<string, LessonContent> = {
           },
           {
                 "id": "c4-e8",
-                "category": "conversation",
-                "prompt": "Where do Marc's parents live?",
+                "category": "family",
+                "prompt": "“My parents live in Lyon” in French is…",
                 "options": [
-                      "Paris",
-                      "Lyon",
-                      "Londres"
+                      "Mes parents habitent à Lyon.",
+                      "Mes parents sont à Lyon.",
+                      "Mon parents habitent à Lyon."
                 ],
-                "answer": 1,
-                "explanation": "Mes parents habitent à Lyon."
+                "answer": 0,
+                "explanation": "Mes parents + habitent à + city."
           },
           {
                 "id": "c4-e9",

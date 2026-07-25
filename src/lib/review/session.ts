@@ -1,4 +1,5 @@
 import { taskFromPoolItem } from '@/lib/review/tasks'
+import { isReviewablePartOfSpeech } from '@/lib/exercises/validate'
 import type {
   ReviewPoolItem,
   ReviewSessionPlan,
@@ -19,6 +20,10 @@ function isSoon(item: ReviewPoolItem, now: number) {
 
 function isOverdue(item: ReviewPoolItem, now: number) {
   return new Date(item.next_review_at).getTime() < now - DAY_MS
+}
+
+function isQuizWorthy(item: ReviewPoolItem) {
+  return isReviewablePartOfSpeech(item.part_of_speech)
 }
 
 function interleaveTasks(tasks: ReviewTask[]): ReviewTask[] {
@@ -48,6 +53,7 @@ function interleaveTasks(tasks: ReviewTask[]): ReviewTask[] {
 /**
  * Build a review session from the master pool.
  * Never returns empty when the pool has items — fills with spiral/weak/soon.
+ * Proper nouns (names/places as lemmas) are excluded — quiz French, not labels.
  */
 export function buildReviewSession(
   pool: ReviewPoolItem[],
@@ -57,12 +63,13 @@ export function buildReviewSession(
   const size = options?.size ?? (mode === 'daily' ? 15 : 12)
   const exclude = new Set(options?.excludeTaskIds ?? [])
   const now = Date.now()
+  const quizPool = pool.filter(isQuizWorthy)
 
-  const overdue = pool.filter((item) => isOverdue(item, now)).sort((a, b) => a.next_review_at.localeCompare(b.next_review_at))
-  const due = pool.filter((item) => isDue(item, now) && !isOverdue(item, now)).sort((a, b) => a.next_review_at.localeCompare(b.next_review_at))
-  const soon = pool.filter((item) => isSoon(item, now)).sort((a, b) => a.next_review_at.localeCompare(b.next_review_at))
-  const weak = [...pool].sort((a, b) => b.mistake_count - a.mistake_count || a.next_review_at.localeCompare(b.next_review_at))
-  const spiral = [...pool].sort((a, b) => (a.last_reviewed_at ?? '').localeCompare(b.last_reviewed_at ?? '') || a.vocab_id.localeCompare(b.vocab_id))
+  const overdue = quizPool.filter((item) => isOverdue(item, now)).sort((a, b) => a.next_review_at.localeCompare(b.next_review_at))
+  const due = quizPool.filter((item) => isDue(item, now) && !isOverdue(item, now)).sort((a, b) => a.next_review_at.localeCompare(b.next_review_at))
+  const soon = quizPool.filter((item) => isSoon(item, now)).sort((a, b) => a.next_review_at.localeCompare(b.next_review_at))
+  const weak = [...quizPool].sort((a, b) => b.mistake_count - a.mistake_count || a.next_review_at.localeCompare(b.next_review_at))
+  const spiral = [...quizPool].sort((a, b) => (a.last_reviewed_at ?? '').localeCompare(b.last_reviewed_at ?? '') || a.vocab_id.localeCompare(b.vocab_id))
 
   const tasks: ReviewTask[] = []
   const usedVocab = new Set<string>()
@@ -94,13 +101,13 @@ export function buildReviewSession(
   }
 
   let pass = 0
-  while (tasks.length < size && pool.length > 0 && pass < 5) {
+  while (tasks.length < size && quizPool.length > 0 && pass < 5) {
     pushFrom(spiral, 'spiral', size - tasks.length, pass + 3)
     pass += 1
   }
 
-  while (tasks.length < size && pool.length > 0) {
-    const item = pool[tasks.length % pool.length]
+  while (tasks.length < size && quizPool.length > 0) {
+    const item = quizPool[tasks.length % quizPool.length]
     const task = taskFromPoolItem(item, 'spiral', tasks.length)
     if (!task) break
     task.id = `${task.id}-extra-${tasks.length}`
@@ -110,11 +117,11 @@ export function buildReviewSession(
 
   const mixed = interleaveTasks(tasks).slice(0, size)
   const dueCount = overdue.length + due.length
-  const weakCount = pool.filter((item) => item.mistake_count > 0).length
+  const weakCount = quizPool.filter((item) => item.mistake_count > 0).length
   return {
     mode,
     tasks: mixed,
-    poolSize: pool.length,
+    poolSize: quizPool.length,
     dueCount,
     weakCount,
     estimatedMinutes: Math.max(5, Math.round(mixed.length * 0.8)),

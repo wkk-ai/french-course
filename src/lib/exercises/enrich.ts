@@ -1,6 +1,7 @@
 import type { LessonExercise } from '@/lib/exercises/types'
 import { CHAPTER_EXERCISE_EXTRAS } from '@/lib/exercises/chapter-extras'
 import { MODULE1_CHAPTER_IDS, MODULE1_LESSONS } from '@/lib/module1-content'
+import { validateLessonExercise } from '@/lib/exercises/validate'
 
 const FILL_IN_RE = /^(?:Complete|Fill in):\s*(.+)$/i
 
@@ -469,5 +470,6 @@ export function enrichLessonExercises(chapterId: string, base: LessonExercise[] 
   const spiral = spiralExercises(chapterId)
   const remediation = buildRemediationExercises(remediationCategories)
   const merged = [...normalized, ...extras, ...spiral, ...remediation]
-  return interleaveExercises(merged)
+  const valid = merged.filter((exercise) => validateLessonExercise(exercise).ok)
+  return interleaveExercises(valid)
 }

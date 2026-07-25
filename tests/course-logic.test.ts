@@ -132,11 +132,12 @@ test('infinite review session never empties when the pool has items', () => {
     source: 'local' as const,
     word: ['bonjour', 'je', "s'appeler", 'Marc', 'être'][index],
     base_translation: ['hello', 'I', 'to be called', 'Marc', 'to be'][index],
+    part_of_speech: ['interjection', 'pronoun', 'verb', 'proper noun', 'verb'][index],
   }))
   const daily = buildReviewSession(pool, 'daily', { size: 12 })
   assert.equal(daily.tasks.length, 12)
-  assert.equal(daily.poolSize, 5)
-  assert.equal(daily.weakCount, 4)
+  assert.equal(daily.poolSize, 4) // Marc (proper noun) excluded
+  assert.ok(daily.tasks.every((task) => task.poolItem?.part_of_speech !== 'proper noun'))
   assert.ok(daily.tasks.every((task) => task.kind !== ('repair' as typeof task.kind)))
   const cont = buildReviewSession(pool, 'continue', { size: 10 })
   assert.equal(cont.tasks.length, 10)
@@ -148,9 +149,84 @@ test('infinite review session never empties when the pool has items', () => {
 
 test('Module 1.1 ships enough lemmas for review backfill', () => {
   const ids = lemmaIdsForChapter('22222222-0000-0000-0000-000000000101')
-  assert.ok(ids.length >= 40)
+  assert.ok(ids.length >= 35)
+  assert.ok(!ids.includes('42a8a816-c56b-4e67-8549-bdfbc98e9b60')) // Marc proper noun
   const label = lessonLabelForLemma('32a8a816-c56b-4e67-8549-bdfbc98e9b60')
   assert.ok(label?.startsWith('Lesson 1.1'))
+})
+
+test('story-memory and character-fact exercises are rejected', () => {
+  const story = validateLessonExercise({
+    id: 'story',
+    type: 'reading',
+    category: 'reading',
+    prompt: 'According to the reading, where does Marie live?',
+    options: ['Paris', 'Lyon', 'London'],
+    answer: 1,
+    explanation: 'x',
+  })
+  assert.equal(story.ok, false)
+
+  const character = validateLessonExercise({
+    id: 'char',
+    type: 'mcq',
+    category: 'reading',
+    prompt: "Where do Marc's parents live?",
+    options: ['Paris', 'Lyon', 'Londres'],
+    answer: 1,
+    explanation: 'x',
+  })
+  assert.equal(character.ok, false)
+
+  const linguistic = validateLessonExercise({
+    id: 'ok',
+    type: 'mcq',
+    category: 'habiter',
+    prompt: 'How do you say “She lives in Lyon”?',
+    options: ['Elle habite à Lyon.', 'Elle est à Lyon.', 'Elle a Lyon.'],
+    answer: 0,
+    explanation: 'x',
+  })
+  assert.equal(linguistic.ok, true)
+})
+
+test('flashcards and review never include proper nouns', () => {
+  const now = Date.now()
+  const pool = [
+    {
+      vocab_id: 'marc',
+      repetition_count: 0,
+      ease_factor: 2.5,
+      interval_days: 0,
+      total_encounters: 1,
+      mistake_count: 5,
+      next_review_at: new Date(now - 1000).toISOString(),
+      last_reviewed_at: null,
+      source: 'local' as const,
+      word: 'Marc',
+      base_translation: 'Marc',
+      part_of_speech: 'proper noun',
+    },
+    {
+      vocab_id: 'habiter',
+      repetition_count: 0,
+      ease_factor: 2.5,
+      interval_days: 0,
+      total_encounters: 1,
+      mistake_count: 1,
+      next_review_at: new Date(now - 1000).toISOString(),
+      last_reviewed_at: null,
+      source: 'local' as const,
+      word: 'habiter',
+      base_translation: 'to live',
+      part_of_speech: 'verb',
+    },
+  ]
+  const deck = buildFlashcardDeck(pool, { posFilter: 'all', size: 10, now })
+  assert.equal(deck.cards.length, 1)
+  assert.equal(deck.cards[0].word, 'habiter')
+  const nouns = buildFlashcardDeck(pool, { posFilter: 'noun', size: 10, now })
+  assert.equal(nouns.cards.length, 0)
 })
 
 test('exercise validator rejects true-false questions posing as statements', () => {
