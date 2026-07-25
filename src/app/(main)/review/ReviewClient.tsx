@@ -5,9 +5,10 @@ import { CheckCircle2, Infinity as InfinityIcon, Play, RotateCcw } from 'lucide-
 import { ExerciseCard } from '@/components/lesson/ExerciseCard'
 import type { ExerciseAnswer } from '@/lib/exercises/types'
 import { isExerciseCorrect } from '@/lib/exercises/grading'
-import { MODULE1_VOCABULARY } from '@/lib/module1-content'
-import { getAllLocalVocabulary, scoreLocalVocabulary } from '@/lib/local-vocab-vault'
+import { MODULE1_CHAPTER_IDS, MODULE1_VOCABULARY } from '@/lib/module1-content'
+import { getAllLocalVocabulary, enqueueLocalVocabulary, scoreLocalVocabulary } from '@/lib/local-vocab-vault'
 import { buildReviewSession, emptySessionMessage } from '@/lib/review/session'
+import { lemmaIdsForChapter, vocabularyRowsForLemmas } from '@/lib/review/lemmas'
 import type { ReviewMistake, ReviewPoolItem, ReviewSessionPlan, ReviewTask, SessionMode } from '@/lib/review/types'
 import { calculateSrsSchedule } from '@/lib/srs'
 import { createClient } from '@/utils/supabase/client'
@@ -63,7 +64,7 @@ export default function ReviewClient() {
       return
     }
 
-    const [progressResult, mistakesResult] = await Promise.all([
+    const [progressResult, mistakesResult, completedResult] = await Promise.all([
       supabase
         .from('user_vocab_progress')
         .select('vocab_id, repetition_count, ease_factor, interval_days, total_encounters, mistake_count, next_review_at, last_reviewed_at, vocabulary(word, base_translation, part_of_speech, register)')
@@ -77,9 +78,14 @@ export default function ReviewClient() {
         .eq('is_resolved', false)
         .order('last_error_at', { ascending: false })
         .limit(30),
+      supabase
+        .from('user_chapter_progress')
+        .select('chapter_id')
+        .eq('user_id', user.id)
+        .eq('status', 'completed'),
     ])
 
-    const remote: ReviewPoolItem[] = (progressResult.data ?? []).map((row) => {
+    let remote: ReviewPoolItem[] = (progressResult.data ?? []).map((row) => {
       const vocabulary = Array.isArray(row.vocabulary) ? row.vocabulary[0] : row.vocabulary
       return enrichPoolItem(
         {
@@ -100,9 +106,66 @@ export default function ReviewClient() {
       )
     })
 
+    // Backfill: completed Module 1 chapters with empty vocab pool (e.g. finished before enqueue worked).
+    const completedIds = (completedResult.data ?? []).map((row) => row.chapter_id)
+    const module1Completed = completedIds.filter((id) => (MODULE1_CHAPTER_IDS as readonly string[]).includes(id))
     const remoteIds = new Set(remote.map((item) => item.vocab_id))
-    const local = getAllLocalVocabulary()
-      .filter((item) => !remoteIds.has(item.vocab_id))
+    let localItems = getAllLocalVocabulary()
+
+    if (remote.length === 0 && localItems.length === 0 && module1Completed.length > 0) {
+      const lemmaIds = [...new Set(module1Completed.flatMap((id) => lemmaIdsForChapter(id)))]
+      if (lemmaIds.length) {
+        enqueueLocalVocabulary(lemmaIds)
+        const rows = vocabularyRowsForLemmas(lemmaIds).map((word) => ({
+          id: word.id,
+          word: word.word,
+          base_translation: word.base_translation,
+          part_of_speech: word.part_of_speech,
+          gender: word.gender,
+          register: word.register,
+          ipa_pronunciation: word.ipa_pronunciation,
+          is_idiom: word.is_idiom,
+          is_slang: word.is_slang,
+          idiom_explanation: word.idiom_explanation,
+        }))
+        const { error: rpcError } = await supabase.rpc('enqueue_lesson_vocabulary', {
+          p_vocab_rows: rows,
+          p_lemma_ids: lemmaIds,
+        })
+        if (!rpcError) {
+          const refreshed = await supabase
+            .from('user_vocab_progress')
+            .select('vocab_id, repetition_count, ease_factor, interval_days, total_encounters, mistake_count, next_review_at, last_reviewed_at, vocabulary(word, base_translation, part_of_speech, register)')
+            .eq('user_id', user.id)
+            .order('next_review_at')
+            .limit(500)
+          remote = (refreshed.data ?? []).map((row) => {
+            const vocabulary = Array.isArray(row.vocabulary) ? row.vocabulary[0] : row.vocabulary
+            return enrichPoolItem(
+              {
+                vocab_id: row.vocab_id,
+                repetition_count: row.repetition_count ?? 0,
+                ease_factor: row.ease_factor ?? 2.5,
+                interval_days: row.interval_days ?? 0,
+                total_encounters: row.total_encounters ?? 1,
+                mistake_count: row.mistake_count ?? 0,
+                next_review_at: row.next_review_at ?? new Date().toISOString(),
+                last_reviewed_at: row.last_reviewed_at ?? null,
+                word: vocabulary?.word,
+                base_translation: vocabulary?.base_translation,
+                part_of_speech: vocabulary?.part_of_speech,
+                register: vocabulary?.register,
+              },
+              'remote',
+            )
+          })
+        }
+        localItems = getAllLocalVocabulary()
+      }
+    }
+
+    const local = localItems
+      .filter((item) => !remoteIds.has(item.vocab_id) && !remote.some((entry) => entry.vocab_id === item.vocab_id))
       .map((item) => enrichPoolItem(item, 'local'))
 
     setPool([...remote, ...local])
@@ -293,14 +356,16 @@ export default function ReviewClient() {
             <InfinityIcon className="size-8 text-primary" aria-hidden />
           </div>
 
-          {pool.length === 0 ? (
+          {pool.length === 0 && mistakes.length === 0 ? (
             <p className="rounded-lg bg-surface-container-low p-4 text-sm text-on-surface-variant">
               {emptySessionMessage(0)}
             </p>
           ) : (
             <>
               <p className="text-sm text-on-surface-variant">
-                Your loop never empties once you have learned something. Start a mixed session, or keep reviewing forever from spiral + weak spots.
+                {pool.length === 0
+                  ? 'Your word pool is empty, but repair drills are ready — start a session to practice them. Completing lessons also backfills words into the loop.'
+                  : 'Your loop never empties once you have learned something. Start a mixed session, or keep reviewing forever from spiral + weak spots.'}
               </p>
               <div className="grid gap-3 sm:grid-cols-2">
                 <button
@@ -313,7 +378,8 @@ export default function ReviewClient() {
                 <button
                   type="button"
                   onClick={() => startSession('continue')}
-                  className="tactile-button flex items-center justify-center gap-2 rounded-xl border-2 border-surface-variant bg-surface-container-lowest py-4 font-bold text-on-surface"
+                  disabled={pool.length === 0 && mistakes.length === 0}
+                  className="tactile-button flex items-center justify-center gap-2 rounded-xl border-2 border-surface-variant bg-surface-container-lowest py-4 font-bold text-on-surface disabled:opacity-50"
                 >
                   <InfinityIcon className="size-5" /> Keep reviewing
                 </button>

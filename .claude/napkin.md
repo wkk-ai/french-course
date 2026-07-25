@@ -42,8 +42,8 @@
 4. **[2026-07-24] Thin DB lesson stubs shadowed rich Module 1**
    Do instead: `resolveLessonContent` must prefer bundled `MODULE1_LESSONS` over incomplete DB `lesson_content`.
 
-5. **[2026-07-24] Review/Vocab Vault empty after lessons**
-   Do instead: enqueue lemmas into one **infinite loop** (staggered dates); Review builds mixed sessions (due/repair/spiral/weak) and **Keep reviewing** never empties while pool > 0; resolve mistakes only after a correct drill.
+5. **[2026-07-25] Review pool stayed 0 after lesson complete**
+   Do instead: **local-first** `enqueueLocalVocabulary` before remote; use `enqueue_lesson_vocabulary` RPC (SECURITY DEFINER) to upsert vocab+progress; Review **backfills** from completed Module 1 chapters; allow Start session when only repairs exist.
 
 6. **[2026-07-24] Popup missing meanings / examples**
    Do instead: every vocab entry gets `meanings[]` + `example { french, english }`; show multi-sense lists in the word popup.

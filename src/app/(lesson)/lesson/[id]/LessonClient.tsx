@@ -15,7 +15,8 @@ import { isCanonicalChapterId } from '@/lib/course-catalog'
 import { calculateLessonScore } from '@/lib/lesson-score'
 import { resolveLessonContent } from '@/lib/lesson-content'
 import { createClient } from '@/utils/supabase/client'
-import { enqueueLocalVocabulary, staggerReviewDates } from '@/lib/local-vocab-vault'
+import { enqueueLocalVocabulary } from '@/lib/local-vocab-vault'
+import { lemmaIdsForChapter, vocabularyRowsForLemmas } from '@/lib/review/lemmas'
 
 type Stage = 'brief' | 'reading' | 'conversation' | 'exercise'
 
@@ -250,48 +251,56 @@ export default function LessonClient({
     </p>
   )
 
-  const enqueueLessonVocabulary = async (userId: string) => {
+  const enqueueLessonVocabulary = async (_userId: string) => {
     const lemmaIds = [
-      ...new Set(
-        [...readingParagraphs, ...conversationLines.flatMap((line) => [{ tokens: line.tokens }])]
+      ...new Set([
+        ...lemmaIdsForChapter(chapterId),
+        ...[...readingParagraphs, ...conversationLines.flatMap((line) => [{ tokens: line.tokens }])]
           .flatMap((paragraph) => paragraph.tokens)
           .map((token) => token.lemmaId)
           .filter((lemmaId): lemmaId is string => Boolean(lemmaId)),
-      ),
+      ]),
     ]
     if (!lemmaIds.length) return
+
+    // Always seed the local infinite loop first — remote FK/RLS must not leave Review empty.
+    enqueueLocalVocabulary(lemmaIds)
+
     try {
       const supabase = createClient()
-      // Ensure dictionary rows exist so Review joins work for bundled Module 1 lemmas.
-      const rows = lemmaIds
-        .map((id) => vocabularyById.get(id))
-        .filter((word): word is VocabularyWord => Boolean(word))
-        .map((word) => ({
-          id: word.id,
-          word: word.word,
-          base_translation: word.base_translation,
-          part_of_speech: word.part_of_speech,
-          gender: word.gender,
-          register: word.register,
-          ipa_pronunciation: word.ipa_pronunciation,
-          is_idiom: word.is_idiom,
-          is_slang: word.is_slang,
-          idiom_explanation: word.idiom_explanation,
-        }))
-      if (rows.length) await supabase.from('vocabulary').upsert(rows, { onConflict: 'id' })
-      const staggered = staggerReviewDates(lemmaIds)
-      await supabase.from('user_vocab_progress').upsert(
-        lemmaIds.map((vocab_id) => ({
-          user_id: userId,
-          vocab_id,
-          next_review_at: staggered.get(vocab_id) ?? new Date().toISOString(),
-          last_reviewed_at: null,
-        })),
-        { onConflict: 'user_id,vocab_id', ignoreDuplicates: true },
-      )
-      enqueueLocalVocabulary(lemmaIds)
+      const rows = vocabularyRowsForLemmas(lemmaIds).map((word) => ({
+        id: word.id,
+        word: word.word,
+        base_translation: word.base_translation,
+        part_of_speech: word.part_of_speech,
+        gender: word.gender,
+        register: word.register,
+        ipa_pronunciation: word.ipa_pronunciation,
+        is_idiom: word.is_idiom,
+        is_slang: word.is_slang,
+        idiom_explanation: word.idiom_explanation,
+      }))
+
+      const { error: rpcError } = await supabase.rpc('enqueue_lesson_vocabulary', {
+        p_vocab_rows: rows,
+        p_lemma_ids: lemmaIds,
+      })
+
+      if (rpcError) {
+        // Fallback when RPC is not applied yet: best-effort direct writes.
+        if (rows.length) await supabase.from('vocabulary').upsert(rows, { onConflict: 'id' })
+        await supabase.from('user_vocab_progress').upsert(
+          lemmaIds.map((vocab_id) => ({
+            user_id: _userId,
+            vocab_id,
+            next_review_at: new Date().toISOString(),
+            last_reviewed_at: null,
+          })),
+          { onConflict: 'user_id,vocab_id', ignoreDuplicates: true },
+        )
+      }
     } catch {
-      // Vocab Vault seeding is best-effort.
+      // Local vault already seeded above.
     }
   }
 

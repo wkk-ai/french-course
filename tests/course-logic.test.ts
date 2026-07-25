@@ -7,6 +7,7 @@ import { staggerReviewDates } from '../src/lib/local-vocab-vault'
 import { resolveLessonContent } from '../src/lib/lesson-content'
 import { calculateLessonScoreLegacy } from '../src/lib/lesson-score'
 import { deriveChapterStatus } from '../src/lib/progression'
+import { lemmaIdsForChapter } from '../src/lib/review/lemmas'
 import { buildReviewSession } from '../src/lib/review/session'
 import { calculateSrsSchedule } from '../src/lib/srs'
 
@@ -136,4 +137,9 @@ test('infinite review session never empties when the pool has items', () => {
   assert.equal(staggered.size, 5)
   const immediate = [...staggered.values()].filter((value) => value === now.toISOString()).length
   assert.ok(immediate <= 10)
+})
+
+test('Module 1.1 ships enough lemmas for review backfill', () => {
+  const ids = lemmaIdsForChapter('22222222-0000-0000-0000-000000000101')
+  assert.ok(ids.length >= 40)
 })
