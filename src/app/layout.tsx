@@ -16,10 +16,18 @@ const sourceSerif = Source_Serif_4({
 export const metadata: Metadata = {
   title: "L'Art du Français",
   description: "Learn French through structured reading and linguistics.",
+  applicationName: "L'Art du Français",
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: '32x32' },
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
+    apple: [{ url: '/apple-icon.png', sizes: '180x180' }],
+  },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#f9f9f9",
+  themeColor: "#003e7a",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
