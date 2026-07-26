@@ -13,16 +13,18 @@ const sourceSerif = Source_Serif_4({
   subsets: ["latin"],
 });
 
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 export const metadata: Metadata = {
   title: "L'Art du Français",
   description: "Learn French through structured reading and linguistics.",
   applicationName: "L'Art du Français",
   icons: {
     icon: [
-      { url: '/favicon.ico', sizes: '32x32' },
-      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: `${basePath}/favicon.ico`, sizes: "32x32" },
+      { url: `${basePath}/favicon.svg`, type: "image/svg+xml" },
     ],
-    apple: [{ url: '/apple-icon.png', sizes: '180x180' }],
+    apple: [{ url: `${basePath}/apple-icon.png`, sizes: "180x180" }],
   },
 };
 
