@@ -11,8 +11,8 @@
 1. **[2026-07-27] Depth padders leak author/AI notes into Theory + Reading**
    Do instead: never pad brief/reading with authoring jargon (“Deep practice (Module-1 bar)”, “Store verbs as infinitives”, “Dans cette leçon, relisez…”, “dictionnaire cliquable”, “Hand-crafted focus”, “Enqueue reviewable lemmas”, “Lecture de consolidation”). Meet depth with real learner content; CI denylist those phrases on all 720. Measured: author pad 716/720 briefs; meta FR pad 717/720 readings; consol template ×525.
 
-2. **[2026-07-27] ~45% reading tokens untappable (no lemmaId)**
-   Do instead: auto-map conjugations from `french-conjugations.ts` into lookup; elide `l'/d'`; grow bank for every content surface; stop filler vocab outside bank; CI fail if content word lacks lemma (proper-noun allowlist only). Measured: 45.2% (85 576/189 397); worst M01 ~48.6%.
+2. **[2026-07-27] Reading tap miss rate was ~17% (conjugation + plurals + bank)**
+   Do instead: auto-map conjugations + bare past participles (vu/allé); scrub EN theme titles from reading/dialogue; CI fail if miss rate ≥ 5%. Measured: 16.82% → ~1.6%.
 
 3. **[2026-07-27] Factory readingFr dumps English glosses + EN grammar labels**
    Do instead: French-only reading; teach EN in Theory meanings list, not `signifie « past tense… »` / `with avoir` / `PC regular` inside `readingFr`. CI fail on ASCII EN content-words in reading/dialogue (allowlist cognates). Measured: 511/705 themes EN-in-readingFr; 305 dialogues with EN labels.
@@ -27,7 +27,7 @@
    Do instead: resolve mistakes after correct rem/practice; else rem forever + Prove score pollution.
 
 7. **[2026-07-27] RPC `chapter_vocabulary` re-seeds Marc/Paris into Review**
-   Do instead: filter proper nouns in `complete_chapter` seed; strip names from `supabase/seed.sql` chapter_vocabulary.
+   Do instead: apply `20260727120000_complete_chapter_skip_proper_nouns.sql` on remote (MCP apply times out — paste SQL editor). Client filter + seed cleanup already shipped.
 
 8. **[2026-07-25] Home shows 720; DB seed thin — unlock/complete desync**
    Do instead: unlock via `BUNDLED_CHAPTER_IDS`; `ensure_chapter_row`; mark local only on real success path.
@@ -86,7 +86,7 @@
    Do instead: mark local only after enqueue intent succeeds; never on pre-save auth failure.
 
 8. **[2026-07-27] Multi-tab local vault last-write-wins**
-   Do instead: per-key merge on `storage` events, or single-tab lock for Review scores.
+   Do instead: CAS merge on write (`mergeVaultItem`); `subscribeLocalVault` + ReviewClient storage listener.
 
 9. **[2026-07-27] Typed drills lock on blur forever**
    Do instead: cloze/translate/conjugation need Confirm; no `onBlur` auto-submit; allow edit until Confirm.

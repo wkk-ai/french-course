@@ -33,3 +33,13 @@ export function clearLocalLearnerData() {
     if (key.startsWith('french-course:lesson-draft:')) localStorage.removeItem(key)
   }
 }
+
+/** Cross-tab sync when another tab marks a chapter complete locally. */
+export function subscribeCompletedChapters(listener: () => void): () => void {
+  if (typeof window === 'undefined') return () => {}
+  const onStorage = (event: StorageEvent) => {
+    if (event.key === KEY) listener()
+  }
+  window.addEventListener('storage', onStorage)
+  return () => window.removeEventListener('storage', onStorage)
+}

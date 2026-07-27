@@ -46,6 +46,69 @@ function registerSurface(map: Map<string, string>, surface: string, lemmaId: str
   if (stripped) map.set(stripped, lemmaId)
 }
 
+/** Map past participles and common gender/number agreements onto the infinitive lemma. */
+function registerPastParticipleSurfaces(map: Map<string, string>, participle: string, lemmaId: string) {
+  registerSurface(map, participle, lemmaId)
+  const pp = participle.normalize('NFC')
+  if (pp.endsWith('é')) {
+    registerSurface(map, `${pp}e`, lemmaId)
+    registerSurface(map, `${pp}s`, lemmaId)
+    registerSurface(map, `${pp}es`, lemmaId)
+    return
+  }
+  if (pp.endsWith('i') && !pp.endsWith('ai') && !pp.endsWith('oi')) {
+    registerSurface(map, `${pp}e`, lemmaId)
+    registerSurface(map, `${pp}s`, lemmaId)
+    registerSurface(map, `${pp}es`, lemmaId)
+    return
+  }
+  if (/(?:u|is|it|ert|ert)$/i.test(pp) || pp === 'né' || pp.endsWith('é')) {
+    registerSurface(map, `${pp}e`, lemmaId)
+    registerSurface(map, `${pp}s`, lemmaId)
+    registerSurface(map, `${pp}es`, lemmaId)
+  }
+}
+
+/** Register common French noun/adjective plural and feminine surface forms. */
+function registerFrenchInflections(map: Map<string, string>, word: VocabularyWord) {
+  const pos = (word.part_of_speech ?? '').toLowerCase()
+  const w = word.word
+  const id = word.id
+  if (pos.includes('proper')) return
+
+  if (pos.includes('noun') || pos.includes('article') || pos.includes('determiner')) {
+    if (w.endsWith('al')) {
+      registerSurface(map, `${w.slice(0, -2)}aux`, id)
+    } else if (w.endsWith('au') || w.endsWith('eu')) {
+      registerSurface(map, `${w}x`, id)
+    } else if (!w.endsWith('s') && !w.endsWith('x')) {
+      registerSurface(map, `${w}s`, id)
+    }
+  }
+
+  if (pos.includes('adjective')) {
+    if (w.endsWith('ier')) {
+      const fem = `${w.slice(0, -3)}ière`
+      registerSurface(map, fem, id)
+      registerSurface(map, `${fem}s`, id)
+      registerSurface(map, `${w}s`, id)
+    } else if (w.endsWith('er') && w.length > 3) {
+      const fem = `${w.slice(0, -2)}ère`
+      registerSurface(map, fem, id)
+      registerSurface(map, `${fem}s`, id)
+      registerSurface(map, `${w}s`, id)
+    } else {
+      const stem = w.endsWith('e') ? w.slice(0, -1) : w
+      registerSurface(map, `${stem}e`, id)
+      registerSurface(map, `${stem}s`, id)
+      registerSurface(map, `${stem}es`, id)
+      if (w.endsWith('e')) {
+        registerSurface(map, `${w}s`, id)
+      }
+    }
+  }
+}
+
 /** Resolve lemma id: full surface, then elision-stripped base. */
 export function lookupLemma(lookup: Map<string, string>, text: string): string | undefined {
   const key = normalizeLookup(text)
@@ -467,7 +530,16 @@ export function buildLemmaLookup(vocabulary: VocabularyWord[]) {
     if (!isConjugableVerb(word)) continue
     for (const row of conjugateVerb(word)) {
       registerSurface(map, row.form, word.id)
+      // Compound forms ("ai vu", "suis allé") — also map the bare participle + agreements.
+      const bare = row.form.replace(/^j'/i, '').trim().split(/\s+/).pop()
+      if (bare && bare !== row.form && /[A-Za-zÀ-ÿ]/.test(bare)) {
+        registerPastParticipleSurfaces(map, bare, word.id)
+      }
     }
+  }
+
+  for (const word of vocabulary) {
+    registerFrenchInflections(map, word)
   }
 
   const phraseLemmas: Record<string, string> = {

@@ -58,7 +58,9 @@ const PROPER_NOUN_ALLOWLIST = new Set([
 const EN_GRAMMAR_LEAK =
   /\b(past tense|past participle|with avoir|with être|you finished|I ate|I have eaten|still \/ again|to eat|to finish|to speak|to see|to take|to do\/make|to write|to buy|goodbye|see you soon|please informal)\b/i
 
-const EN_GLOSS_LEAK = /signifie «[^»]*\b(the|you|I|we|they|have|been|with|yesterday|already|weekend|interview|narrative|regular|irregular)\b/i
+const EN_GLOSS_LEAK = /signifie\s*«/i
+const EN_TITLE_IN_FR =
+  /\b(Emotions|Grammar|Prices|Elections|Friendship|Conflict|Headlines|Borders|Relatives|Concession|Passive|Citizen|Debate|Advice|Health|Jobs|Reciprocal|Compare|Laws|Report|scene|story|drill|news|nouns|tone|switch|Final|global|texts|diploma)\b/
 
 export function hasAuthorPad(text: string): boolean {
   const lower = text.toLowerCase()
@@ -69,6 +71,7 @@ export function hasAuthorPad(text: string): boolean {
 export function englishLeakInFrench(text: string): boolean {
   if (EN_GRAMMAR_LEAK.test(text)) return true
   if (EN_GLOSS_LEAK.test(text)) return true
+  if (EN_TITLE_IN_FR.test(text)) return true
   if (/\bStructure du jour\s*:[^·\n]*\b(with|regular|irregular|tense|apply)\b/i.test(text)) return true
   return false
 }

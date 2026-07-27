@@ -80,6 +80,56 @@ const IRREGULAR: Record<string, IrregularBundle> = {
     auxiliaire: 'avoir',
     imperatif: ['fais', 'faisons', 'faites'],
   },
+  venir: {
+    present: ['viens', 'viens', 'vient', 'venons', 'venez', 'viennent'],
+    imparfait: ['venais', 'venais', 'venait', 'venions', 'veniez', 'venaient'],
+    futur: ['viendrai', 'viendras', 'viendra', 'viendrons', 'viendrez', 'viendront'],
+    conditionnel: ['viendrais', 'viendrais', 'viendrait', 'viendrions', 'viendriez', 'viendraient'],
+    subjonctif: ['vienne', 'viennes', 'vienne', 'venions', 'veniez', 'viennent'],
+    participePasse: 'venu',
+    auxiliaire: 'être',
+    imperatif: ['viens', 'venons', 'venez'],
+  },
+  revenir: {
+    present: ['reviens', 'reviens', 'revient', 'revenons', 'revenez', 'reviennent'],
+    imparfait: ['revenais', 'revenais', 'revenait', 'revenions', 'reveniez', 'revenaient'],
+    futur: ['reviendrai', 'reviendras', 'reviendra', 'reviendrons', 'reviendrez', 'reviendront'],
+    conditionnel: ['reviendrais', 'reviendrais', 'reviendrait', 'reviendrions', 'reviendriez', 'reviendraient'],
+    subjonctif: ['revienne', 'reviennes', 'revienne', 'revenions', 'reveniez', 'reviennent'],
+    participePasse: 'revenu',
+    auxiliaire: 'être',
+    imperatif: ['reviens', 'revenons', 'revenez'],
+  },
+  apprendre: {
+    present: ['apprends', 'apprends', 'apprend', 'apprenons', 'apprenez', 'apprennent'],
+    imparfait: ['apprenais', 'apprenais', 'apprenait', 'apprenions', 'appreniez', 'apprenaient'],
+    futur: ['apprendrai', 'apprendras', 'apprendra', 'apprendrons', 'apprendrez', 'apprendront'],
+    conditionnel: ['apprendrais', 'apprendrais', 'apprendrait', 'apprendrions', 'apprendriez', 'apprendraient'],
+    subjonctif: ['apprenne', 'apprennes', 'apprenne', 'apprenions', 'appreniez', 'apprennent'],
+    participePasse: 'appris',
+    auxiliaire: 'avoir',
+    imperatif: ['apprends', 'apprenons', 'apprenez'],
+  },
+  comprendre: {
+    present: ['comprends', 'comprends', 'comprend', 'comprenons', 'comprenez', 'comprennent'],
+    imparfait: ['comprenais', 'comprenais', 'comprenait', 'comprenions', 'compreniez', 'comprenaient'],
+    futur: ['comprendrai', 'comprendras', 'comprendra', 'comprendrons', 'comprendrez', 'comprendront'],
+    conditionnel: ['comprendrais', 'comprendrais', 'comprendrait', 'comprendrions', 'comprendriez', 'comprendraient'],
+    subjonctif: ['comprenne', 'comprennes', 'comprenne', 'comprenions', 'compreniez', 'comprennent'],
+    participePasse: 'compris',
+    auxiliaire: 'avoir',
+    imperatif: ['comprends', 'comprenons', 'comprenez'],
+  },
+  devoir: {
+    present: ['dois', 'dois', 'doit', 'devons', 'devez', 'doivent'],
+    imparfait: ['devais', 'devais', 'devait', 'devions', 'deviez', 'devaient'],
+    futur: ['devrai', 'devras', 'devra', 'devrons', 'devrez', 'devront'],
+    conditionnel: ['devrais', 'devrais', 'devrait', 'devrions', 'devriez', 'devraient'],
+    subjonctif: ['doive', 'doives', 'doive', 'devions', 'deviez', 'doivent'],
+    participePasse: 'dû',
+    auxiliaire: 'avoir',
+    imperatif: ['—', '—', '—'],
+  },
   prendre: {
     present: ['prends', 'prends', 'prend', 'prenons', 'prenez', 'prennent'],
     imparfait: ['prenais', 'prenais', 'prenait', 'prenions', 'preniez', 'prenaient'],
@@ -150,6 +200,156 @@ const IRREGULAR: Record<string, IrregularBundle> = {
     auxiliaire: 'être',
     imperatif: ['pars', 'partons', 'partez'],
   },
+  sortir: {
+    present: ['sors', 'sors', 'sort', 'sortons', 'sortez', 'sortent'],
+    imparfait: ['sortais', 'sortais', 'sortait', 'sortions', 'sortiez', 'sortaient'],
+    futur: ['sortirai', 'sortiras', 'sortira', 'sortirons', 'sortirez', 'sortiront'],
+    conditionnel: ['sortirais', 'sortirais', 'sortirait', 'sortirions', 'sortiriez', 'sortiraient'],
+    subjonctif: ['sorte', 'sortes', 'sorte', 'sortions', 'sortiez', 'sortent'],
+    participePasse: 'sorti',
+    auxiliaire: 'être',
+    imperatif: ['sors', 'sortons', 'sortez'],
+  },
+  dormir: {
+    present: ['dors', 'dors', 'dort', 'dormons', 'dormez', 'dorment'],
+    imparfait: ['dormais', 'dormais', 'dormait', 'dormions', 'dormiez', 'dormaient'],
+    futur: ['dormirai', 'dormiras', 'dormira', 'dormirons', 'dormirez', 'dormiront'],
+    conditionnel: ['dormirais', 'dormirais', 'dormirait', 'dormirions', 'dormiriez', 'dormiraient'],
+    subjonctif: ['dorme', 'dormes', 'dorme', 'dormions', 'dormiez', 'dorment'],
+    participePasse: 'dormi',
+    auxiliaire: 'avoir',
+    imperatif: ['dors', 'dormons', 'dormez'],
+  },
+  servir: {
+    present: ['sers', 'sers', 'sert', 'servons', 'servez', 'servent'],
+    imparfait: ['servais', 'servais', 'servait', 'servions', 'serviez', 'servaient'],
+    futur: ['servirai', 'serviras', 'servira', 'servirons', 'servirez', 'serviront'],
+    conditionnel: ['servirais', 'servirais', 'servirait', 'servirions', 'serviriez', 'serviraient'],
+    subjonctif: ['serve', 'serves', 'serve', 'servions', 'serviez', 'servent'],
+    participePasse: 'servi',
+    auxiliaire: 'avoir',
+    imperatif: ['sers', 'servons', 'servez'],
+  },
+  sentir: {
+    present: ['sens', 'sens', 'sent', 'sentons', 'sentez', 'sentent'],
+    imparfait: ['sentais', 'sentais', 'sentait', 'sentions', 'sentiez', 'sentaient'],
+    futur: ['sentirai', 'sentiras', 'sentira', 'sentirons', 'sentirez', 'sentiront'],
+    conditionnel: ['sentirais', 'sentirais', 'sentirait', 'sentirions', 'sentiriez', 'sentiraient'],
+    subjonctif: ['sente', 'sentes', 'sente', 'sentions', 'sentiez', 'sentent'],
+    participePasse: 'senti',
+    auxiliaire: 'avoir',
+    imperatif: ['sens', 'sentons', 'sentez'],
+  },
+  mentir: {
+    present: ['mens', 'mens', 'ment', 'mentons', 'mentez', 'mentent'],
+    imparfait: ['mentais', 'mentais', 'mentait', 'mentions', 'mentiez', 'mentaient'],
+    futur: ['mentirai', 'mentiras', 'mentira', 'mentirons', 'mentirez', 'mentiront'],
+    conditionnel: ['mentirais', 'mentirais', 'mentirait', 'mentirions', 'mentiriez', 'mentiraient'],
+    subjonctif: ['mente', 'mentes', 'mente', 'mentions', 'mentiez', 'mentent'],
+    participePasse: 'menti',
+    auxiliaire: 'avoir',
+    imperatif: ['mens', 'mentons', 'mentez'],
+  },
+  écrire: {
+    present: ['écris', 'écris', 'écrit', 'écrivons', 'écrivez', 'écrivent'],
+    imparfait: ['écrivais', 'écrivais', 'écrivait', 'écrivions', 'écriviez', 'écrivaient'],
+    futur: ['écrirai', 'écriras', 'écrira', 'écrirons', 'écrirez', 'écriront'],
+    conditionnel: ['écrirais', 'écrirais', 'écrirait', 'écririons', 'écririez', 'écriraient'],
+    subjonctif: ['écrive', 'écrives', 'écrive', 'écrivions', 'écriviez', 'écrivent'],
+    participePasse: 'écrit',
+    auxiliaire: 'avoir',
+    imperatif: ['écris', 'écrivons', 'écrivez'],
+  },
+  ecrire: {
+    present: ['écris', 'écris', 'écrit', 'écrivons', 'écrivez', 'écrivent'],
+    imparfait: ['écrivais', 'écrivais', 'écrivait', 'écrivions', 'écriviez', 'écrivaient'],
+    futur: ['écrirai', 'écriras', 'écrira', 'écrirons', 'écrirez', 'écriront'],
+    conditionnel: ['écrirais', 'écrirais', 'écrirait', 'écririons', 'écririez', 'écriraient'],
+    subjonctif: ['écrive', 'écrives', 'écrive', 'écrivions', 'écriviez', 'écrivent'],
+    participePasse: 'écrit',
+    auxiliaire: 'avoir',
+    imperatif: ['écris', 'écrivons', 'écrivez'],
+  },
+  lire: {
+    present: ['lis', 'lis', 'lit', 'lisons', 'lisez', 'lisent'],
+    imparfait: ['lisais', 'lisais', 'lisait', 'lisions', 'lisiez', 'lisaient'],
+    futur: ['lirai', 'liras', 'lira', 'lirons', 'lirez', 'liront'],
+    conditionnel: ['lirais', 'lirais', 'lirait', 'lirions', 'liriez', 'liraient'],
+    subjonctif: ['lise', 'lises', 'lise', 'lisions', 'lisiez', 'lisent'],
+    participePasse: 'lu',
+    auxiliaire: 'avoir',
+    imperatif: ['lis', 'lisons', 'lisez'],
+  },
+  mettre: {
+    present: ['mets', 'mets', 'met', 'mettons', 'mettez', 'mettent'],
+    imparfait: ['mettais', 'mettais', 'mettait', 'mettions', 'mettiez', 'mettaient'],
+    futur: ['mettrai', 'mettras', 'mettra', 'mettrons', 'mettrez', 'mettront'],
+    conditionnel: ['mettrais', 'mettrais', 'mettrait', 'mettrions', 'mettriez', 'mettraient'],
+    subjonctif: ['mette', 'mettes', 'mette', 'mettions', 'mettiez', 'mettent'],
+    participePasse: 'mis',
+    auxiliaire: 'avoir',
+    imperatif: ['mets', 'mettons', 'mettez'],
+  },
+  ouvrir: {
+    present: ['ouvre', 'ouvres', 'ouvre', 'ouvrons', 'ouvrez', 'ouvrent'],
+    imparfait: ['ouvrais', 'ouvrais', 'ouvrait', 'ouvrions', 'ouvriez', 'ouvraient'],
+    futur: ['ouvrirai', 'ouvriras', 'ouvrira', 'ouvrirons', 'ouvrirez', 'ouvriront'],
+    conditionnel: ['ouvrirais', 'ouvrirais', 'ouvrirait', 'ouvririons', 'ouvririez', 'ouvriraient'],
+    subjonctif: ['ouvre', 'ouvres', 'ouvre', 'ouvrions', 'ouvriez', 'ouvrent'],
+    participePasse: 'ouvert',
+    auxiliaire: 'avoir',
+    imperatif: ['ouvre', 'ouvrons', 'ouvrez'],
+  },
+  savoir: {
+    present: ['sais', 'sais', 'sait', 'savons', 'savez', 'savent'],
+    imparfait: ['savais', 'savais', 'savait', 'savions', 'saviez', 'savaient'],
+    futur: ['saurai', 'sauras', 'saura', 'saurons', 'saurez', 'sauront'],
+    conditionnel: ['saurais', 'saurais', 'saurait', 'saurions', 'sauriez', 'sauraient'],
+    subjonctif: ['sache', 'saches', 'sache', 'sachions', 'sachiez', 'sachent'],
+    participePasse: 'su',
+    auxiliaire: 'avoir',
+    imperatif: ['sache', 'sachons', 'sachez'],
+  },
+  connaître: {
+    present: ['connais', 'connais', 'connaît', 'connaissons', 'connaissez', 'connaissent'],
+    imparfait: ['connaissais', 'connaissais', 'connaissait', 'connaissions', 'connaissiez', 'connaissaient'],
+    futur: ['connaîtrai', 'connaîtras', 'connaîtra', 'connaîtrons', 'connaîtrez', 'connaîtront'],
+    conditionnel: ['connaîtrais', 'connaîtrais', 'connaîtrait', 'connaîtrions', 'connaîtriez', 'connaîtraient'],
+    subjonctif: ['connaisse', 'connaisses', 'connaisse', 'connaissions', 'connaissiez', 'connaissent'],
+    participePasse: 'connu',
+    auxiliaire: 'avoir',
+    imperatif: ['connais', 'connaissons', 'connaissez'],
+  },
+  connaitre: {
+    present: ['connais', 'connais', 'connaît', 'connaissons', 'connaissez', 'connaissent'],
+    imparfait: ['connaissais', 'connaissais', 'connaissait', 'connaissions', 'connaissiez', 'connaissaient'],
+    futur: ['connaîtrai', 'connaîtras', 'connaîtra', 'connaîtrons', 'connaîtrez', 'connaîtront'],
+    conditionnel: ['connaîtrais', 'connaîtrais', 'connaîtrait', 'connaîtrions', 'connaîtriez', 'connaîtraient'],
+    subjonctif: ['connaisse', 'connaisses', 'connaisse', 'connaissions', 'connaissiez', 'connaissent'],
+    participePasse: 'connu',
+    auxiliaire: 'avoir',
+    imperatif: ['connais', 'connaissons', 'connaissez'],
+  },
+  naître: {
+    present: ['nais', 'nais', 'naît', 'naissons', 'naissez', 'naissent'],
+    imparfait: ['naissais', 'naissais', 'naissait', 'naissions', 'naissiez', 'naissaient'],
+    futur: ['naîtrai', 'naîtras', 'naîtra', 'naîtrons', 'naîtrez', 'naîtront'],
+    conditionnel: ['naîtrais', 'naîtrais', 'naîtrait', 'naîtrions', 'naîtriez', 'naîtraient'],
+    subjonctif: ['naisse', 'naisses', 'naisse', 'naissions', 'naissiez', 'naissent'],
+    participePasse: 'né',
+    auxiliaire: 'être',
+    imperatif: ['nais', 'naissons', 'naissez'],
+  },
+  naitre: {
+    present: ['nais', 'nais', 'naît', 'naissons', 'naissez', 'naissent'],
+    imparfait: ['naissais', 'naissais', 'naissait', 'naissions', 'naissiez', 'naissaient'],
+    futur: ['naîtrai', 'naîtras', 'naîtra', 'naîtrons', 'naîtrez', 'naîtront'],
+    conditionnel: ['naîtrais', 'naîtrais', 'naîtrait', 'naîtrions', 'naîtriez', 'naîtraient'],
+    subjonctif: ['naisse', 'naisses', 'naisse', 'naissions', 'naissiez', 'naissent'],
+    participePasse: 'né',
+    auxiliaire: 'être',
+    imperatif: ['nais', 'naissons', 'naissez'],
+  },
   "s'appeler": {
     present: ["m'appelle", "t'appelles", "s'appelle", 'nous appelons', 'vous appelez', "s'appellent"],
     imparfait: ["m'appelais", "t'appelais", "s'appelait", 'nous appelions', 'vous appeliez', "s'appelaient"],
@@ -173,23 +373,53 @@ function withAux(auxForms: string[], participle: string, _auxiliaire: 'avoir' | 
   return auxForms.map((aux) => `${aux} ${participle}`)
 }
 
+function erPresentVowel(infinitive: string): { singular: string; plural: string } {
+  const lower = infinitive.normalize('NFC').toLowerCase()
+  // -eter / -éter verbs: répéter → répète, acheter → achète
+  if (/(?:eter|éter)$/.test(lower)) {
+    return { singular: 'è', plural: 'ènt' }
+  }
+  return { singular: 'e', plural: 'ent' }
+}
+
 function regularEr(infinitive: string): IrregularBundle {
+  const lower = infinitive.normalize('NFC').toLowerCase()
+  const isEter = /(?:eter|éter)$/.test(lower)
+
   let stem = infinitive.slice(0, -2)
   // manger → mangeons needs soft g
   const softG = stem.endsWith('g')
   const softC = stem.endsWith('c')
   const nousStem = softG ? `${stem}e` : softC ? `${stem.slice(0, -1)}ç` : stem
-  // payer / appeler style doubles often handled as regular for A1 display
   const futurStem = infinitive
+
+  if (isEter && stem.length > 1) {
+    const cons = stem.slice(-1)
+    const base = stem.slice(0, -1).replace(/é$/, 'è').replace(/e$/, 'è')
+    const sg = `${base}${cons}e`
+    const pl = `${base}${cons}ent`
+    return {
+      present: [sg, `${sg}s`, sg, `${nousStem}ons`, `${stem}ez`, pl],
+      imparfait: [`${nousStem}ais`, `${nousStem}ais`, `${nousStem}ait`, `${nousStem}ions`, `${nousStem}iez`, `${nousStem}aient`],
+      futur: [`${futurStem}ai`, `${futurStem}as`, `${futurStem}a`, `${futurStem}ons`, `${futurStem}ez`, `${futurStem}ont`],
+      conditionnel: [`${futurStem}ais`, `${futurStem}ais`, `${futurStem}ait`, `${futurStem}ions`, `${futurStem}iez`, `${futurStem}aient`],
+      subjonctif: [sg, `${sg}s`, sg, `${nousStem}ions`, `${nousStem}iez`, pl],
+      participePasse: `${stem}é`,
+      auxiliaire: 'avoir',
+      imperatif: [sg, `${nousStem}ons`, `${stem}ez`],
+    }
+  }
+
+  const { singular, plural } = erPresentVowel(infinitive)
   return {
-    present: [`${stem}e`, `${stem}es`, `${stem}e`, `${nousStem}ons`, `${stem}ez`, `${stem}ent`],
+    present: [`${stem}${singular}`, `${stem}${singular}s`, `${stem}${singular}`, `${nousStem}ons`, `${stem}ez`, `${stem}${plural}`],
     imparfait: [`${nousStem}ais`, `${nousStem}ais`, `${nousStem}ait`, `${nousStem}ions`, `${nousStem}iez`, `${nousStem}aient`],
     futur: [`${futurStem}ai`, `${futurStem}as`, `${futurStem}a`, `${futurStem}ons`, `${futurStem}ez`, `${futurStem}ont`],
     conditionnel: [`${futurStem}ais`, `${futurStem}ais`, `${futurStem}ait`, `${futurStem}ions`, `${futurStem}iez`, `${futurStem}aient`],
-    subjonctif: [`${stem}e`, `${stem}es`, `${stem}e`, `${nousStem}ions`, `${nousStem}iez`, `${stem}ent`],
+    subjonctif: [`${stem}${singular}`, `${stem}${singular}s`, `${stem}${singular}`, `${nousStem}ions`, `${nousStem}iez`, `${stem}${plural}`],
     participePasse: `${stem}é`,
     auxiliaire: 'avoir',
-    imperatif: [`${stem}e`, `${nousStem}ons`, `${stem}ez`],
+    imperatif: [`${stem}${singular}`, `${nousStem}ons`, `${stem}ez`],
   }
 }
 

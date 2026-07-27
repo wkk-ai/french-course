@@ -65,15 +65,45 @@ export function ExerciseCard({
   const correct = locked && isExerciseCorrect(exercise, answer)
   const [hintShown, setHintShown] = useState(false)
   const [draftText, setDraftText] = useState('')
-  const [orderBank, setOrderBank] = useState<string[]>(() => ('type' in exercise && exercise.type === 'order' ? shuffle(exercise.words) : []))
+  const [orderBank, setOrderBank] = useState<string[]>(() => {
+    if ('type' in exercise && exercise.type === 'order') {
+      if (answer?.kind === 'order') return exercise.words.filter((word) => !answer.value.includes(word))
+      return shuffle(exercise.words)
+    }
+    return []
+  })
   const [orderPicked, setOrderPicked] = useState<string[]>(() => (answer?.kind === 'order' ? answer.value : []))
   const [matchSelection, setMatchSelection] = useState<{ side: 'left' | 'right'; index: number } | null>(null)
-  const [matchPairs, setMatchPairs] = useState<Record<number, number>>(() => (answer?.kind === 'match' ? answer.value : {}))
+  const [matchPairOrder, setMatchPairOrder] = useState<Array<{ left: number; right: number }>>(() => {
+    if (answer?.kind === 'match') {
+      return Object.entries(answer.value).map(([left, right]) => ({ left: Number(left), right }))
+    }
+    return []
+  })
+
+  const matchPairs = useMemo(() => {
+    const pairs: Record<number, number> = {}
+    for (const { left, right } of matchPairOrder) pairs[left] = right
+    return pairs
+  }, [matchPairOrder])
 
   useEffect(() => {
     setDraftText('')
     setHintShown(false)
-  }, [exercise.id])
+    if (exercise.type === 'order') {
+      const picked = answer?.kind === 'order' ? answer.value : []
+      setOrderPicked(picked)
+      setOrderBank(answer?.kind === 'order' ? exercise.words.filter((word) => !picked.includes(word)) : shuffle(exercise.words))
+    }
+    if (exercise.type === 'match') {
+      setMatchPairOrder(
+        answer?.kind === 'match'
+          ? Object.entries(answer.value).map(([left, right]) => ({ left: Number(left), right }))
+          : [],
+      )
+      setMatchSelection(null)
+    }
+  }, [exercise.id, exercise.type, answer])
 
   const isMcqExercise =
     exercise.type === 'register' ||
@@ -143,7 +173,19 @@ export function ExerciseCard({
     const nextBank = orderBank.filter((_, i) => i !== wordIndex)
     setOrderPicked(next)
     setOrderBank(nextBank)
-    if (next.length === exercise.answer.length) lockOrder(next)
+  }
+
+  const undoLastOrderWord = () => {
+    if (locked || exercise.type !== 'order' || orderPicked.length === 0) return
+    const last = orderPicked[orderPicked.length - 1]
+    setOrderPicked((current) => current.slice(0, -1))
+    setOrderBank((current) => [...current, last])
+  }
+
+  const confirmOrder = () => {
+    if (locked || exercise.type !== 'order') return
+    if (orderPicked.length !== exercise.answer.length) return
+    lockOrder(orderPicked)
   }
 
   const resetOrder = () => {
@@ -164,10 +206,20 @@ export function ExerciseCard({
     }
     const leftIndex = side === 'left' ? index : matchSelection.index
     const rightIndex = side === 'right' ? index : matchSelection.index
-    const next = { ...matchPairs, [leftIndex]: rightIndex }
-    setMatchPairs(next)
+    setMatchPairOrder((current) => [...current, { left: leftIndex, right: rightIndex }])
     setMatchSelection(null)
-    if (Object.keys(next).length === exercise.pairs.length) lockMatch(next)
+  }
+
+  const undoLastMatchPair = () => {
+    if (locked || exercise.type !== 'match' || matchPairOrder.length === 0) return
+    setMatchPairOrder((current) => current.slice(0, -1))
+    setMatchSelection(null)
+  }
+
+  const confirmMatch = () => {
+    if (locked || exercise.type !== 'match') return
+    if (matchPairOrder.length !== exercise.pairs.length) return
+    lockMatch(matchPairs)
   }
 
   const sourceLabel = exercise.source === 'spiral' ? ' · spiral review' : exercise.source === 'remediation' ? ' · from your mistakes' : ''
@@ -324,10 +376,28 @@ export function ExerciseCard({
               </button>
             ))}
           </div>
-          {!locked && orderPicked.length > 0 && (
-            <button type="button" onClick={resetOrder} className="text-xs font-bold text-primary underline">
-              Reset
-            </button>
+          {!locked && (
+            <div className="flex flex-wrap items-center gap-3">
+              {orderPicked.length > 0 && (
+                <>
+                  <button type="button" onClick={undoLastOrderWord} className="text-xs font-bold text-primary underline">
+                    Undo
+                  </button>
+                  <button type="button" onClick={resetOrder} className="text-xs font-bold text-primary underline">
+                    Reset
+                  </button>
+                </>
+              )}
+              {orderPicked.length === exercise.answer.length && (
+                <button
+                  type="button"
+                  onClick={confirmOrder}
+                  className="tactile-button rounded-lg border-primary-container bg-primary px-4 py-2 text-sm font-bold text-on-primary"
+                >
+                  Confirm
+                </button>
+              )}
+            </div>
           )}
         </div>
       )}
@@ -371,6 +441,24 @@ export function ExerciseCard({
               )
             })}
           </div>
+          {!locked && (
+            <div className="col-span-full flex flex-wrap items-center gap-3">
+              {matchPairOrder.length > 0 && (
+                <button type="button" onClick={undoLastMatchPair} className="text-xs font-bold text-primary underline">
+                  Undo
+                </button>
+              )}
+              {matchPairOrder.length === exercise.pairs.length && (
+                <button
+                  type="button"
+                  onClick={confirmMatch}
+                  className="tactile-button rounded-lg border-primary-container bg-primary px-4 py-2 text-sm font-bold text-on-primary"
+                >
+                  Confirm match
+                </button>
+              )}
+            </div>
+          )}
         </div>
       )}
 

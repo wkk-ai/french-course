@@ -1,5 +1,5 @@
 import { taskFromPoolItem } from '@/lib/review/tasks'
-import { isReviewablePartOfSpeech } from '@/lib/exercises/validate'
+import { isReviewablePoolItem } from '@/lib/review/pool-filter'
 import type {
   ReviewPoolItem,
   ReviewSessionPlan,
@@ -23,7 +23,7 @@ function isOverdue(item: ReviewPoolItem, now: number) {
 }
 
 function isQuizWorthy(item: ReviewPoolItem) {
-  return isReviewablePartOfSpeech(item.part_of_speech)
+  return isReviewablePoolItem(item)
 }
 
 function interleaveTasks(tasks: ReviewTask[]): ReviewTask[] {

@@ -1,17 +1,18 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { CheckCircle2, ChevronRight, Infinity as InfinityIcon, Layers, Play } from 'lucide-react'
+import { CheckCircle2, ChevronRight, Infinity as InfinityIcon, Layers, LogOut, Play } from 'lucide-react'
 import { ExerciseCard } from '@/components/lesson/ExerciseCard'
 import { VocabFlashcard } from '@/components/review/VocabFlashcard'
+import { useReviewSessionLock } from '@/components/review/ReviewSessionLock'
 import type { ExerciseAnswer } from '@/lib/exercises/types'
 import { isExerciseCorrect } from '@/lib/exercises/grading'
 import { BUNDLED_CHAPTER_IDS } from '@/lib/bundled-chapter-ids'
 import { BUNDLED_VOCABULARY } from '@/lib/phase1/content'
-import { isReviewablePartOfSpeech } from '@/lib/exercises/validate'
-import { getAllLocalVocabulary, enqueueLocalVocabulary, scoreLocalVocabulary } from '@/lib/local-vocab-vault'
+import { getAllLocalVocabulary, enqueueLocalVocabulary, scoreLocalVocabulary, subscribeLocalVault } from '@/lib/local-vocab-vault'
 import { mergeCompletedChapterIds } from '@/lib/local-progress'
 import { buildFlashcardDeck, countPoolByFilter, FLASHCARD_FILTERS, flashcardQuality } from '@/lib/review/flashcards'
+import { filterReviewPool } from '@/lib/review/pool-filter'
 import { buildReviewSession, emptySessionMessage } from '@/lib/review/session'
 import { lemmaIdsForChapter, vocabularyRowsForLemmas } from '@/lib/review/lemmas'
 import type {
@@ -43,6 +44,13 @@ function enrichPoolItem(item: Omit<ReviewPoolItem, 'source'> & { source?: 'remot
   }
 }
 
+function enrichPoolItems(
+  items: Array<Omit<ReviewPoolItem, 'source'> & { source?: 'remote' | 'local' }>,
+  source: 'remote' | 'local',
+): ReviewPoolItem[] {
+  return filterReviewPool(items.map((item) => enrichPoolItem(item, source)))
+}
+
 const KIND_LABEL: Record<ReviewTask['kind'], string> = {
   overdue: 'Overdue',
   due: 'Due',
@@ -67,6 +75,7 @@ export default function ReviewClient() {
   const [completedInSession, setCompletedInSession] = useState(0)
   const [seenTaskIds, setSeenTaskIds] = useState<string[]>([])
   const [pendingQuality, setPendingQuality] = useState<number | null>(null)
+  const { setActive: setReviewSessionLock } = useReviewSessionLock()
 
   const task = session?.tasks[index]
   const flashCard = flashDeck?.cards[index]
@@ -83,10 +92,7 @@ export default function ReviewClient() {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
-      const local = getAllLocalVocabulary()
-        .map((item) => enrichPoolItem(item, 'local'))
-        .filter((item) => isReviewablePartOfSpeech(item.part_of_speech))
-      setPool(local)
+      setPool(enrichPoolItems(getAllLocalVocabulary(), 'local'))
       return
     }
 
@@ -186,12 +192,12 @@ export default function ReviewClient() {
       }
     }
 
-    const local = localItems
-      .filter((item) => !remoteIds.has(item.vocab_id) && !remote.some((entry) => entry.vocab_id === item.vocab_id))
-      .map((item) => enrichPoolItem(item, 'local'))
+    const local = enrichPoolItems(
+      localItems.filter((item) => !remoteIds.has(item.vocab_id) && !remote.some((entry) => entry.vocab_id === item.vocab_id)),
+      'local',
+    )
 
-    const combined = [...remote, ...local].filter((item) => isReviewablePartOfSpeech(item.part_of_speech))
-    setPool(combined)
+    setPool(filterReviewPool([...remote, ...local]))
   }, [])
 
   useEffect(() => {
@@ -201,11 +207,7 @@ export default function ReviewClient() {
         await loadPool()
       } catch {
         if (!cancelled) {
-          setPool(
-            getAllLocalVocabulary()
-              .map((item) => enrichPoolItem(item, 'local'))
-              .filter((item) => isReviewablePartOfSpeech(item.part_of_speech)),
-          )
+          setPool(enrichPoolItems(getAllLocalVocabulary(), 'local'))
         }
       } finally {
         if (!cancelled) setBooting(false)
@@ -215,6 +217,24 @@ export default function ReviewClient() {
       cancelled = true
     }
   }, [loadPool])
+
+  useEffect(() => {
+    return subscribeLocalVault(() => {
+      const localItems = enrichPoolItems(getAllLocalVocabulary(), 'local')
+      setPool((current) => {
+        const remote = filterReviewPool(current.filter((item) => item.source === 'remote'))
+        const remoteIds = new Set(remote.map((item) => item.vocab_id))
+        const local = localItems.filter((item) => !remoteIds.has(item.vocab_id))
+        return filterReviewPool([...remote, ...local])
+      })
+    })
+  }, [])
+
+  useEffect(() => {
+    const inSession = Boolean(session || flashDeck)
+    setReviewSessionLock(inSession)
+    return () => setReviewSessionLock(false)
+  }, [session, flashDeck, setReviewSessionLock])
 
   const preview = useMemo(() => {
     if (!pool.length) return null
@@ -243,16 +263,12 @@ export default function ReviewClient() {
   }
 
   const persistVocabScore = async (item: ReviewPoolItem, quality: number) => {
-    if (item.source === 'local') {
-      scoreLocalVocabulary(item.vocab_id, quality)
-      return
-    }
+    // Always mirror locally so a later remote refresh cannot erase an unsaved rating.
+    scoreLocalVocabulary(item.vocab_id, quality)
+    if (item.source === 'local') return
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      scoreLocalVocabulary(item.vocab_id, quality)
-      return
-    }
+    if (!user) return
     const schedule = calculateSrsSchedule(
       {
         repetitionCount: item.repetition_count,
@@ -274,7 +290,9 @@ export default function ReviewClient() {
       })
       .eq('user_id', user.id)
       .eq('vocab_id', item.vocab_id)
-    if (updateError) scoreLocalVocabulary(item.vocab_id, quality)
+    if (updateError) {
+      throw new Error('Could not save this review online. It is kept on this device — try again.')
+    }
   }
 
   const startSession = (mode: SessionMode) => {
@@ -340,6 +358,13 @@ export default function ReviewClient() {
       }
       setPendingQuality(quality)
     } catch (caughtError) {
+      // Unlock the card so the learner can retry after a save failure.
+      setPendingQuality(null)
+      setAnswers((current) => {
+        const next = { ...current }
+        delete next[task.id]
+        return next
+      })
       setError(caughtError instanceof Error ? caughtError.message : 'Unable to save this review.')
     } finally {
       setLoading(false)
@@ -376,8 +401,37 @@ export default function ReviewClient() {
     setPendingQuality(null)
   }
 
+  const confirmExitSession = () => {
+    if (window.confirm('Exit this review session? Cards you already finished are saved.')) {
+      backToHub()
+    }
+  }
+
+  useEffect(() => {
+    if (!session && !flashDeck) return
+    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault()
+      event.returnValue = ''
+    }
+    const onPopState = () => {
+      if (window.confirm('Exit this review session? Cards you already finished are saved.')) {
+        backToHub()
+        return
+      }
+      history.pushState(null, '', window.location.href)
+    }
+    history.pushState(null, '', window.location.href)
+    window.addEventListener('beforeunload', onBeforeUnload)
+    window.addEventListener('popstate', onPopState)
+    return () => {
+      window.removeEventListener('beforeunload', onBeforeUnload)
+      window.removeEventListener('popstate', onPopState)
+    }
+  }, [session, flashDeck])
+
   const inExerciseSession = Boolean(session)
   const inFlashSession = Boolean(flashDeck)
+  const inActiveSession = (inExerciseSession && Boolean(task)) || (inFlashSession && Boolean(flashCard))
   const exerciseDone = inExerciseSession && !task
   const flashDone = inFlashSession && !flashCard
   const showHub = !inExerciseSession && !inFlashSession
@@ -391,7 +445,7 @@ export default function ReviewClient() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-[680px] flex-col gap-8">
+    <div className={`mx-auto flex w-full max-w-[680px] flex-col gap-8 ${inActiveSession ? 'pb-24' : ''}`}>
       <header>
         <p className="text-label-caps text-primary">INFINITE LOOP</p>
         <h1 className="text-headline-lg">Review</h1>
@@ -566,6 +620,19 @@ export default function ReviewClient() {
       )}
 
       {error && <p role="alert" className="rounded-lg bg-error-container p-3 text-sm text-on-error-container">{error}</p>}
+
+      {inActiveSession && (
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t-2 border-surface-variant bg-surface-container-lowest p-4 pb-safe md:left-24">
+          <button
+            type="button"
+            onClick={confirmExitSession}
+            className="tactile-button flex w-full items-center justify-center gap-2 rounded-xl border-2 border-surface-variant bg-surface-container-low py-3 font-bold text-on-surface"
+          >
+            <LogOut className="size-5" aria-hidden />
+            Exit session
+          </button>
+        </div>
+      )}
     </div>
   )
 }

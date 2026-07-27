@@ -74,14 +74,26 @@ function learnerBriefPad(body: string, minBrief: number, lesson?: LessonContent)
   return padded
 }
 
+function frenchTopicLabel(raw: string | undefined): string {
+  const cleaned = (raw ?? '')
+    .replace(/practice|checkpoint:?|prove:?|learn|apply|integrate|descriptions?/gi, '')
+    .replace(/\bwith\b/gi, '')
+    .replace(/[^A-Za-zÀ-ÿŒœÆæ0-9'\s-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+  if (!cleaned) return "aujourd'hui"
+  const words = cleaned.match(/[A-Za-zÀ-ÿŒœÆæ']+/g) ?? []
+  const hasFrenchMark = /[àâäéèêëîïôöùûüçœæÀÂÄÉÈÊËÎÏÔÖÙÛÜÇŒÆ]/.test(cleaned)
+  const frenchFunction = words.filter((w) =>
+    /^(le|la|les|un|une|des|de|du|au|aux|et|en|à|ce|cette|ces|sur|pour|avec|dans|je|tu|il|elle|nous|vous)$/i.test(w),
+  )
+  // English lesson titles (Grammar, Prices, Elections…) must not enter FR reading.
+  if (!hasFrenchMark && frenchFunction.length === 0 && words.length > 0) return 'ce thème'
+  return cleaned
+}
+
 function topicReadingParagraphs(lesson: LessonContent, pass: number): string[] {
-  const title =
-    (lesson.brief?.title ?? 'cette leçon')
-      .replace(/practice|checkpoint:?|prove:?|learn|apply|integrate|descriptions?/gi, '')
-      .replace(/\bwith\b/gi, '')
-      .replace(/[^A-Za-zÀ-ÿŒœÆæ0-9'\s-]/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim() || "aujourd'hui"
+  const title = frenchTopicLabel(lesson.brief?.title)
   const existing = readingPlainText(lesson)
   const sentences = existing.split(/(?<=[.!?])\s+/).filter((s) => s.trim().length > 15)
   const offset = (pass * 3) % Math.max(1, sentences.length)

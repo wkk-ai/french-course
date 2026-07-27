@@ -10,10 +10,15 @@ function normalizePath(pathname: string | null) {
   return trimmed
 }
 
+function isLessonPath(path: string) {
+  return path.startsWith('/lesson/')
+}
+
 export function AuthGate({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
   const [ready, setReady] = useState(false)
+  const [sessionLost, setSessionLost] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -38,6 +43,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
         return
       }
 
+      setSessionLost(false)
       setReady(true)
     }
 
@@ -48,8 +54,16 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (cancelled) return
       if (!session) {
+        const current = normalizePath(pathname)
+        // Soft-fail mid-lesson: keep UI mounted so draft answers stay visible.
+        if (isLessonPath(current)) {
+          setSessionLost(true)
+          return
+        }
         setReady(false)
         router.replace('/login/')
+      } else {
+        setSessionLost(false)
       }
     })
 
@@ -67,5 +81,18 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     )
   }
 
-  return <>{children}</>
+  return (
+    <>
+      {sessionLost && (
+        <div className="sticky top-0 z-50 border-b border-error/30 bg-error-container px-4 py-3 text-center text-sm text-on-error-container">
+          Your session ended. Your answers are still on this page —{' '}
+          <a className="font-bold underline" href={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ''}/login/`}>
+            sign in again
+          </a>{' '}
+          to save.
+        </div>
+      )}
+      {children}
+    </>
+  )
 }

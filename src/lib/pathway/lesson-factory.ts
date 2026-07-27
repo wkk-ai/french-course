@@ -3,7 +3,8 @@ import { conversationLine, readingParagraphs } from '@/lib/lesson-text'
 import type { Phase1Theme } from '@/lib/phase1/theme-bank'
 
 const THEORY_JARGON_RE = /Hand-crafted focus|Enqueue reviewable lemmas|prove chunk/i
-const ENGLISH_LEAK_IN_READING_RE = /\b(hello|goodbye|thank you|past tense|clickable dictionary)\b/i
+const ENGLISH_LEAK_IN_READING_RE =
+  /\b(hello|goodbye|thank you|past tense|clickable dictionary|signifie\s*«|Leçon\s*«|Structure du jour|Production guidée|habits;|regular|irregular|Emotions|Grammar|Prices|Elections)\b/i
 
 export type DeepTheme = Phase1Theme & {
   role?: 'A' | 'B' | 'C' | 'D'
@@ -159,8 +160,9 @@ function defaultReadingFr(theme: DeepTheme): string[] {
     .slice(0, 8)
     .map((line) => `${line.speaker} : « ${line.text} »`)
     .join(' ')
+  // Never inject English theme.grammar / titles into French reading.
   return [
-    `Aujourd'hui, nous travaillons : ${theme.grammar}. ${focus[0] ?? ''} ${focus[1] ?? ''}`,
+    `Aujourd'hui, nous travaillons le français de la leçon. ${focus[0] ?? ''} ${focus[1] ?? ''}`,
     `${focus.slice(2, 5).join(' ')} ${dialogueSample}`,
     `${focus.slice(0, 4).join(' ')} On répète les phrases du jour à voix haute.`,
     `${theme.meanings

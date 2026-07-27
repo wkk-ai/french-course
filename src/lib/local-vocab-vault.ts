@@ -16,6 +16,8 @@ export type LocalVaultItem = {
 
 type VaultStore = Record<string, LocalVaultItem>
 
+// No module-level read cache — each readStore() re-reads localStorage directly.
+
 function readStore(): VaultStore {
   if (typeof window === 'undefined') return {}
   try {
@@ -25,10 +27,46 @@ function readStore(): VaultStore {
   }
 }
 
+function reviewedAtMs(item: LocalVaultItem): number {
+  return item.last_reviewed_at ? new Date(item.last_reviewed_at).getTime() : 0
+}
+
+/** Merge two vault rows: max counters; SRS fields from later review (or higher repetition on tie). */
+function mergeVaultItem(left: LocalVaultItem, right: LocalVaultItem): LocalVaultItem {
+  const leftMs = reviewedAtMs(left)
+  const rightMs = reviewedAtMs(right)
+  const preferRight = rightMs > leftMs || (rightMs === leftMs && right.repetition_count > left.repetition_count)
+  const base = preferRight ? right : left
+  return {
+    ...base,
+    total_encounters: Math.max(left.total_encounters, right.total_encounters),
+    mistake_count: Math.max(left.mistake_count, right.mistake_count),
+  }
+}
+
+function mergeStores(incoming: VaultStore, latest: VaultStore): VaultStore {
+  const merged: VaultStore = { ...latest }
+  for (const [vocabId, item] of Object.entries(incoming)) {
+    merged[vocabId] = merged[vocabId] ? mergeVaultItem(merged[vocabId], item) : item
+  }
+  return merged
+}
+
+/** Compare-and-swap write: merge incoming with latest store before persisting. */
 function writeStore(store: VaultStore) {
   if (typeof window === 'undefined') return
-  const fresh = readStore()
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...fresh, ...store }))
+  const latest = readStore()
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(mergeStores(store, latest)))
+}
+
+/** Listen for cross-tab vault writes (storage events fire in other tabs only). */
+export function subscribeLocalVault(listener: () => void): () => void {
+  if (typeof window === 'undefined') return () => {}
+  const handler = (event: StorageEvent) => {
+    if (event.key === STORAGE_KEY) listener()
+  }
+  window.addEventListener('storage', handler)
+  return () => window.removeEventListener('storage', handler)
 }
 
 /** Spread new lemmas across days so Review stays infinite without dumping everything due today. */

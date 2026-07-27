@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { BookOpen, ScrollText, BarChart2, RotateCcw } from 'lucide-react';
+import { useReviewSessionLock } from '@/components/review/ReviewSessionLock';
 
 const navItems = [
   { name: 'Learn', href: '/', icon: BookOpen },
@@ -13,7 +14,10 @@ const navItems = [
 
 export function Navigation() {
   const pathname = usePathname();
+  const { active: reviewSessionActive } = useReviewSessionLock();
   const current = (pathname ?? '/').replace(/\/+$/, '') || '/';
+
+  if (reviewSessionActive) return null;
 
   const isItemActive = (href: string) => {
     const target = href.replace(/\/+$/, '') || '/';

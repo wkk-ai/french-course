@@ -31,7 +31,7 @@ Last updated: **2026-07-27** (waves A–D implementation landed; re-measure tap 
 | R1-04 | fixed | English leaking into “French” reading (gloss dumps, EN titles, Prove labels) | 256+ lessons / 511 themes |
 | R1-05 | fixed | Identical pad paragraphs cloned (“Lecture de consolidation…”) | ×525 |
 | R1-06 | fixed | CI `validateChapterContent` only checks length — pads make all 720 green | 0 validate fails |
-| R1-07 | fixed | Review still seeds proper nouns (Marc/Paris) via DB `chapter_vocabulary` on complete | RPC bypasses client filter |
+| R1-07 | open | Review still seeds proper nouns (Marc/Paris) via DB `chapter_vocabulary` on complete | **Remote RPC not migrated yet** — file `supabase/migrations/20260727120000_complete_chapter_skip_proper_nouns.sql` ready; client `filterReviewPool` + seed cleanup already shipped |
 | R1-08 | fixed | Mistakes never clear (`is_resolved` never set true) → rem drills forever | LessonClient + migrations |
 | R1-09 | fixed | Prove score / pass gate includes remediation extras | LessonClient exercises merge |
 
@@ -82,9 +82,9 @@ Last updated: **2026-07-27** (waves A–D implementation landed; re-measure tap 
 | ID | Status | Bug | User impact |
 |----|--------|-----|-------------|
 | R2-01 | fixed | Phone zoom locked (`maximumScale: 1`) | Low-vision can’t enlarge text |
-| R2-02 | open | Full course pack pulled into client (~2.8MB themes; home `index.html` ~**34MB**) | Slow open / jank on phone |
+| R2-02 | fixed | Full course pack pulled into client (~2.8MB themes; home `index.html` ~**34MB**) | Home now sends playable stubs only (no resolved lesson bodies) |
 | R2-03 | fixed | Leave lesson (Back / X / Rules) wipes all answers — no draft, no “leave?” | Long lesson lost in one tap |
-| R2-04 | fixed | Session expiry / sign-out mid-lesson unmounts AuthGate → same wipe | Answers only in React state |
+| R2-04 | fixed | Session expiry / sign-out mid-lesson unmounts AuthGate → same wipe | Soft banner + keep lesson mounted on lesson paths |
 | R2-05 | fixed | Sign-out does not clear local progress / vocab vault; keys not user-scoped | Next account inherits prior user’s unlock + Review |
 
 ### P1
@@ -93,15 +93,15 @@ Last updated: **2026-07-27** (waves A–D implementation landed; re-measure tap 
 |----|--------|-----|-------------|
 | R2-06 | fixed | Fail Prove: copy says remediate Apply/Integrate but **no links**; Pass stays disabled | Dead end |
 | R2-07 | fixed | Wrong MCQ/match answer locked forever — no retry | Can’t recover without restarting lesson |
-| R2-08 | open | Match/order: no undo; last pair auto-locks | One mis-tap fails card |
-| R2-09 | open | All 22+ drills on one endless scroll (“Q x of y” feels like carousel) | Fatigue / lost place |
+| R2-08 | fixed | Match/order: no undo; last pair auto-locks | Confirm + Undo on match/order |
+| R2-09 | fixed | All 22+ drills on one endless scroll (“Q x of y” feels like carousel) | One exercise at a time + Next |
 | R2-10 | fixed | Flashcards: **Again \| Easy \| Hard** — big green Easy in middle | Accidental “I know it” |
 | R2-11 | fixed | PWA installable but SW only clears caches — offline fake | Install promise broken |
 | R2-12 | fixed | No Sign up / Forgot password | New users stuck |
 | R2-13 | fixed | Network fail → dumped to login with no offline message | Looks like auth failure |
 | R2-14 | fixed | Top bar / lesson header ignore notch; X under Dynamic Island | Hard to hit Close |
 | R2-15 | fixed | Sign-out / Close / X-Ray tap targets &lt; 44px | Fat-finger misses |
-| R2-16 | open | Review session: bottom nav still live — leave mid-run loses session | No exit control |
+| R2-16 | fixed | Review session: bottom nav still live — leave mid-run loses session | ReviewSessionLock hides nav; sticky Exit + beforeunload/Back confirm |
 | R2-17 | open | XP / streak / Center chapters = remote only | Local finishes invisible in chrome |
 | R2-18 | open | Center “Reading Activity” ≠ reading words; “Words learned” = any queued lemma | Misleading stats |
 | R2-19 | fixed | White text on lime Complete/Pass (`bg-success` + `text-on-primary`) | Hard to read CTA |
@@ -109,8 +109,8 @@ Last updated: **2026-07-27** (waves A–D implementation landed; re-measure tap 
 | R2-21 | open | Browser Back mid-lesson exits whole lesson; reopen always Theory | Stage not in URL |
 | R2-22 | fixed | `lang="fr"` while chrome is English | Screen readers mispronounce UI |
 | R2-23 | fixed | Center heatmap `today` frozen at **build time** (static export) | Wrong week until redeploy |
-| R2-24 | open | Multi-tab Review vault last-write-wins clobber | Ratings “forget” |
-| R2-25 | open | Multi-tab Home/Lesson progress stale | Unlock confusion |
+| R2-24 | fixed | Multi-tab Review vault last-write-wins clobber | `subscribeLocalVault` + always mirror scores locally |
+| R2-25 | fixed | Multi-tab Home/Lesson progress stale | `subscribeCompletedChapters` / storage listener |
 | R2-26 | fixed | AuthGate `getSession` vs pages `getUser` | Empty progress then kick |
 | R2-27 | fixed | Complete-lesson / login double-submit race | Duplicate RPC / enqueue |
 
@@ -126,7 +126,7 @@ Last updated: **2026-07-27** (waves A–D implementation landed; re-measure tap 
 | R2-33 | fixed | Nav icon = house, label = Learn |
 | R2-34 | fixed | Login shows raw server error string |
 | R2-35 | open | Vocab growth chart labels collide (`W1` every month) |
-| R2-36 | open | Soft 404: no `not-found.tsx`; empty lesson shell soft dead-end |
+| R2-36 | fixed | Soft 404: no `not-found.tsx`; empty lesson shell soft dead-end | `src/app/not-found.tsx` + lesson `notFound()` |
 | R2-37 | fixed | Center / TopBar flash zeros before fetch |
 | R2-38 | fixed | Lesson auth-fail gate says “Loading lesson…” while redirecting |
 | R2-39 | fixed | Cleanup SW re-registers every visit — brief control flicker |

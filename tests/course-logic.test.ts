@@ -569,3 +569,78 @@ test('clickable lookup resolves conjugated être and elided forms', async () => 
   // May or may not resolve histoire lemma; must not throw
   assert.ok(histoire.length >= 1)
 })
+
+test('irregular conjugations: dormir and écrire are not false regulars', async () => {
+  const { conjugateVerb } = await import('../src/lib/french-conjugations')
+  const dorm = conjugateVerb({
+    id: 'dormir',
+    word: 'dormir',
+    base_translation: 'to sleep',
+    part_of_speech: 'verb',
+    register: 'neutral',
+  } as never)
+  const present = dorm.filter((row) => row.tense === 'Présent').map((row) => row.form)
+  assert.ok(present.includes('dors'), `expected dors, got ${present.join(',')}`)
+  assert.ok(!present.includes('dormis'), 'dormir must not use false regular -ir forms')
+
+  const ecrire = conjugateVerb({
+    id: 'ecrire',
+    word: 'écrire',
+    base_translation: 'to write',
+    part_of_speech: 'verb',
+    register: 'neutral',
+  } as never)
+  const ePresent = ecrire.filter((row) => row.tense === 'Présent').map((row) => row.form)
+  assert.ok(ePresent.includes('écris'), `expected écris, got ${ePresent.join(',')}`)
+  assert.ok(!ePresent.includes('écri'), 'écrire must not use false regular -re stem')
+})
+
+test('past participles like vu / allé resolve to infinitive lemmas', async () => {
+  const { tokenizeFrench } = await import('../src/lib/clickable-text')
+  const { BUNDLED_VOCABULARY } = await import('../src/lib/phase1/content')
+  const vu = tokenizeFrench('j’ai vu Marie', 'pp1', BUNDLED_VOCABULARY)
+  assert.ok(vu.some((t) => t.text === 'vu' && t.lemmaId), 'vu should map to voir')
+  const alle = tokenizeFrench('elle est allée', 'pp2', BUNDLED_VOCABULARY)
+  assert.ok(alle.some((t) => t.text === 'allée' && t.lemmaId), 'allée should map to aller')
+})
+
+test('bundled tap coverage stays under 5% (proper nouns allowlisted)', async () => {
+  const { BUNDLED_CHAPTER_IDS, BUNDLED_LESSONS } = await import('../src/lib/bundled-lessons')
+  const { BUNDLED_VOCABULARY } = await import('../src/lib/phase1/content')
+  const { measureBundledTapCoverage } = await import('../src/lib/pathway/tap-coverage')
+  const stats = measureBundledTapCoverage(BUNDLED_LESSONS, BUNDLED_CHAPTER_IDS, BUNDLED_VOCABULARY)
+  assert.ok(stats.totalWordTokens > 100_000, 'expected large token sample')
+  assert.ok(
+    stats.missRate < 0.05,
+    `tap miss rate ${(stats.missRate * 100).toFixed(2)}% must be < 5% (${stats.missTokens}/${stats.totalWordTokens})`,
+  )
+})
+
+test('u1.B has few untappable content surfaces after enrich', async () => {
+  const { BUNDLED_LESSONS } = await import('../src/lib/bundled-lessons')
+  const { BUNDLED_VOCABULARY } = await import('../src/lib/phase1/content')
+  const { untappableSurfaces } = await import('../src/lib/pathway/content-quality')
+  const { measureLessonTapCoverage } = await import('../src/lib/pathway/tap-coverage')
+  const lesson = BUNDLED_LESSONS['22222222-0000-0000-0000-000000000111']
+  assert.ok(lesson)
+  const stats = measureLessonTapCoverage(lesson, BUNDLED_VOCABULARY)
+  const misses = untappableSurfaces(lesson, BUNDLED_VOCABULARY)
+  assert.ok(stats.missRate < 0.08, `u1.B miss rate ${(stats.missRate * 100).toFixed(1)}% too high`)
+  assert.ok(misses.length < 40, `u1.B has ${misses.length} unique untappable surfaces: ${misses.slice(0, 12).join(', ')}`)
+})
+
+test('subscribeLocalVault is exported for cross-tab Review sync', async () => {
+  const vault = await import('../src/lib/local-vocab-vault')
+  assert.equal(typeof vault.subscribeLocalVault, 'function')
+  assert.equal(typeof vault.subscribeLocalVault(() => {}), 'function')
+})
+
+test('HomeClient uses lightweight bundled-chapter-ids only', async () => {
+  const fs = await import('node:fs')
+  const path = await import('node:path')
+  const source = fs.readFileSync(path.join(process.cwd(), 'src/app/(main)/HomeClient.tsx'), 'utf8')
+  assert.equal(source.includes('bundled-lessons'), false)
+  assert.equal(source.includes('BUNDLED_LESSONS'), false)
+  assert.equal(source.includes('resolveLessonContent'), false)
+  assert.ok(source.includes('bundled-chapter-ids'))
+})

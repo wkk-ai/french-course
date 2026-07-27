@@ -13,7 +13,7 @@ import {
 } from '@/lib/pathway/catalog'
 import { deriveChapterStatus } from '@/lib/progression'
 import { BUNDLED_CHAPTER_IDS } from '@/lib/bundled-chapter-ids'
-import { mergeCompletedChapterIds } from '@/lib/local-progress'
+import { mergeCompletedChapterIds, readLocalCompletedChapters, subscribeCompletedChapters } from '@/lib/local-progress'
 import { createClient } from '@/utils/supabase/client'
 
 type Module = {
@@ -137,6 +137,18 @@ export default function HomeClient({
     return () => {
       cancelled = true
     }
+  }, [])
+
+  useEffect(() => {
+    return subscribeCompletedChapters(() => {
+      setProgressByChapter((current) => {
+        const next = new Map(current)
+        for (const id of readLocalCompletedChapters()) {
+          next.set(id, 'completed')
+        }
+        return next
+      })
+    })
   }, [])
 
   const authoredChapters = useMemo(() => {

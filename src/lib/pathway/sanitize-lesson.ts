@@ -27,7 +27,15 @@ function isMetaReadingParagraph(tokens: WordToken[]): boolean {
   const text = paragraphText(tokens)
   if (hasAuthorPad(text)) return true
   if (englishLeakInFrench(text)) return true
-  return META_READING_MARKERS.some((marker) => text.includes(marker))
+  if (META_READING_MARKERS.some((marker) => text.includes(marker))) return true
+  // Drop factory paragraphs that are mostly English title words (Prices, Elections, Grammar…).
+  const words = text.match(/[A-Za-zÀ-ÿŒœÆæ']+/g) ?? []
+  if (words.length >= 4) {
+    const asciiContent = words.filter((word) => /^[A-Za-z]+$/.test(word) && word.length > 2)
+    const frenchy = words.filter((word) => /[àâäéèêëîïôöùûüçœæÀÂÄÉÈÊËÎÏÔÖÙÛÜÇŒÆ]/.test(word) || /^(je|tu|il|elle|nous|vous|ils|elles|le|la|les|un|une|des|et|de|du|au|aux|en|à|est|suis|pas|oui|non|bonjour|merci)$/i.test(word))
+    if (asciiContent.length >= 3 && frenchy.length === 0 && asciiContent.length / words.length > 0.5) return true
+  }
+  return false
 }
 
 function stripAuthorPhrases(body: string): string {
@@ -49,15 +57,27 @@ function stripAuthorPhrases(body: string): string {
   return next.replace(/\n{3,}/g, '\n\n').trim()
 }
 
+function frenchTopicLabel(raw: string): string {
+  const cleaned = raw
+    .replace(/practice|checkpoint:?|prove:?|learn|apply|integrate|descriptions?/gi, '')
+    .replace(/\bwith\b/gi, '')
+    .replace(/\bêtre\b/gi, 'être')
+    .replace(/[^A-Za-zÀ-ÿŒœÆæ0-9'\s-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+  if (!cleaned) return "aujourd'hui"
+  const words = cleaned.match(/[A-Za-zÀ-ÿŒœÆæ']+/g) ?? []
+  const hasFrenchMark = /[àâäéèêëîïôöùûüçœæÀÂÄÉÈÊËÎÏÔÖÙÛÜÇŒÆ]/.test(cleaned)
+  const frenchFunction = words.filter((w) =>
+    /^(le|la|les|un|une|des|de|du|au|aux|et|en|à|ce|cette|ces|sur|pour|avec|dans|je|tu|il|elle|nous|vous)$/i.test(w),
+  )
+  if (!hasFrenchMark && frenchFunction.length === 0 && words.length > 0) return 'ce thème'
+  if (englishLeakInFrench(cleaned)) return 'ce thème'
+  return cleaned
+}
+
 function topicFillerFrench(title: string, meanings: Array<[string, string]>, index: number): string {
-  const label =
-    title
-      .replace(/practice|checkpoint:?|prove:?|learn|apply|integrate|descriptions?/gi, '')
-      .replace(/\bwith\b/gi, '')
-      .replace(/\bêtre\b/gi, 'être')
-      .replace(/[^A-Za-zÀ-ÿŒœÆæ0-9'\s-]/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim() || "aujourd'hui"
+  const label = frenchTopicLabel(title)
   const frWords = meanings
     .slice(0, 8)
     .map(([fr]) => fr.replace(/[()]/g, '').trim())
@@ -105,20 +125,39 @@ export function sanitizeLessonContent(lesson: LessonContent, vocabulary: Vocabul
   }
 
   const exercises = (lesson.exercises ?? []).filter((exercise) => {
-    const blob = [exercise.prompt, ...(exercise.options ?? [])].join(' ')
+    const options = 'options' in exercise && Array.isArray(exercise.options) ? exercise.options : []
+    const blob = [exercise.prompt, ...options].join(' ')
     if (/plot|spoiler|character name|Before grammar|Chunks should be learned|prove chunk|Hand-crafted/i.test(blob)) {
       return false
     }
-    if ((exercise.options ?? []).some((option) => /^(plot|name|story|Only English)$/i.test(option.trim()))) {
+    if (options.some((option: string) => /^(plot|name|story|Only English)$/i.test(option.trim()))) {
       return false
     }
     return true
   })
 
+  const dialogue = (lesson.dialogue ?? [])
+    .map((line, index) => {
+      let text = line.text
+        .replace(/\s*sur\s*:\s*[^?.!]*/gi, ' sur cette leçon')
+        .replace(/\b(Emotions|Grammar|Prices|Elections|Friendship|Conflict|Headlines|Borders|Relatives|Concession|Passive|Citizen|Debate|Advice|Health|Jobs|Reciprocal|Compare|Laws|Report)\b(?:\s*·\s*apply)?/g, 'cette leçon')
+      if (englishLeakInFrench(text) || /signifie\s*«/i.test(text)) {
+        const fallbacks = [
+          'Tu comprends cette leçon ?',
+          'Oui, un peu. Je répète les phrases.',
+          'Donne un exemple, s’il te plaît.',
+          'D’accord. Écoute encore une fois.',
+        ]
+        text = fallbacks[index % fallbacks.length]
+      }
+      return { ...line, text }
+    })
+
   return {
     ...lesson,
     brief,
     reading,
+    dialogue,
     exercises: exercises.length >= 22 ? exercises : lesson.exercises,
   }
 }

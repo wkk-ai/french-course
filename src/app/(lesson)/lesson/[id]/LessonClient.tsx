@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { BookOpen, ChevronRight, Eye, Flame, MessagesSquare, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import type { ExerciseAnswer, GrammarRule, LessonContent, VerbConjugation, VocabularyWord, WordToken } from '@/lib/course'
@@ -82,9 +82,13 @@ export default function LessonClient({
   const [xRayEnabled, setXRayEnabled] = useState(false)
   const [activeWordId, setActiveWordId] = useState<string | null>(null)
   const popupRef = useRef<HTMLDivElement | null>(null)
+  const dictAnchorRef = useRef<HTMLButtonElement | null>(null)
+  const [dictPopupPos, setDictPopupPos] = useState<{ top: number; left: number } | null>(null)
   const [conjugationWord, setConjugationWord] = useState<VocabularyWord | null>(null)
   const [conjugationTense, setConjugationTense] = useState<string>('Présent')
   const [answers, setAnswers] = useState<Record<string, ExerciseAnswer>>({})
+  const [exerciseIndex, setExerciseIndex] = useState(0)
+  const exerciseSectionRef = useRef<HTMLElement>(null)
   const [remediationCategories, setRemediationCategories] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -115,14 +119,32 @@ export default function LessonClient({
     }
   }, [activeWordId])
 
+  useLayoutEffect(() => {
+    if (!activeWordId || !dictAnchorRef.current || !popupRef.current) {
+      setDictPopupPos(null)
+      return
+    }
+    const anchor = dictAnchorRef.current.getBoundingClientRect()
+    const popup = popupRef.current
+    const width = popup.offsetWidth || 288
+    const height = popup.offsetHeight || 160
+    const margin = 8
+    let top = anchor.top - height - 12
+    if (top < margin) top = anchor.bottom + 12
+    let left = anchor.left + anchor.width / 2 - width / 2
+    left = Math.max(margin, Math.min(left, window.innerWidth - width - margin))
+    setDictPopupPos({ top, left })
+  }, [activeWordId])
+
   // Restore draft answers / stage
   useEffect(() => {
     try {
       const raw = sessionStorage.getItem(DRAFT_KEY(chapterId))
       if (!raw) return
-      const parsed = JSON.parse(raw) as { stage?: Stage; answers?: Record<string, ExerciseAnswer> }
+      const parsed = JSON.parse(raw) as { stage?: Stage; answers?: Record<string, ExerciseAnswer>; exerciseIndex?: number }
       if (parsed.stage) setStage(parsed.stage)
       if (parsed.answers) setAnswers(parsed.answers)
+      if (typeof parsed.exerciseIndex === 'number' && parsed.exerciseIndex >= 0) setExerciseIndex(parsed.exerciseIndex)
     } catch {
       // ignore corrupt draft
     }
@@ -132,11 +154,11 @@ export default function LessonClient({
   useEffect(() => {
     if (gate !== 'ready') return
     try {
-      sessionStorage.setItem(DRAFT_KEY(chapterId), JSON.stringify({ stage, answers }))
+      sessionStorage.setItem(DRAFT_KEY(chapterId), JSON.stringify({ stage, answers, exerciseIndex }))
     } catch {
       // quota
     }
-  }, [chapterId, stage, answers, gate])
+  }, [chapterId, stage, answers, exerciseIndex, gate])
 
   useEffect(() => {
     const dirty = Object.keys(answers).length > 0 && stage !== 'brief'
@@ -221,6 +243,11 @@ export default function LessonClient({
     return remediation.filter((exercise) => !existingIds.has(exercise.id))
   }, [baseExercises, remediationCategories, isProve])
   const exercises = useMemo(() => [...baseExercises, ...remediationExercises], [baseExercises, remediationExercises])
+  const currentExercise = exercises[exerciseIndex]
+  const currentExerciseAnswered = currentExercise
+    ? isExerciseAnswered(currentExercise, answers[currentExercise.id])
+    : false
+  const answeredExerciseCount = exercises.filter((exercise) => isExerciseAnswered(exercise, answers[exercise.id])).length
   const scoringExercises = baseExercises
   const answeredAll =
     scoringExercises.length > 0 &&
@@ -230,6 +257,19 @@ export default function LessonClient({
   const provePassed = !isProve || (answeredAll && didPassProve(liveScore))
   const progress = stage === 'brief' ? 20 : stage === 'reading' ? 45 : stage === 'conversation' ? 70 : answeredAll ? 100 : 90
   const remediateLinks = useMemo(() => siblingRemediationLinks(chapterId), [chapterId])
+
+  useEffect(() => {
+    if (exercises.length === 0) {
+      if (exerciseIndex !== 0) setExerciseIndex(0)
+      return
+    }
+    if (exerciseIndex >= exercises.length) setExerciseIndex(exercises.length - 1)
+  }, [exerciseIndex, exercises.length])
+
+  useEffect(() => {
+    if (stage !== 'exercise') return
+    exerciseSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [exerciseIndex, stage])
 
   const syntaxClass = (token: WordToken) => {
     if (!xRayEnabled) return ''
@@ -334,7 +374,11 @@ export default function LessonClient({
               <button
                 type="button"
                 data-dict-word
-                onClick={() => setActiveWordId(active ? null : token.id)}
+                ref={active ? dictAnchorRef : undefined}
+                onClick={(event) => {
+                  dictAnchorRef.current = event.currentTarget
+                  setActiveWordId(active ? null : token.id)
+                }}
                 className={`transition-colors ${clickableClass} ${syntaxClass(token)} ${active ? 'bg-surface-container-high' : ''}`}
               >
                 {token.text}
@@ -348,7 +392,12 @@ export default function LessonClient({
                 role="dialog"
                 aria-label={`${word.word} definition`}
                 onPointerDown={(event) => event.stopPropagation()}
-                className="absolute bottom-full left-1/2 z-30 mb-3 w-72 -translate-x-1/2 rounded-xl border-2 border-surface-variant bg-surface-container-lowest p-4 text-left shadow-lg"
+                className="fixed z-50 w-72 rounded-xl border-2 border-surface-variant bg-surface-container-lowest p-4 text-left shadow-lg"
+                style={
+                  dictPopupPos
+                    ? { top: dictPopupPos.top, left: dictPopupPos.left }
+                    : { top: 0, left: 0, visibility: 'hidden' }
+                }
               >
                 <div className="flex items-start justify-between gap-2">
                   <div>
@@ -544,6 +593,27 @@ export default function LessonClient({
         p_grammar_results: grammarResults,
       })
 
+      if (rpcError) {
+        const { error: progressError } = await supabase.from('user_chapter_progress').upsert({
+          user_id: user.id,
+          chapter_id: chapterId,
+          status: 'completed',
+          score,
+          completed_at: new Date().toISOString(),
+        }, { onConflict: 'user_id,chapter_id' })
+        if (progressError) {
+          throw new Error('We could not save this lesson. Check your connection and try again.')
+        }
+
+        await Promise.all(
+          scoringExercises
+            .filter((exercise) => !isExerciseCorrect(exercise, answers[exercise.id]))
+            .map((exercise) =>
+              recordMistake(exercise.category, `Lesson exercise: ${exercise.prompt}`, lemmaIdFromExercise(exercise)),
+            ),
+        )
+      }
+
       await enqueueLessonVocabulary(user.id)
       await recordDailyReading(user.id, wordsRead)
 
@@ -564,32 +634,12 @@ export default function LessonClient({
           .in('grammar_category', correctCats)
       }
 
+      // Only unlock locally after remote (or fallback) progress actually saved.
       markLocalChapterCompleted(chapterId)
       try {
         sessionStorage.removeItem(DRAFT_KEY(chapterId))
       } catch {
         // ignore
-      }
-
-      if (rpcError) {
-        const { error: progressError } = await supabase.from('user_chapter_progress').upsert({
-          user_id: user.id,
-          chapter_id: chapterId,
-          status: 'completed',
-          score,
-          completed_at: new Date().toISOString(),
-        }, { onConflict: 'user_id,chapter_id' })
-        if (progressError) {
-          console.warn('complete_chapter fallback failed', progressError.message)
-        }
-
-        await Promise.all(
-          scoringExercises
-            .filter((exercise) => !isExerciseCorrect(exercise, answers[exercise.id]))
-            .map((exercise) =>
-              recordMistake(exercise.category, `Lesson exercise: ${exercise.prompt}`, lemmaIdFromExercise(exercise)),
-            ),
-        )
       }
 
       router.push('/')
@@ -750,12 +800,42 @@ export default function LessonClient({
         )}
 
         {stage === 'exercise' && (
-          <section className="mt-8 space-y-5">
+          <section ref={exerciseSectionRef} className="mt-8 space-y-5">
             <p className="text-body-reading text-on-surface-variant">
               {isProve
                 ? `Prove gate: no hints. Score at least ${PROVE_PASS_SCORE}% to pass. Fail → remediate Apply/Integrate, then retry.`
                 : 'Mixed drills: multiple choice, fill-in, matching, word order, and more. Answer each once — wrong answers feed Review.'}
             </p>
+            {exercises.length > 0 && (
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border-2 border-surface-variant bg-surface-container-low p-4">
+                <div>
+                  <p className="text-label-caps text-primary">
+                    Question {exerciseIndex + 1} of {exercises.length}
+                  </p>
+                  <p className="mt-1 text-sm text-on-surface-variant">
+                    {answeredExerciseCount} of {exercises.length} answered
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    disabled={exerciseIndex === 0}
+                    onClick={() => setExerciseIndex((index) => Math.max(0, index - 1))}
+                    className="tactile-button rounded-lg border-2 border-surface-variant bg-surface-container-lowest px-4 py-2 text-sm font-bold text-on-surface disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Prev
+                  </button>
+                  <button
+                    type="button"
+                    disabled={exerciseIndex >= exercises.length - 1 || !currentExerciseAnswered}
+                    onClick={() => setExerciseIndex((index) => Math.min(exercises.length - 1, index + 1))}
+                    className="tactile-button rounded-lg border-2 border-surface-variant bg-surface-container-lowest px-4 py-2 text-sm font-bold text-on-surface disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
             {isProve && answeredAll && (
               <div className={`space-y-2 rounded-lg p-3 text-sm ${provePassed ? 'bg-success/15 text-tertiary' : 'bg-error-container text-on-error-container'}`}>
                 <p>Score {liveScore}% {provePassed ? '· pass' : `· need ${PROVE_PASS_SCORE}%+`}</p>
@@ -771,31 +851,31 @@ export default function LessonClient({
                 )}
               </div>
             )}
-            {exercises.map((exercise, exerciseIndex) => (
+            {currentExercise && (
               <ExerciseCard
-                key={exercise.id}
-                exercise={exercise}
+                key={currentExercise.id}
+                exercise={currentExercise}
                 index={exerciseIndex}
                 total={exercises.length}
-                answer={answers[exercise.id]}
+                answer={answers[currentExercise.id]}
                 allowHints={!isProve}
-                onAnswer={(value) => setAnswers((current) => ({ ...current, [exercise.id]: value }))}
+                onAnswer={(value) => setAnswers((current) => ({ ...current, [currentExercise.id]: value }))}
                 onMistake={() =>
                   void recordMistake(
-                    exercise.category,
-                    `Lesson exercise: ${exercise.prompt}`,
-                    lemmaIdFromExercise(exercise),
+                    currentExercise.category,
+                    `Lesson exercise: ${currentExercise.prompt}`,
+                    lemmaIdFromExercise(currentExercise),
                   )
                 }
                 onRetry={() =>
                   setAnswers((current) => {
                     const next = { ...current }
-                    delete next[exercise.id]
+                    delete next[currentExercise.id]
                     return next
                   })
                 }
               />
-            ))}
+            )}
             {error && <p role="alert" className="rounded-lg bg-error-container p-3 text-sm text-on-error-container">{error}</p>}
             <div className="flex gap-3">
               <button type="button" onClick={() => setStage(hasConversation ? 'conversation' : 'reading')} className="tactile-button flex-1 rounded-xl border-2 border-surface-variant bg-surface-container-lowest py-4 font-bold text-on-surface">
@@ -815,8 +895,17 @@ export default function LessonClient({
       </main>
 
       {conjugationWord && (
-        <div role="dialog" aria-modal="true" aria-label={`${conjugationWord.word} conjugations`} className="fixed inset-0 z-50 flex items-end bg-black/30 p-4 sm:items-center sm:justify-center">
-          <section className="flex max-h-[85vh] w-full max-w-md flex-col rounded-xl border-2 border-surface-variant bg-surface-container-lowest p-6">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${conjugationWord.word} conjugations`}
+          className="fixed inset-0 z-50 flex items-end bg-black/30 p-4 sm:items-center sm:justify-center"
+          onClick={() => setConjugationWord(null)}
+        >
+          <section
+            className="flex max-h-[85vh] w-full max-w-md flex-col rounded-xl border-2 border-surface-variant bg-surface-container-lowest p-6"
+            onClick={(event) => event.stopPropagation()}
+          >
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-label-caps text-primary">VERB ENGINE</p>
