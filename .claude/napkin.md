@@ -12,7 +12,7 @@
    Do instead: never pad brief/reading with authoring jargon (“Deep practice (Module-1 bar)”, “Store verbs as infinitives”, “Dans cette leçon, relisez…”, “dictionnaire cliquable”, “Hand-crafted focus”, “Enqueue reviewable lemmas”, “Lecture de consolidation”). Meet depth with real learner content; CI denylist those phrases on all 720. Measured: author pad 716/720 briefs; meta FR pad 717/720 readings; consol template ×525.
 
 2. **[2026-07-27] Reading tap “Not in the dictionary” despite bank entry**
-   Do instead: (1) unique vocab id namespaces — CORE_EXTRA `800+`, TAP_FILL `5000+`, never overlap; (2) CI assert unique ids; (3) test tap via `resolveVocabularyForLesson` (dedupe-by-id path), not raw array; (4) LessonClient enrich with full `BUNDLED_VOCABULARY`. Root cause: `outil` id collided with `cinéma` → outil dropped → dotted “not in dictionary”.
+   Do instead: (1) unique vocab id namespaces — M1 `1–295`, P1 `400–499`, LATER `600–841`, CORE_EXTRA `4000+`, TAP_FILL `5000+`; (2) CI assert unique ids; (3) test tap via `resolveVocabularyForLesson` (dedupe-by-id path); (4) `npx tsx scripts/audit-vocab-ids.ts` after vocab edits. Root cause: overlapping numeric ids dropped rows on lesson load.
 
 3. **[2026-07-27] Factory readingFr dumps English glosses + EN grammar labels**
    Do instead: French-only reading; teach EN in Theory meanings list, not `signifie « past tense… »` / `with avoir` / `PC regular` inside `readingFr`. CI fail on ASCII EN content-words in reading/dialogue (allowlist cognates). Measured: 511/705 themes EN-in-readingFr; 305 dialogues with EN labels.
