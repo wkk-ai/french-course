@@ -31,7 +31,7 @@ Last updated: **2026-07-27** (waves A–D implementation landed; re-measure tap 
 | R1-04 | fixed | English leaking into “French” reading (gloss dumps, EN titles, Prove labels) | 256+ lessons / 511 themes |
 | R1-05 | fixed | Identical pad paragraphs cloned (“Lecture de consolidation…”) | ×525 |
 | R1-06 | fixed | CI `validateChapterContent` only checks length — pads make all 720 green | 0 validate fails |
-| R1-07 | open | Review still seeds proper nouns (Marc/Paris) via DB `chapter_vocabulary` on complete | **Remote RPC not migrated yet** — file `supabase/migrations/20260727120000_complete_chapter_skip_proper_nouns.sql` ready; client `filterReviewPool` + seed cleanup already shipped |
+| R1-07 | fixed | Review still seeds proper nouns (Marc/Paris) via DB `chapter_vocabulary` on complete | Remote `complete_chapter` now skips proper nouns; client filter + seed cleanup also shipped |
 | R1-08 | fixed | Mistakes never clear (`is_resolved` never set true) → rem drills forever | LessonClient + migrations |
 | R1-09 | fixed | Prove score / pass gate includes remediation extras | LessonClient exercises merge |
 
