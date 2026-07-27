@@ -604,18 +604,35 @@ test('past participles like vu / allé resolve to infinitive lemmas', async () =
   assert.ok(alle.some((t) => t.text === 'allée' && t.lemmaId), 'allée should map to aller')
 })
 
-test('outils séparés and similar content words resolve for dictionary tap', async () => {
+test('outils séparés resolve after lesson vocabulary dedupe-by-id', async () => {
   const { tokenizeFrench } = await import('../src/lib/clickable-text')
-  const { BUNDLED_VOCABULARY } = await import('../src/lib/bundled-vocabulary')
+  const { resolveVocabularyForLesson } = await import('../src/lib/lesson-content')
+  // Lesson pages dedupe by id — colliding ids used to drop outil and show “Not in the dictionary”.
+  const vocabulary = resolveVocabularyForLesson([], [])
+  const byId = new Map(vocabulary.map((word) => [word.id, word]))
   const tokens = tokenizeFrench(
     'Habiter et être restent deux outils séparés.',
     'tap',
-    BUNDLED_VOCABULARY,
+    vocabulary,
   )
   const outils = tokens.find((t) => t.text === 'outils')
   const separes = tokens.find((t) => t.text === 'séparés')
   assert.ok(outils?.lemmaId, 'outils must be in dictionary')
   assert.ok(separes?.lemmaId, 'séparés must be in dictionary')
+  assert.equal(byId.get(outils!.lemmaId!)?.word, 'outil')
+  assert.ok(byId.get(separes!.lemmaId!), 'séparés lemma row must exist after dedupe')
+})
+
+test('bundled vocabulary ids are unique', async () => {
+  const { BUNDLED_VOCABULARY } = await import('../src/lib/bundled-vocabulary')
+  const seen = new Map<string, string>()
+  const collisions: string[] = []
+  for (const word of BUNDLED_VOCABULARY) {
+    const prior = seen.get(word.id)
+    if (prior && prior !== word.word) collisions.push(`${word.id}: ${prior} vs ${word.word}`)
+    seen.set(word.id, word.word)
+  }
+  assert.equal(collisions.length, 0, collisions.slice(0, 10).join('; '))
 })
 
 test('bundled tap coverage stays near zero (proper nouns allowlisted)', async () => {

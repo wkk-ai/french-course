@@ -8,7 +8,8 @@ function v(
   part_of_speech: string,
   gender: 'masculine' | 'feminine' | null = null,
 ): VocabularyWord {
-  const id = `10000000-0000-0000-0000-00000000${String(900 + n).padStart(4, '0')}`
+  // Namespace 5000+ — must not overlap CORE_EXTRA (800+) or phase banks.
+  const id = `10000000-0000-0000-0000-00000000${String(5000 + n).padStart(4, '0')}`
   return {
     id,
     word,

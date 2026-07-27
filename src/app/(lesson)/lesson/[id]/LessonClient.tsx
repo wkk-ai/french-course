@@ -215,24 +215,30 @@ export default function LessonClient({
     }
   }, [chapterId, router])
 
-  const vocabularyById = useMemo(() => new Map(vocabulary.map((word) => [word.id, word])), [vocabulary])
+  const dictVocabulary = useMemo(() => {
+    const byId = new Map(BUNDLED_VOCABULARY.map((word) => [word.id, word]))
+    for (const word of vocabulary) byId.set(word.id, word)
+    return [...byId.values()]
+  }, [vocabulary])
+  const vocabularyById = useMemo(() => new Map(dictVocabulary.map((word) => [word.id, word])), [dictVocabulary])
+  // Always enrich against the full client bank so id-collisions / thin props cannot drop surfaces.
   const readingParagraphs = useMemo(
     () =>
       content.reading?.map((paragraph) => ({
         ...paragraph,
-        tokens: enrichTokens(paragraph.tokens, vocabulary),
+        tokens: enrichTokens(paragraph.tokens, dictVocabulary),
       })) ?? [],
-    [content.reading, vocabulary],
+    [content.reading, dictVocabulary],
   )
   const conversationLines = useMemo(
     () =>
       content.conversation?.lines.map((line, index) => ({
         ...line,
         tokens: line.tokens?.length
-          ? enrichTokens(line.tokens, vocabulary)
-          : tokenizeFrench(line.text, `conv-${index}`, vocabulary),
+          ? enrichTokens(line.tokens, dictVocabulary)
+          : tokenizeFrench(line.text, `conv-${index}`, dictVocabulary),
       })) ?? [],
-    [content.conversation, vocabulary],
+    [content.conversation, dictVocabulary],
   )
   const isProve = PATHWAY_BY_CHAPTER_ID.get(chapterId)?.sub.role === 'D'
   const baseExercises = useMemo(() => content.exercises ?? [], [content.exercises])
