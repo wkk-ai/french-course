@@ -136,28 +136,35 @@ export function sanitizeLessonContent(lesson: LessonContent, vocabulary: Vocabul
     return true
   })
 
-  const dialogue = (lesson.dialogue ?? [])
-    .map((line, index) => {
-      let text = line.text
-        .replace(/\s*sur\s*:\s*[^?.!]*/gi, ' sur cette leçon')
-        .replace(/\b(Emotions|Grammar|Prices|Elections|Friendship|Conflict|Headlines|Borders|Relatives|Concession|Passive|Citizen|Debate|Advice|Health|Jobs|Reciprocal|Compare|Laws|Report)\b(?:\s*·\s*apply)?/g, 'cette leçon')
-      if (englishLeakInFrench(text) || /signifie\s*«/i.test(text)) {
-        const fallbacks = [
-          'Tu comprends cette leçon ?',
-          'Oui, un peu. Je répète les phrases.',
-          'Donne un exemple, s’il te plaît.',
-          'D’accord. Écoute encore une fois.',
-        ]
-        text = fallbacks[index % fallbacks.length]
+  const conversation = lesson.conversation
+    ? {
+        ...lesson.conversation,
+        lines: lesson.conversation.lines.map((line, index) => {
+          let text = line.text
+            .replace(/\s*sur\s*:\s*[^?.!]*/gi, ' sur cette leçon')
+            .replace(
+              /\b(Emotions|Grammar|Prices|Elections|Friendship|Conflict|Headlines|Borders|Relatives|Concession|Passive|Citizen|Debate|Advice|Health|Jobs|Reciprocal|Compare|Laws|Report)\b(?:\s*·\s*apply)?/g,
+              'cette leçon',
+            )
+          if (englishLeakInFrench(text) || /signifie\s*«/i.test(text)) {
+            const fallbacks = [
+              'Tu comprends cette leçon ?',
+              'Oui, un peu. Je répète les phrases.',
+              'Donne un exemple, s’il te plaît.',
+              'D’accord. Écoute encore une fois.',
+            ]
+            text = fallbacks[index % fallbacks.length]
+          }
+          return { ...line, text }
+        }),
       }
-      return { ...line, text }
-    })
+    : lesson.conversation
 
   return {
     ...lesson,
     brief,
     reading,
-    dialogue,
+    conversation,
     exercises: exercises.length >= 22 ? exercises : lesson.exercises,
   }
 }
