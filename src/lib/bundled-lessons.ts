@@ -1,6 +1,6 @@
 import type { LessonContent } from '@/lib/course'
 import { MODULE1_CHAPTER_IDS, MODULE1_LESSONS } from '@/lib/module1-content'
-import { FACTORY_CHAPTER_IDS, FACTORY_LESSONS, PHASE1_CHAPTER_IDS, PHASE1_LESSONS } from '@/lib/phase1/content'
+import { FACTORY_CHAPTER_IDS, getFactoryLessons, PHASE1_CHAPTER_IDS, getPhase1Lessons } from '@/lib/phase1/content'
 import { PATHWAY_BY_CHAPTER_ID } from '@/lib/pathway/catalog'
 import { deepenLessonToModule1Bar } from '@/lib/pathway/deepen-lesson'
 import { BUNDLED_CHAPTER_IDS as CATALOG_CHAPTER_IDS } from '@/lib/bundled-chapter-ids'
@@ -22,21 +22,47 @@ function withDepth(lessons: Record<string, LessonContent>): Record<string, Lesso
   return out
 }
 
+let _bundled: Record<string, LessonContent> | null = null
+
+function getBundledLessons(): Record<string, LessonContent> {
+  if (!_bundled) {
+    _bundled = withDepth({
+      ...getFactoryLessons(),
+      ...MODULE1_LESSONS,
+    })
+  }
+  return _bundled
+}
+
 /** All authored playable lessons — Module 01 + factory M02–M36, deepened to Module-1 bar. */
-export const BUNDLED_LESSONS: Record<string, LessonContent> = withDepth({
-  ...FACTORY_LESSONS,
-  ...MODULE1_LESSONS,
+export const BUNDLED_LESSONS: Record<string, LessonContent> = new Proxy({} as Record<string, LessonContent>, {
+  get(_t, prop, receiver) {
+    return Reflect.get(getBundledLessons(), prop, receiver)
+  },
+  ownKeys() {
+    return Reflect.ownKeys(getBundledLessons())
+  },
+  getOwnPropertyDescriptor(_t, prop) {
+    return Reflect.getOwnPropertyDescriptor(getBundledLessons(), prop)
+  },
+  has(_t, prop) {
+    return Reflect.has(getBundledLessons(), prop)
+  },
 })
 
 /** Pathway order for every chapter that has bundled content. */
-export const BUNDLED_CHAPTER_IDS: string[] = CATALOG_CHAPTER_IDS.filter((id) => Boolean(BUNDLED_LESSONS[id]))
+export const BUNDLED_CHAPTER_IDS: string[] = CATALOG_CHAPTER_IDS.filter((id) => {
+  // Catalog ids are the source of truth; factory + module1 cover them.
+  return FACTORY_CHAPTER_IDS.includes(id) || Boolean(MODULE1_LESSONS[id])
+})
 
 /** @deprecated Prefer BUNDLED_CHAPTER_IDS */
 export const AUTHORED_CHAPTER_IDS = BUNDLED_CHAPTER_IDS
 
 export function hasBundledLesson(chapterId: string): boolean {
-  return Boolean(BUNDLED_LESSONS[chapterId])
+  return Boolean(getBundledLessons()[chapterId])
 }
 
-export { MODULE1_CHAPTER_IDS, MODULE1_LESSONS, PHASE1_CHAPTER_IDS, PHASE1_LESSONS, FACTORY_CHAPTER_IDS, FACTORY_LESSONS }
+export { MODULE1_CHAPTER_IDS, MODULE1_LESSONS, PHASE1_CHAPTER_IDS, FACTORY_CHAPTER_IDS }
+export { getFactoryLessons, getPhase1Lessons }
 export { CATALOG_CHAPTER_IDS }

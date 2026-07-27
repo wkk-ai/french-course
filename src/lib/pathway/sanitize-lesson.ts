@@ -1,6 +1,6 @@
 import type { LessonContent, VocabularyWord, WordToken } from '@/lib/course'
 import { readingParagraphs } from '@/lib/lesson-text'
-import { BUNDLED_VOCABULARY } from '@/lib/phase1/content'
+import { BUNDLED_VOCABULARY } from '@/lib/bundled-vocabulary'
 import { AUTHOR_PAD_DENYLIST, hasAuthorPad, englishLeakInFrench } from '@/lib/pathway/content-quality'
 
 const META_READING_MARKERS = [

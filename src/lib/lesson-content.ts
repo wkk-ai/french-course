@@ -5,7 +5,7 @@ import {
   MODULE1_CONJUGATIONS,
   MODULE1_RULES,
 } from '@/lib/module1-content'
-import { BUNDLED_VOCABULARY } from '@/lib/phase1/content'
+import { BUNDLED_VOCABULARY } from '@/lib/bundled-vocabulary'
 
 export function resolveLessonContent(
   chapterId: string,

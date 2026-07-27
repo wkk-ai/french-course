@@ -155,7 +155,12 @@ function splitGluedPunctuation(token: WordToken): WordToken[] {
 }
 
 /** Build lookup keys for surface forms → lemma id. */
+let cachedLookupVocab: VocabularyWord[] | null = null
+let cachedLookupMap: Map<string, string> | null = null
+
 export function buildLemmaLookup(vocabulary: VocabularyWord[]) {
+  if (cachedLookupVocab === vocabulary && cachedLookupMap) return cachedLookupMap
+
   const map = new Map<string, string>()
   for (const word of vocabulary) {
     map.set(normalizeLookup(word.word), word.id)
@@ -574,6 +579,8 @@ export function buildLemmaLookup(vocabulary: VocabularyWord[]) {
     map.set(normalizeLookup(phrase), id)
   }
 
+  cachedLookupVocab = vocabulary
+  cachedLookupMap = map
   return map
 }
 

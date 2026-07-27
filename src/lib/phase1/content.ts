@@ -1,19 +1,10 @@
 import type { LessonContent, VocabularyWord } from '@/lib/course'
-import { MODULE1_VOCABULARY } from '@/lib/module1-content'
 import { PHASE1_THEMES } from '@/lib/phase1/theme-bank'
-import { PHASE1_VOCABULARY } from '@/lib/phase1/vocabulary'
 import { buildLessonFromTheme } from '@/lib/pathway/lesson-factory'
 import { LATER_THEMES } from '@/lib/pathway/themes-m07-m36'
-import { LATER_VOCABULARY } from '@/lib/pathway/vocabulary-later'
-import { CORE_EXTRA_VOCABULARY } from '@/lib/pathway/vocabulary-core-extra'
+import { BUNDLED_VOCABULARY } from '@/lib/bundled-vocabulary'
 
-/** Full dictionary: Module 1 + Phase I + M07–M36 + core extras for tap coverage. */
-export const BUNDLED_VOCABULARY: VocabularyWord[] = [
-  ...MODULE1_VOCABULARY,
-  ...PHASE1_VOCABULARY,
-  ...LATER_VOCABULARY,
-  ...CORE_EXTRA_VOCABULARY,
-]
+export { BUNDLED_VOCABULARY } from '@/lib/bundled-vocabulary'
 
 /** All factory themes outside hand-authored Module 1 Learn A cores (M02–M36). */
 export const FACTORY_THEMES = [...PHASE1_THEMES, ...LATER_THEMES]
@@ -26,12 +17,21 @@ export function buildFactoryLessons(vocabulary: VocabularyWord[] = BUNDLED_VOCAB
   return lessons
 }
 
-export const FACTORY_LESSONS = buildFactoryLessons()
+let _factoryLessons: Record<string, LessonContent> | null = null
+
+/** Lazy — building 700+ lessons is expensive; never import this path from client components. */
+export function getFactoryLessons(): Record<string, LessonContent> {
+  if (!_factoryLessons) _factoryLessons = buildFactoryLessons()
+  return _factoryLessons
+}
+
 export const FACTORY_CHAPTER_IDS = FACTORY_THEMES.map((theme) => theme.id)
 
-/** @deprecated Prefer FACTORY_LESSONS */
-export const PHASE1_LESSONS = Object.fromEntries(
-  PHASE1_THEMES.map((theme) => [theme.id, FACTORY_LESSONS[theme.id]]),
-)
-/** @deprecated Prefer FACTORY_CHAPTER_IDS filter */
+/** @deprecated Prefer getFactoryLessons() */
+export function getPhase1Lessons(): Record<string, LessonContent> {
+  const all = getFactoryLessons()
+  return Object.fromEntries(PHASE1_THEMES.map((theme) => [theme.id, all[theme.id]]))
+}
+
+/** @deprecated Prefer FACTORY_CHAPTER_IDS */
 export const PHASE1_CHAPTER_IDS = PHASE1_THEMES.map((theme) => theme.id)

@@ -1,15 +1,11 @@
-import { BUNDLED_CHAPTER_IDS, BUNDLED_LESSONS } from '@/lib/bundled-lessons'
+import { BUNDLED_CHAPTER_IDS } from '@/lib/bundled-chapter-ids'
 import { PATHWAY_BY_CHAPTER_ID, pathwayLabel } from '@/lib/pathway/catalog'
 import type { GrammarRuleDocument } from '@/lib/rules/types'
+import { chapterIdsForRuleSlug } from '@/lib/rules/slug-chapters-data'
 
 /** Map rule slug → chapter IDs that teach it (from brief.ruleSlugs). */
 export function unlockChaptersForSlug(slug: string): string[] {
-  const ids: string[] = []
-  for (const chapterId of BUNDLED_CHAPTER_IDS) {
-    const slugs = BUNDLED_LESSONS[chapterId]?.brief?.ruleSlugs ?? []
-    if (slugs.includes(slug)) ids.push(chapterId)
-  }
-  return ids
+  return chapterIdsForRuleSlug(slug)
 }
 
 export function lessonLabelForChapter(chapterId: string): string {
@@ -60,7 +56,7 @@ export function masteryStage(
 
 export function masteryLabel(stage: RuleMasteryStage): string {
   if (stage === 'locked') return 'Locked'
-  if (stage === 'introduced') return 'Introduced'
+  if (stage === 'solid') return 'Solid'
   if (stage === 'practiced') return 'Practiced'
-  return 'Solid'
+  return 'Introduced'
 }

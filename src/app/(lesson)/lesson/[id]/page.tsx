@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import type { GrammarRule, VerbConjugation, VocabularyWord } from '@/lib/course'
-import { BUNDLED_CHAPTER_IDS } from '@/lib/bundled-lessons'
+import { BUNDLED_CHAPTER_IDS } from '@/lib/bundled-chapter-ids'
 import { isCanonicalChapterId } from '@/lib/course-catalog'
 import { resolveConjugations, resolveLessonContent, resolveRules, resolveVocabularyForLesson } from '@/lib/lesson-content'
 import { PATHWAY_BY_CHAPTER_ID } from '@/lib/pathway/catalog'

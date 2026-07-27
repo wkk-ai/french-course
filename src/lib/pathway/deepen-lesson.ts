@@ -1,6 +1,6 @@
 import type { LessonContent } from '@/lib/course'
 import { readingParagraphs } from '@/lib/lesson-text'
-import { BUNDLED_VOCABULARY } from '@/lib/phase1/content'
+import { BUNDLED_VOCABULARY } from '@/lib/bundled-vocabulary'
 import { sanitizeLessonContent } from '@/lib/pathway/sanitize-lesson'
 
 function parseMeaningsFromBrief(body: string): Array<[string, string]> {

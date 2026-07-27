@@ -1,5 +1,5 @@
 import { isReviewablePartOfSpeech } from '@/lib/exercises/validate'
-import { BUNDLED_VOCABULARY } from '@/lib/phase1/content'
+import { BUNDLED_VOCABULARY } from '@/lib/bundled-vocabulary'
 import type { ReviewPoolItem } from '@/lib/review/types'
 
 /** Resolve POS from pool row or bundled vocabulary fallback. */

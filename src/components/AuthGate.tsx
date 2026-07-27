@@ -6,7 +6,12 @@ import { createClient } from '@/utils/supabase/client'
 
 function normalizePath(pathname: string | null) {
   if (!pathname) return '/'
-  const trimmed = pathname.replace(/\/+$/, '') || '/'
+  const base = (process.env.NEXT_PUBLIC_BASE_PATH ?? '').replace(/\/$/, '')
+  let path = pathname
+  if (base && (path === base || path.startsWith(`${base}/`))) {
+    path = path.slice(base.length) || '/'
+  }
+  const trimmed = path.replace(/\/+$/, '') || '/'
   return trimmed
 }
 

@@ -6,7 +6,7 @@ import { BookOpen, ChevronRight, Eye, Flame, MessagesSquare, X } from 'lucide-re
 import { useRouter } from 'next/navigation'
 import type { ExerciseAnswer, GrammarRule, LessonContent, VerbConjugation, VocabularyWord, WordToken } from '@/lib/course'
 import { ExerciseCard } from '@/components/lesson/ExerciseCard'
-import { buildRemediationExercises } from '@/lib/exercises/enrich'
+import { buildRemediationExercises } from '@/lib/exercises/remediation'
 import { isExerciseAnswered, isExerciseCorrect } from '@/lib/exercises/grading'
 import { RichText } from '@/components/RichText'
 import { enrichTokens, isPunctuationToken, tokenizeFrench } from '@/lib/clickable-text'
@@ -17,9 +17,9 @@ import { createClient } from '@/utils/supabase/client'
 import { BUNDLED_CHAPTER_IDS } from '@/lib/bundled-chapter-ids'
 import { bumpLocalMistakeCount, enqueueLocalVocabulary } from '@/lib/local-vocab-vault'
 import { markLocalChapterCompleted, mergeCompletedChapterIds } from '@/lib/local-progress'
-import { BUNDLED_VOCABULARY } from '@/lib/phase1/content'
+import { BUNDLED_VOCABULARY } from '@/lib/bundled-vocabulary'
 import { PATHWAY_BY_CHAPTER_ID } from '@/lib/pathway/catalog'
-import { lemmaIdsForChapter, vocabularyRowsForLemmas } from '@/lib/review/lemmas'
+import { lemmaIdsFromLesson, vocabularyRowsForLemmas } from '@/lib/review/lemmas-from-lesson'
 import { isReviewablePartOfSpeech } from '@/lib/exercises/validate'
 import type { LessonExercise } from '@/lib/exercises/types'
 
@@ -450,7 +450,7 @@ export default function LessonClient({
 
   const enqueueLessonVocabulary = async (_userId: string) => {
     // Reviewable lemmas only — never enqueue proper nouns / plot names.
-    const lemmaIds = lemmaIdsForChapter(chapterId)
+    const lemmaIds = lemmaIdsFromLesson(content)
     if (!lemmaIds.length) return
 
     // Always seed the local infinite loop first — remote FK/RLS must not leave Review empty.

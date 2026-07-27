@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { BookOpen } from 'lucide-react'
 import type { FlashcardItem } from '@/lib/review/types'
 import { isConjugableVerb } from '@/lib/french-conjugations'
-import { BUNDLED_VOCABULARY } from '@/lib/phase1/content'
+import { BUNDLED_VOCABULARY } from '@/lib/bundled-vocabulary'
 
 const REGISTER_LABEL: Record<string, string> = {
   Courant: 'Everyday',

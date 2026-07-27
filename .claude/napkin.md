@@ -27,10 +27,10 @@
    Do instead: resolve mistakes after correct rem/practice; else rem forever + Prove score pollution.
 
 7. **[2026-07-27] RPC `chapter_vocabulary` re-seeds Marc/Paris into Review**
-   Do instead: apply `20260727120000_complete_chapter_skip_proper_nouns.sql` on remote (MCP apply times out — paste SQL editor). Client filter + seed cleanup already shipped.
+   Do instead: remote `complete_chapter` migration applied; keep client `filterReviewPool` as belt-and-suspenders.
 
-8. **[2026-07-25] Home shows 720; DB seed thin — unlock/complete desync**
-   Do instead: unlock via `BUNDLED_CHAPTER_IDS`; `ensure_chapter_row`; mark local only on real success path.
+8. **[2026-07-27] Lesson page freezes (“Checking session…” / Page Unresponsive)**
+   Do instead: never import `BUNDLED_LESSONS` / factory themes from client components; use `bundled-vocabulary`, `remediation.ts`, packed lemma index; lazy-build factory lessons server-side only; cache `buildLemmaLookup`.
 
 9. **[2026-07-25] Prove D must gate at 70%, no hints**
    Do instead: `didPassProve`; `allowHints={!isProve}`; exclude rem from Prove score; fail → remediate B/C.

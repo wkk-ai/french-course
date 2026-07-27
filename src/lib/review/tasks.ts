@@ -2,7 +2,7 @@ import { validateLessonExercise } from '@/lib/exercises/validate'
 import { lessonLabelForLemma } from '@/lib/review/lemmas'
 import type { ReviewPoolItem, ReviewTask, ReviewTaskKind } from '@/lib/review/types'
 import type { LessonExercise } from '@/lib/exercises/types'
-import { BUNDLED_VOCABULARY } from '@/lib/phase1/content'
+import { BUNDLED_VOCABULARY } from '@/lib/bundled-vocabulary'
 
 function bundledWord(vocabId: string) {
   return BUNDLED_VOCABULARY.find((word) => word.id === vocabId) ?? null
