@@ -11,8 +11,8 @@
 1. **[2026-07-27] Depth padders leak author/AI notes into Theory + Reading**
    Do instead: never pad brief/reading with authoring jargon (“Deep practice (Module-1 bar)”, “Store verbs as infinitives”, “Dans cette leçon, relisez…”, “dictionnaire cliquable”, “Hand-crafted focus”, “Enqueue reviewable lemmas”, “Lecture de consolidation”). Meet depth with real learner content; CI denylist those phrases on all 720. Measured: author pad 716/720 briefs; meta FR pad 717/720 readings; consol template ×525.
 
-2. **[2026-07-27] Reading tap miss / “not clickable” words**
-   Do instead: (1) every alphabetic token is a `<button>` even if unknown; (2) block OS select/Translate steal (`select-none`); (3) grow `vocabulary-core-extra` for misses — never leave dictionary gaps as plain spans. Measured: `outils`/`séparés` were spans because missing from bank.
+2. **[2026-07-27] Reading tap miss / “not in dictionary”**
+   Do instead: (1) every alphabetic token is a `<button>`; (2) `select-none` against Translate steal; (3) grow `vocabulary-tap-fill` + conjugations (soft-g, -eler, stem changers); (4) sanitize scrub EN titles + re-tokenize dialogue; (5) measure with `scripts/measure-tap-coverage.ts` — bar is ~0% miss on reading+dialogue. Measured: 0 miss / ~204k tokens after fill.
 
 3. **[2026-07-27] Factory readingFr dumps English glosses + EN grammar labels**
    Do instead: French-only reading; teach EN in Theory meanings list, not `signifie « past tense… »` / `with avoir` / `PC regular` inside `readingFr`. CI fail on ASCII EN content-words in reading/dialogue (allowlist cognates). Measured: 511/705 themes EN-in-readingFr; 305 dialogues with EN labels.

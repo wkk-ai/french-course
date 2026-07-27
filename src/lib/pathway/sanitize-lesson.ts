@@ -30,10 +30,10 @@ function isMetaReadingParagraph(tokens: WordToken[]): boolean {
   if (META_READING_MARKERS.some((marker) => text.includes(marker))) return true
   // Drop factory paragraphs that are mostly English title words (Prices, Elections, Grammar…).
   const words = text.match(/[A-Za-zÀ-ÿŒœÆæ']+/g) ?? []
-  if (words.length >= 4) {
+  if (words.length >= 3) {
     const asciiContent = words.filter((word) => /^[A-Za-z]+$/.test(word) && word.length > 2)
     const frenchy = words.filter((word) => /[àâäéèêëîïôöùûüçœæÀÂÄÉÈÊËÎÏÔÖÙÛÜÇŒÆ]/.test(word) || /^(je|tu|il|elle|nous|vous|ils|elles|le|la|les|un|une|des|et|de|du|au|aux|en|à|est|suis|pas|oui|non|bonjour|merci)$/i.test(word))
-    if (asciiContent.length >= 3 && frenchy.length === 0 && asciiContent.length / words.length > 0.5) return true
+    if (asciiContent.length >= 2 && frenchy.length === 0 && asciiContent.length / words.length > 0.45) return true
   }
   return false
 }
@@ -105,7 +105,14 @@ export function sanitizeLessonContent(lesson: LessonContent, vocabulary: Vocabul
   let match: RegExpExecArray | null
   const body = brief?.body ?? ''
   while ((match = meaningRe.exec(body)) !== null) {
-    meanings.push([match[1].trim(), match[2].trim()])
+    const fr = match[1].trim()
+    const en = match[2].trim()
+    // Do not pad reading with English lemma labels from bad briefs.
+    if (/^[A-Za-z]+$/.test(fr) && !/[àâäéèêëîïôöùûüçœæ]/i.test(fr) && fr.length > 2) {
+      if (englishLeakInFrench(fr) || /^(wild|import|radar|structure|texte)$/i.test(fr)) continue
+    }
+    if (englishLeakInFrench(fr)) continue
+    meanings.push([fr, en])
   }
 
   const title = brief?.title ?? 'cette leçon'
@@ -143,10 +150,19 @@ export function sanitizeLessonContent(lesson: LessonContent, vocabulary: Vocabul
           let text = line.text
             .replace(/\s*sur\s*:\s*[^?.!]*/gi, ' sur cette leçon')
             .replace(
-              /\b(Emotions|Grammar|Prices|Elections|Friendship|Conflict|Headlines|Borders|Relatives|Concession|Passive|Citizen|Debate|Advice|Health|Jobs|Reciprocal|Compare|Laws|Report)\b(?:\s*·\s*apply)?/g,
+              /\b(Emotions|Grammar|Prices|Elections|Friendship|Conflict|Headlines|Borders|Relatives|Concession|Passive|Citizen|Debate|Advice|Health|Jobs|Reciprocal|Compare|Laws|Report|Office|Studies|Tech|Climate|Poetry|Idioms|News|Essay|Data|Results|Research|Companies|Consumer|Hypothesis|Opinion|Global|Phase|Drills|Literary|Comprehension|onboarding|markers|openers|triggers|lexicon|skeleton|rewrite|Analysis|Character|Tone|Recycling|Proposals|Planet|Regret|Witness|Memory|Thesis|Support|Counter|Meetings|Reports|Objectives|Project|Forms|Applications|Contracts|Boilerplate|Disputes|Feature|Investigation|Editorial|Synthesis|Varieties|Norms|Africa|Americas|Diversity|Tale|Chapter|Ending|Food|Shopping|Fill|Formal|Version|Exact|Mix|Consequence|Yesterday|narrative|recap|review|Error|correction|Announcement|choice|Letter|Predictions|Promise|letter|Gift|scenario|Narrative|Biography|Register|ladder|Checkpoint|Prove|Tense|Weekend)\b(?:\s*·\s*apply)?/gi,
               'cette leçon',
             )
-          if (englishLeakInFrench(text) || /signifie\s*«/i.test(text)) {
+            .replace(/\bin\s+the\s+wild\b/gi, 'dans la vraie vie')
+            .replace(/\bVersion\s*(tu|vous)\b/gi, 'Et toi')
+            .replace(/hierj'ai…\/demainjevais…\/l'annéeprochaineje…rai/gi, "Hier j'ai fini. Demain je vais parler.")
+            .replace(/…rai/g, ' parlerai')
+          if (
+            englishLeakInFrench(text) ||
+            /signifie\s*«/i.test(text) ||
+            /\b[A-Z][a-z]+(?:[A-Z][a-z]+)+\b/.test(text) ||
+            /^(where|never|ladder|scenario|review|recap|narrative)$/i.test(text.trim())
+          ) {
             const fallbacks = [
               'Tu comprends cette leçon ?',
               'Oui, un peu. Je répète les phrases.',
@@ -155,10 +171,39 @@ export function sanitizeLessonContent(lesson: LessonContent, vocabulary: Vocabul
             ]
             text = fallbacks[index % fallbacks.length]
           }
-          return { ...line, text }
+          // Tokens must match scrubbed text — otherwise EN theme titles stay tappable-missing.
+          return {
+            ...line,
+            text,
+            tokens: readingParagraphs(`conv-${index}`, [text], vocabulary)[0]?.tokens ?? line.tokens,
+          }
         }),
       }
     : lesson.conversation
+
+  // Drop reading paragraphs that are mostly English title noise or broken futur pads (…rai).
+  reading = reading.filter((paragraph) => {
+    const text = paragraph.tokens.map((t) => t.text).join('')
+    if (/\b(Office|Studies|Tech|Climate|Poetry|onboarding|Comprehension|Drills|Phase I|In The Wild|Global tense|Fill many|Write from|Formal vs|postcard|prompts)\b/i.test(text)) {
+      return false
+    }
+    if (/=atmy|at my parents|=at\s*my\b/i.test(text)) return false
+    // Factory futur pads glue as je…raiOn… — no word boundary after rai.
+    if (/je…+rai/i.test(text) || /je\.{2,}rai/i.test(text) || /…rai/.test(text) || /\/l'annéeprochaineje/i.test(text)) return false
+    return true
+  })
+
+  // Re-pad if scrubbing removed too much reading depth.
+  pass = 0
+  while (wordCount() < 220 && pass < 4) {
+    const extra = readingParagraphs(
+      `sanitize2-${title}-${pass}`.replace(/\s+/g, ''),
+      [topicFillerFrench(title, meanings, pass + 3)],
+      vocabulary,
+    )
+    reading.push(...extra)
+    pass += 1
+  }
 
   return {
     ...lesson,

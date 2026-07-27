@@ -300,6 +300,36 @@ const IRREGULAR: Record<string, IrregularBundle> = {
     auxiliaire: 'avoir',
     imperatif: ['ouvre', 'ouvrons', 'ouvrez'],
   },
+  suivre: {
+    present: ['suis', 'suis', 'suit', 'suivons', 'suivez', 'suivent'],
+    imparfait: ['suivais', 'suivais', 'suivait', 'suivions', 'suiviez', 'suivaient'],
+    futur: ['suivrai', 'suivras', 'suivra', 'suivrons', 'suivrez', 'suivront'],
+    conditionnel: ['suivrais', 'suivrais', 'suivrait', 'suivrions', 'suivriez', 'suivraient'],
+    subjonctif: ['suive', 'suives', 'suive', 'suivions', 'suiviez', 'suivent'],
+    participePasse: 'suivi',
+    auxiliaire: 'avoir',
+    imperatif: ['suis', 'suivons', 'suivez'],
+  },
+  conclure: {
+    present: ['conclus', 'conclus', 'conclut', 'concluons', 'concluez', 'concluent'],
+    imparfait: ['concluais', 'concluais', 'concluait', 'concluions', 'concluiez', 'concluaient'],
+    futur: ['conclurai', 'concluras', 'conclura', 'conclurons', 'conclurez', 'concluront'],
+    conditionnel: ['conclurais', 'conclurais', 'conclurait', 'conclurions', 'concluriez', 'concluraient'],
+    subjonctif: ['conclue', 'conclues', 'conclue', 'concluions', 'concluiez', 'concluent'],
+    participePasse: 'conclu',
+    auxiliaire: 'avoir',
+    imperatif: ['conclus', 'concluons', 'concluez'],
+  },
+  appartenir: {
+    present: ['appartiens', 'appartiens', 'appartient', 'appartenons', 'appartenez', 'appartiennent'],
+    imparfait: ['appartenais', 'appartenais', 'appartenait', 'appartenions', 'apparteniez', 'appartenaient'],
+    futur: ['appartiendrai', 'appartiendras', 'appartiendra', 'appartiendrons', 'appartiendrez', 'appartiendront'],
+    conditionnel: ['appartiendrais', 'appartiendrais', 'appartiendrait', 'appartiendrions', 'appartiendriez', 'appartiendraient'],
+    subjonctif: ['appartienne', 'appartiennes', 'appartienne', 'appartenions', 'apparteniez', 'appartiennent'],
+    participePasse: 'appartenu',
+    auxiliaire: 'avoir',
+    imperatif: ['appartiens', 'appartenons', 'appartenez'],
+  },
   savoir: {
     present: ['sais', 'sais', 'sait', 'savons', 'savez', 'savent'],
     imparfait: ['savais', 'savais', 'savait', 'savions', 'saviez', 'savaient'],
@@ -385,13 +415,13 @@ function erPresentVowel(infinitive: string): { singular: string; plural: string 
 function regularEr(infinitive: string): IrregularBundle {
   const lower = infinitive.normalize('NFC').toLowerCase()
   const isEter = /(?:eter|éter)$/.test(lower)
+  const isYer = lower === 'envoyer' || /[^e]yer$/.test(lower)
 
   let stem = infinitive.slice(0, -2)
-  // manger → mangeons needs soft g
+  // Soft g/c only before a/o/u — NOT before i (mangions, not mangeions).
   const softG = stem.endsWith('g')
   const softC = stem.endsWith('c')
-  const nousStem = softG ? `${stem}e` : softC ? `${stem.slice(0, -1)}ç` : stem
-  const futurStem = infinitive
+  const softStem = softG ? `${stem}e` : softC ? `${stem.slice(0, -1)}ç` : stem
 
   if (isEter && stem.length > 1) {
     const cons = stem.slice(-1)
@@ -399,27 +429,101 @@ function regularEr(infinitive: string): IrregularBundle {
     const sg = `${base}${cons}e`
     const pl = `${base}${cons}ent`
     return {
-      present: [sg, `${sg}s`, sg, `${nousStem}ons`, `${stem}ez`, pl],
-      imparfait: [`${nousStem}ais`, `${nousStem}ais`, `${nousStem}ait`, `${nousStem}ions`, `${nousStem}iez`, `${nousStem}aient`],
-      futur: [`${futurStem}ai`, `${futurStem}as`, `${futurStem}a`, `${futurStem}ons`, `${futurStem}ez`, `${futurStem}ont`],
-      conditionnel: [`${futurStem}ais`, `${futurStem}ais`, `${futurStem}ait`, `${futurStem}ions`, `${futurStem}iez`, `${futurStem}aient`],
-      subjonctif: [sg, `${sg}s`, sg, `${nousStem}ions`, `${nousStem}iez`, pl],
+      present: [sg, `${sg}s`, sg, `${softStem}ons`, `${stem}ez`, pl],
+      imparfait: [`${softStem}ais`, `${softStem}ais`, `${softStem}ait`, `${stem}ions`, `${stem}iez`, `${softStem}aient`],
+      futur: [`${infinitive}ai`, `${infinitive}as`, `${infinitive}a`, `${infinitive}ons`, `${infinitive}ez`, `${infinitive}ont`],
+      conditionnel: [`${infinitive}ais`, `${infinitive}ais`, `${infinitive}ait`, `${infinitive}ions`, `${infinitive}iez`, `${infinitive}aient`],
+      subjonctif: [sg, `${sg}s`, sg, `${stem}ions`, `${stem}iez`, pl],
       participePasse: `${stem}é`,
       auxiliaire: 'avoir',
-      imperatif: [sg, `${nousStem}ons`, `${stem}ez`],
+      imperatif: [sg, `${softStem}ons`, `${stem}ez`],
+    }
+  }
+
+  // lever / promener family: lève, lèves, lève, levons…
+  if (/^(lever|soulever|relever|enlever|mener|amener|emmener|promener|semer|peser)$/.test(lower)) {
+    const sgStem = stem.replace(/e([^e]*)$/, 'è$1')
+    return {
+      present: [`${sgStem}e`, `${sgStem}es`, `${sgStem}e`, `${softStem}ons`, `${stem}ez`, `${sgStem}ent`],
+      imparfait: [`${softStem}ais`, `${softStem}ais`, `${softStem}ait`, `${stem}ions`, `${stem}iez`, `${softStem}aient`],
+      futur: [`${infinitive}ai`, `${infinitive}as`, `${infinitive}a`, `${infinitive}ons`, `${infinitive}ez`, `${infinitive}ont`],
+      conditionnel: [`${infinitive}ais`, `${infinitive}ais`, `${infinitive}ait`, `${infinitive}ions`, `${infinitive}iez`, `${infinitive}aient`],
+      subjonctif: [`${sgStem}e`, `${sgStem}es`, `${sgStem}e`, `${stem}ions`, `${stem}iez`, `${sgStem}ent`],
+      participePasse: `${stem}é`,
+      auxiliaire: 'avoir',
+      imperatif: [`${sgStem}e`, `${softStem}ons`, `${stem}ez`],
+    }
+  }
+
+  // appeler / épeler: -eler → èll before silent e (appelle, épelle)
+  if (/^(appeler|épeler|epeler|rappeler|renouveler)$/.test(lower) || /[^g]eler$/.test(lower)) {
+    const sgStem = `${stem.slice(0, -2)}èll`
+    return {
+      present: [`${sgStem}e`, `${sgStem}es`, `${sgStem}e`, `${softStem}ons`, `${stem}ez`, `${sgStem}ent`],
+      imparfait: [`${softStem}ais`, `${softStem}ais`, `${softStem}ait`, `${stem}ions`, `${stem}iez`, `${softStem}aient`],
+      futur: [`${infinitive}ai`, `${infinitive}as`, `${infinitive}a`, `${infinitive}ons`, `${infinitive}ez`, `${infinitive}ont`],
+      conditionnel: [`${infinitive}ais`, `${infinitive}ais`, `${infinitive}ait`, `${infinitive}ions`, `${infinitive}iez`, `${infinitive}aient`],
+      subjonctif: [`${sgStem}e`, `${sgStem}es`, `${sgStem}e`, `${stem}ions`, `${stem}iez`, `${sgStem}ent`],
+      participePasse: `${stem}é`,
+      auxiliaire: 'avoir',
+      imperatif: [`${sgStem}e`, `${softStem}ons`, `${stem}ez`],
+    }
+  }
+
+  // préférer / espérer family: é → è in singular (préfère)
+  if (/^(préférer|preferer|espérer|esperer|répéter|repeter|compléter|completer|inquiéter|inquieter|protéger)$/.test(lower)) {
+    const sgStem = stem.replace(/é([^é]*)$/i, 'è$1')
+    return {
+      present: [`${sgStem}e`, `${sgStem}es`, `${sgStem}e`, `${softStem}ons`, `${stem}ez`, `${sgStem}ent`],
+      imparfait: [`${softStem}ais`, `${softStem}ais`, `${softStem}ait`, `${stem}ions`, `${stem}iez`, `${softStem}aient`],
+      futur: [`${infinitive}ai`, `${infinitive}as`, `${infinitive}a`, `${infinitive}ons`, `${infinitive}ez`, `${infinitive}ont`],
+      conditionnel: [`${infinitive}ais`, `${infinitive}ais`, `${infinitive}ait`, `${infinitive}ions`, `${infinitive}iez`, `${infinitive}aient`],
+      subjonctif: [`${sgStem}e`, `${sgStem}es`, `${sgStem}e`, `${stem}ions`, `${stem}iez`, `${sgStem}ent`],
+      participePasse: `${stem}é`,
+      auxiliaire: 'avoir',
+      imperatif: [`${sgStem}e`, `${softStem}ons`, `${stem}ez`],
+    }
+  }
+
+  // envoyer → envoie (y→i); futur enverrai
+  if (lower === 'envoyer') {
+    const sgStem = `${stem.slice(0, -1)}i`
+    return {
+      present: [`${sgStem}e`, `${sgStem}es`, `${sgStem}e`, `${softStem}ons`, `${stem}ez`, `${sgStem}ent`],
+      imparfait: [`${softStem}ais`, `${softStem}ais`, `${softStem}ait`, `${stem}ions`, `${stem}iez`, `${softStem}aient`],
+      futur: ['enverrai', 'enverras', 'enverra', 'enverrons', 'enverrez', 'enverront'],
+      conditionnel: ['enverrais', 'enverrais', 'enverrait', 'enverrions', 'enverriez', 'enverraient'],
+      subjonctif: [`${sgStem}e`, `${sgStem}es`, `${sgStem}e`, `${stem}ions`, `${stem}iez`, `${sgStem}ent`],
+      participePasse: `${stem}é`,
+      auxiliaire: 'avoir',
+      imperatif: [`${sgStem}e`, `${softStem}ons`, `${stem}ez`],
+    }
+  }
+
+  if (isYer) {
+    const sgStem = `${stem.slice(0, -1)}i`
+    return {
+      present: [`${sgStem}e`, `${sgStem}es`, `${sgStem}e`, `${softStem}ons`, `${stem}ez`, `${sgStem}ent`],
+      imparfait: [`${softStem}ais`, `${softStem}ais`, `${softStem}ait`, `${stem}ions`, `${stem}iez`, `${softStem}aient`],
+      futur: [`${infinitive}ai`, `${infinitive}as`, `${infinitive}a`, `${infinitive}ons`, `${infinitive}ez`, `${infinitive}ont`],
+      conditionnel: [`${infinitive}ais`, `${infinitive}ais`, `${infinitive}ait`, `${infinitive}ions`, `${infinitive}iez`, `${infinitive}aient`],
+      subjonctif: [`${sgStem}e`, `${sgStem}es`, `${sgStem}e`, `${stem}ions`, `${stem}iez`, `${sgStem}ent`],
+      participePasse: `${stem}é`,
+      auxiliaire: 'avoir',
+      imperatif: [`${sgStem}e`, `${softStem}ons`, `${stem}ez`],
     }
   }
 
   const { singular, plural } = erPresentVowel(infinitive)
   return {
-    present: [`${stem}${singular}`, `${stem}${singular}s`, `${stem}${singular}`, `${nousStem}ons`, `${stem}ez`, `${stem}${plural}`],
-    imparfait: [`${nousStem}ais`, `${nousStem}ais`, `${nousStem}ait`, `${nousStem}ions`, `${nousStem}iez`, `${nousStem}aient`],
-    futur: [`${futurStem}ai`, `${futurStem}as`, `${futurStem}a`, `${futurStem}ons`, `${futurStem}ez`, `${futurStem}ont`],
-    conditionnel: [`${futurStem}ais`, `${futurStem}ais`, `${futurStem}ait`, `${futurStem}ions`, `${futurStem}iez`, `${futurStem}aient`],
-    subjonctif: [`${stem}${singular}`, `${stem}${singular}s`, `${stem}${singular}`, `${nousStem}ions`, `${nousStem}iez`, `${stem}${plural}`],
+    present: [`${stem}${singular}`, `${stem}${singular}s`, `${stem}${singular}`, `${softStem}ons`, `${stem}ez`, `${stem}${plural}`],
+    imparfait: [`${softStem}ais`, `${softStem}ais`, `${softStem}ait`, `${stem}ions`, `${stem}iez`, `${softStem}aient`],
+    futur: [`${infinitive}ai`, `${infinitive}as`, `${infinitive}a`, `${infinitive}ons`, `${infinitive}ez`, `${infinitive}ont`],
+    conditionnel: [`${infinitive}ais`, `${infinitive}ais`, `${infinitive}ait`, `${infinitive}ions`, `${infinitive}iez`, `${infinitive}aient`],
+    subjonctif: [`${stem}${singular}`, `${stem}${singular}s`, `${stem}${singular}`, `${stem}ions`, `${stem}iez`, `${stem}${plural}`],
     participePasse: `${stem}é`,
     auxiliaire: 'avoir',
-    imperatif: [`${stem}${singular}`, `${nousStem}ons`, `${stem}ez`],
+    imperatif: [`${stem}${singular}`, `${softStem}ons`, `${stem}ez`],
   }
 }
 

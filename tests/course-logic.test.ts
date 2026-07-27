@@ -618,15 +618,15 @@ test('outils séparés and similar content words resolve for dictionary tap', as
   assert.ok(separes?.lemmaId, 'séparés must be in dictionary')
 })
 
-test('bundled tap coverage stays under 5% (proper nouns allowlisted)', async () => {
+test('bundled tap coverage stays near zero (proper nouns allowlisted)', async () => {
   const { BUNDLED_CHAPTER_IDS, BUNDLED_LESSONS } = await import('../src/lib/bundled-lessons')
   const { BUNDLED_VOCABULARY } = await import('../src/lib/phase1/content')
   const { measureBundledTapCoverage } = await import('../src/lib/pathway/tap-coverage')
   const stats = measureBundledTapCoverage(BUNDLED_LESSONS, BUNDLED_CHAPTER_IDS, BUNDLED_VOCABULARY)
   assert.ok(stats.totalWordTokens > 100_000, 'expected large token sample')
   assert.ok(
-    stats.missRate < 0.05,
-    `tap miss rate ${(stats.missRate * 100).toFixed(2)}% must be < 5% (${stats.missTokens}/${stats.totalWordTokens})`,
+    stats.missRate < 0.001,
+    `tap miss rate ${(stats.missRate * 100).toFixed(2)}% must be < 0.1% (${stats.missTokens}/${stats.totalWordTokens})`,
   )
 })
 

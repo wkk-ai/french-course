@@ -1,7 +1,7 @@
 # Bug backlog — L'Art du Français
 
 Saved audit list. Two exhaustive rounds (logic/content + UX/UI/auth).  
-Last updated: **2026-07-27** (waves A–D implementation landed; re-measure tap miss after deploy).
+Last updated: **2026-07-27** (dictionary tap miss driven to 0% across 720 lessons).
 
 **Status key:** `open` · `fixed` · `wontfix`  
 **Severity:** P0 break learning · P1 serious friction · P2 polish
@@ -27,7 +27,7 @@ Last updated: **2026-07-27** (waves A–D implementation landed; re-measure tap 
 |----|--------|-----|------------------|
 | R1-01 | fixed | Author/AI notes in Theory First (“Deep practice…”, “Hand-crafted focus…”, infinitive/CI jargon) | ~536+ briefs; deepen + factory pad |
 | R1-02 | fixed | Meta French pads in Reading (“Dans cette leçon…”, “dictionnaire cliquable…”, “Le but n'est pas…”) | **717 / 720** lessons |
-| R1-03 | fixed | ~45% reading/dialogue words not tappable (no lemma) | **85 576 / 189 397** tokens |
+| R1-03 | fixed | Reading/dialogue words missing from dictionary (no lemma) | Was ~45%; now **0 / ~203 549** tokens (`measure-tap-coverage`) |
 | R1-04 | fixed | English leaking into “French” reading (gloss dumps, EN titles, Prove labels) | 256+ lessons / 511 themes |
 | R1-05 | fixed | Identical pad paragraphs cloned (“Lecture de consolidation…”) | ×525 |
 | R1-06 | fixed | CI `validateChapterContent` only checks length — pads make all 720 green | 0 validate fails |

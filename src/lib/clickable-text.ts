@@ -44,6 +44,13 @@ function registerSurface(map: Map<string, string>, surface: string, lemmaId: str
   map.set(normalizeLookup(surface), lemmaId)
   const stripped = stripElisionBase(surface)
   if (stripped) map.set(stripped, lemmaId)
+  // Content sometimes drops grave accents (épelle vs épèlle).
+  const relaxed = surface.replace(/è/g, 'e').replace(/È/g, 'E')
+  if (relaxed !== surface) {
+    map.set(normalizeLookup(relaxed), lemmaId)
+    const relaxedStripped = stripElisionBase(relaxed)
+    if (relaxedStripped) map.set(relaxedStripped, lemmaId)
+  }
 }
 
 /** Map past participles and common gender/number agreements onto the infinitive lemma. */
@@ -109,16 +116,28 @@ function registerFrenchInflections(map: Map<string, string>, word: VocabularyWor
   }
 }
 
-/** Resolve lemma id: full surface, then elision-stripped base. */
+/** Resolve lemma id: full surface, then elision-stripped base, then hyphen clitic. */
 export function lookupLemma(lookup: Map<string, string>, text: string): string | undefined {
   const key = normalizeLookup(text)
   const direct = lookup.get(key)
   if (direct) return direct
   const stripped = stripElisionBase(text)
-  return stripped ? lookup.get(stripped) : undefined
+  if (stripped) {
+    const fromElision = lookup.get(stripped)
+    if (fromElision) return fromElision
+  }
+  // Inverted questions / imperatives: Pouvez-vous, Allons-y, Repose-toi
+  const clitic = key.match(
+    /^(.+)-(tu|vous|nous|il|elle|on|y|en|ce|moi|toi|le|la|les|lui|leur)$/,
+  )
+  if (clitic) {
+    const fromClitic = lookup.get(clitic[1])
+    if (fromClitic) return fromClitic
+  }
+  return undefined
 }
 
-const VOCAB_MULTIWORD_PHRASES = ['au revoir', 'à bientôt', "s'il vous plaît", "s'il te plaît"]
+const VOCAB_MULTIWORD_PHRASES = ['au revoir', 'à bientôt', "s'il vous plaît", "s'il te plaît", "qu'est-ce", "qu'est-ce que", "qu'est-ce que c'est", 'rendez-vous']
 
 /** Split leading/trailing punctuation glued onto words (e.g. "Moi," → "Moi" + ","). */
 function splitGluedPunctuation(token: WordToken): WordToken[] {
@@ -548,6 +567,27 @@ export function buildLemmaLookup(vocabulary: VocabularyWord[]) {
   }
 
   const phraseLemmas: Record<string, string> = {
+    "qu'est-ce": '10000000-0000-0000-0000-000000000958',
+    "qu'est ce": '10000000-0000-0000-0000-000000000958',
+    "qu'est-ce que": '10000000-0000-0000-0000-000000000959',
+    "qu'est ce que": '10000000-0000-0000-0000-000000000959',
+    "qu'est-ce que c'est": '10000000-0000-0000-0000-000000000959',
+    "qu'est ce que c'est": '10000000-0000-0000-0000-000000000959',
+    "qu'est": '10000000-0000-0000-0000-000000000958',
+    'rendez-vous': '10000000-0000-0000-0000-000000000985',
+    'rendez vous': '10000000-0000-0000-0000-000000000985',
+    'comment allez-vous': '10000000-0000-0000-0000-000000001052',
+    'comment allez vous': '10000000-0000-0000-0000-000000001052',
+    'est-ce': '10000000-0000-0000-0000-000000001027',
+    'est ce': '10000000-0000-0000-0000-000000001027',
+    'est-ce que': '10000000-0000-0000-0000-000000001028',
+    'est ce que': '10000000-0000-0000-0000-000000001028',
+    'grand-mère': '10000000-0000-0000-0000-000000000040',
+    'grand mère': '10000000-0000-0000-0000-000000000040',
+    'grand-père': '10000000-0000-0000-0000-000000000041',
+    'grand père': '10000000-0000-0000-0000-000000000041',
+    'états-unis': '10000000-0000-0000-0000-000000001029',
+    'jusqu\'à': '10000000-0000-0000-0000-000000001030',
     'en france': '10000000-0000-0000-0000-000000000093',
     'moi aussi': '10000000-0000-0000-0000-000000000084',
     'au café': '10000000-0000-0000-0000-000000000018',
@@ -584,6 +624,7 @@ export function buildLemmaLookup(vocabulary: VocabularyWord[]) {
   return map
 }
 
+// Space-separated parts only; hyphens between parts are optional in the matcher.
 const MULTIWORD = [
   'à bientôt',
   'au revoir',
@@ -591,6 +632,13 @@ const MULTIWORD = [
   "s'il te plaît",
   "s’il vous plaît",
   "s’il te plaît",
+  "qu'est ce que c'est",
+  "qu'est ce que",
+  "qu'est ce",
+  'comment allez vous',
+  'est ce que',
+  'est ce',
+  'rendez vous',
   "de l'eau",
   "de l’eau",
   "c'est",
@@ -598,7 +646,6 @@ const MULTIWORD = [
   "c'était",
   "c’était",
   'bien sûr',
-  'comment allez-vous',
   'de rien',
   'quel âge',
   "l'addition",
@@ -608,8 +655,8 @@ const MULTIWORD = [
   'en france',
   'moi aussi',
   'joyeux anniversaire',
-  'grand-mère',
-  'grand-père',
+  'grand mère',
+  'grand père',
   'semaine prochaine',
   'la semaine prochaine',
   "jus d'orange",
@@ -618,13 +665,15 @@ const MULTIWORD = [
   "l'âge",
   "l'université",
   "l'homme",
-  "l'après-midi",
+  "l'après midi",
   "l'air",
   "d'école",
   "d'orange",
   "d'une",
   'se présenter',
   'petit déjeuner',
+  "jusqu'à",
+  "d'abord",
 ]
 
 /** Merge multi-word idioms and attach missing lemmaIds from vocabulary. */
@@ -639,18 +688,42 @@ export function enrichTokens(tokens: WordToken[], vocabulary: VocabularyWord[]):
     let matched = false
     for (const phrase of MULTIWORD) {
       const parts = phrase.split(' ')
-      if (i + parts.length > expanded.length) continue
-      const slice = expanded.slice(i, i + parts.length)
-      const joined = slice.map((token) => normalizeLookup(token.text)).join(' ')
-      if (joined === normalizeLookup(phrase)) {
-        const lemmaId = lookup.get(normalizeLookup(phrase)) ?? slice.find((token) => token.lemmaId)?.lemmaId
+      // Allow optional hyphen tokens between phrase parts (qu'est-ce, rendez-vous, allez-vous).
+      const consumed: WordToken[] = []
+      let cursor = i
+      let partIndex = 0
+      while (partIndex < parts.length && cursor < expanded.length) {
+        const token = expanded[cursor]
+        if (token.text === '-' || token.text === '–') {
+          consumed.push(token)
+          cursor += 1
+          continue
+        }
+        if (normalizeLookup(token.text) !== normalizeLookup(parts[partIndex])) break
+        consumed.push(token)
+        cursor += 1
+        partIndex += 1
+      }
+      if (partIndex === parts.length) {
+        const wordBits = consumed.filter((token) => token.text !== '-' && token.text !== '–')
+        let display = ''
+        for (const token of consumed) {
+          if (token.text === '-' || token.text === '–') display += token.text
+          else if (!display || display.endsWith('-')) display += token.text
+          else display += ` ${token.text}`
+        }
+        const lemmaId =
+          lookup.get(normalizeLookup(phrase)) ??
+          lookup.get(normalizeLookup(display)) ??
+          lookup.get(normalizeLookup(wordBits.map((token) => token.text).join(' '))) ??
+          wordBits.find((token) => token.lemmaId)?.lemmaId
         merged.push({
-          id: slice[0].id,
-          text: slice.map((token) => token.text).join(' '),
+          id: consumed[0].id,
+          text: display,
           syntax: syntaxForLemma(lemmaId, vocabularyById),
           lemmaId,
         })
-        i += parts.length
+        i = cursor
         matched = true
         break
       }
@@ -658,6 +731,31 @@ export function enrichTokens(tokens: WordToken[], vocabulary: VocabularyWord[]):
     if (matched) continue
 
     const token = expanded[i]
+    // Merge hyphen compounds for lookup (rendez-vous, Est-ce, vingt-deux, États-Unis).
+    if (
+      i + 2 < expanded.length &&
+      (expanded[i + 1].text === '-' || expanded[i + 1].text === '–') &&
+      /[A-Za-zÀ-ÿ]/.test(expanded[i].text) &&
+      /[A-Za-zÀ-ÿ]/.test(expanded[i + 2].text)
+    ) {
+      const joined = `${expanded[i].text}-${expanded[i + 2].text}`
+      const lemmaId =
+        lookupLemma(lookup, joined) ??
+        token.lemmaId ??
+        lookupLemma(lookup, expanded[i].text) ??
+        lookupLemma(lookup, expanded[i + 2].text)
+      if (lemmaId || lookup.has(normalizeLookup(joined))) {
+        merged.push({
+          id: token.id,
+          text: joined,
+          syntax: syntaxForLemma(lemmaId, vocabularyById),
+          lemmaId: lemmaId ?? lookup.get(normalizeLookup(joined)),
+        })
+        i += 3
+        continue
+      }
+    }
+
     const lemmaId = token.lemmaId ?? lookupLemma(lookup, token.text)
     const syntax = isPunctuationToken(token.text) ? 'none' : syntaxForLemma(lemmaId, vocabularyById)
     merged.push(lemmaId ? { ...token, lemmaId, syntax } : { ...token, syntax })
