@@ -5,12 +5,14 @@ import { PHASE1_VOCABULARY } from '@/lib/phase1/vocabulary'
 import { buildLessonFromTheme } from '@/lib/pathway/lesson-factory'
 import { LATER_THEMES } from '@/lib/pathway/themes-m07-m36'
 import { LATER_VOCABULARY } from '@/lib/pathway/vocabulary-later'
+import { CORE_EXTRA_VOCABULARY } from '@/lib/pathway/vocabulary-core-extra'
 
-/** Full dictionary: Module 1 + Phase I + M07–M36. */
+/** Full dictionary: Module 1 + Phase I + M07–M36 + core extras for tap coverage. */
 export const BUNDLED_VOCABULARY: VocabularyWord[] = [
   ...MODULE1_VOCABULARY,
   ...PHASE1_VOCABULARY,
   ...LATER_VOCABULARY,
+  ...CORE_EXTRA_VOCABULARY,
 ]
 
 /** All factory themes outside hand-authored Module 1 Learn A cores (M02–M36). */

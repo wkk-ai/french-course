@@ -16,7 +16,7 @@ return {
       "Avec un ami : Tu es d'où ? Je suis anglais, mais j'habite en France. C'est Paul identifie. Il est anglais décrit.",
       "Sophie dit : Je m'appelle Sophie. Je suis française. J'habite à Lyon. Thomas dit : Moi, c'est Thomas. Je suis anglais. J'habite à Paris.",
       "Politesse : bonjour, merci, au revoir. Vous avec un inconnu, tu avec un ami. Habiter et être restent deux outils séparés.",
-      " Dans cette leçon, relisez chaque mot avec son sens anglais avant de répondre. Les phrases entraînent la grammaire du jour, pas la mémoire de l'histoire. Répétez les formules utiles à voix basse. Notez les pièges de registre, d'articles et d'accents. Quand un mot apparaît, rappelez d'abord la traduction, puis la règle. Prenez le temps de relire un paragraphe difficile. Les exercices reprennent les mêmes mots et structures. Si une réponse est fausse, lisez l'explication et revoyez la liste de sens. Utilisez le dictionnaire cliquable pour vérifier un sens. La répétition lente construit une vraie lecture en français. Encore un passage : combinez vocabulaire et grammaire dans des phrases complètes. Évitez de mémoriser seulement l'ordre des boutons. Cherchez le sens. Gardez une petite liste des mots difficiles et revoyez-en cinq demain. Relisez ce texte après les exercices. Patience ici accélère la suite du parcours.",
+      "En voyage, on demande souvent : Tu es d'où ? Je suis française et j'habite à Marseille. Mon ami Thomas est anglais ; il habite à Paris. La nationalité utilise être : je suis, tu es, il est. La ville utilise habiter : j'habite à Lyon, elle habite en France. On ne dit pas C'est française pour une description — on dit Elle est française. Ces phrases reviennent dans chaque rencontre.",
     ], V),
     conversation: {
       title: "Nationality & origin practice",
@@ -229,7 +229,7 @@ return {
       "Deuxième : Salut ! Moi, c'est Sophie. Je suis française. J'habite à Lyon. Comment ça va ? Ça va bien, merci.",
       "Troisième : Bonjour ! Comment vous appelez-vous ? Je m'appelle Thomas. Je suis anglais. J'habite en France, à Paris. Au revoir !",
       "Tu avec un ami, vous avec un professeur. C'est Marc pour le nom. Il est anglais pour la nationalité. J'habite à Paris pour la ville.",
-      " Dans cette leçon, relisez chaque mot avec son sens anglais avant de répondre. Les phrases entraînent la grammaire du jour, pas la mémoire de l'histoire. Répétez les formules utiles à voix basse. Notez les pièges de registre, d'articles et d'accents. Quand un mot apparaît, rappelez d'abord la traduction, puis la règle. Prenez le temps de relire un paragraphe difficile. Les exercices reprennent les mêmes mots et structures. Si une réponse est fausse, lisez l'explication et revoyez la liste de sens. Utilisez le dictionnaire cliquable pour vérifier un sens. La répétition lente construit une vraie lecture en français. Encore un passage : combinez vocabulaire et grammaire dans des phrases complètes. Évitez de mémoriser seulement l'ordre des boutons. Cherchez le sens. Gardez une petite liste des mots difficiles et revoyez-en cinq demain. Relisez ce texte après les exercices. Patience ici accélère la suite du parcours.",
+      "Première rencontre : Bonjour, je m'appelle Sophie. Je suis française. Deuxième : Enchanté, moi c'est Marc. Je suis étudiant. Troisième : Comment vous appelez-vous ? Je m'appelle Thomas. Je suis anglais et j'habite à Paris. Chaque version présente un nom, une nationalité et parfois une ville. Répétez les trois modèles à voix haute avant le dialogue.",
     ], V),
     conversation: {
       title: "Checkpoint: three introductions practice",
@@ -442,7 +442,7 @@ return {
       "Pour l'âge, on utilise avoir : J'ai vingt ans. On ne dit pas Je suis vingt ans. Question : Quel âge as-tu ? Réponse : J'ai vingt-cinq ans.",
       "Pour un rendez-vous : On se voit vendredi ? Mon anniversaire est samedi. La semaine prochaine, on se voit lundi.",
       "Regardez le calendrier : semaine, mois, année. Les nombres servent partout — âge, dates, prix plus tard. Apprenez 1–20 solidement.",
-      " Dans cette leçon, relisez chaque mot avec son sens anglais avant de répondre. Les phrases entraînent la grammaire du jour, pas la mémoire de l'histoire. Répétez les formules utiles à voix basse. Notez les pièges de registre, d'articles et d'accents. Quand un mot apparaît, rappelez d'abord la traduction, puis la règle. Prenez le temps de relire un paragraphe difficile. Les exercices reprennent les mêmes mots et structures. Si une réponse est fausse, lisez l'explication et revoyez la liste de sens. Utilisez le dictionnaire cliquable pour vérifier un sens. La répétition lente construit une vraie lecture en français. Encore un passage : combinez vocabulaire et grammaire dans des phrases complètes. Évitez de mémoriser seulement l'ordre des boutons. Cherchez le sens. Gardez une petite liste des mots difficiles et revoyez-en cinq demain. Relisez ce texte après les exercices. Patience ici accélère la suite du parcours.",
+      "Lundi, mardi, mercredi : la semaine commence. On dit : Quel jour sommes-nous ? Aujourd'hui, c'est mercredi. Demain, c'est jeudi. On se voit vendredi ? Oui, à quinze heures. La semaine prochaine, on se voit lundi. Les jours de la semaine aident à fixer un rendez-vous.",
     ], V),
     conversation: {
       title: "Planning the week practice",
@@ -655,7 +655,7 @@ return {
       "Aujourd'hui, c'est mercredi. Demain, c'est jeudi. Hier, c'était mardi. J'ai vingt-deux ans. Mon anniversaire est samedi.",
       "On se voit vendredi ? Oui. Quel âge as-tu ? J'ai vingt-deux ans. La semaine prochaine, on se voit lundi.",
       "Les nombres 1–20 reviennent : un, deux, trois… vingt. Avoir + nombre + ans pour l'âge. Pas être.",
-      " Dans cette leçon, relisez chaque mot avec son sens anglais avant de répondre. Les phrases entraînent la grammaire du jour, pas la mémoire de l'histoire. Répétez les formules utiles à voix basse. Notez les pièges de registre, d'articles et d'accents. Quand un mot apparaît, rappelez d'abord la traduction, puis la règle. Prenez le temps de relire un paragraphe difficile. Les exercices reprennent les mêmes mots et structures. Si une réponse est fausse, lisez l'explication et revoyez la liste de sens. Utilisez le dictionnaire cliquable pour vérifier un sens. La répétition lente construit une vraie lecture en français. Encore un passage : combinez vocabulaire et grammaire dans des phrases complètes. Évitez de mémoriser seulement l'ordre des boutons. Cherchez le sens. Gardez une petite liste des mots difficiles et revoyez-en cinq demain. Relisez ce texte après les exercices. Patience ici accélère la suite du parcours.",
+      "Le calendrier mélange jours et nombres. Quel âge as-tu ? J'ai vingt ans. Mon anniversaire est en mars. On compte : un, deux, trois… jusqu'à vingt. Avoir + nombre + ans pour l'âge — jamais je suis vingt ans. Combinez jour et date : samedi, le huit mars.",
     ], V),
     conversation: {
       title: "Checkpoint: a week agenda practice",
@@ -868,7 +868,7 @@ return {
       "Pour payer : L'addition, s'il vous plaît. Le serveur dit : Ça fait sept euros. On répond merci. Il peut dire de rien.",
       "Les articles : un café (one cup), du thé (some tea), de l'eau (some water). Comptez les objets avec un/une. Pour une quantité : du / de la / de l'.",
       "Silent letters : in vous voulez, final sound often drops. Spelling still keeps the letters. Use vous with staff — not salut.",
-      " Dans cette leçon, relisez chaque mot avec son sens anglais avant de répondre. Les phrases entraînent la grammaire du jour, pas la mémoire de l'histoire. Répétez les formules utiles à voix basse. Notez les pièges de registre, d'articles et d'accents. Quand un mot apparaît, rappelez d'abord la traduction, puis la règle. Prenez le temps de relire un paragraphe difficile. Les exercices reprennent les mêmes mots et structures. Si une réponse est fausse, lisez l'explication et revoyez la liste de sens. Utilisez le dictionnaire cliquable pour vérifier un sens. La répétition lente construit une vraie lecture en français. Encore un passage : combinez vocabulaire et grammaire dans des phrases complètes. Évitez de mémoriser seulement l'ordre des boutons. Cherchez le sens. Gardez une petite liste des mots difficiles et revoyez-en cinq demain. Relisez ce texte après les exercices. Patience ici accélère la suite du parcours.",
+      "Au café, d'abord bonjour. Ensuite : Un café, s'il vous plaît. Et pour vous ? Un thé, merci. L'addition, s'il vous plaît. Combien ça coûte ? Voici dix euros. Gardez la monnaie. Au revoir ! Vouvoyer le serveur reste la norme.",
     ], V),
     conversation: {
       title: "Bill & politeness practice",
@@ -1081,7 +1081,7 @@ return {
       "S'il vous plaît termine la commande. Plus tard : L'addition, s'il vous plaît. Ça fait douze euros. Merci — de rien — au revoir.",
       "Articles : un café, un croissant, du sucre, de l'eau. Ne dites pas je suis un café.",
       "La terrasse est dehors. On dit bonjour en arrivant. On garde vous avec le personnel. Les verbes prendre, vouloir et payer organisent toute la scène.",
-      " Dans cette leçon, relisez chaque mot avec son sens anglais avant de répondre. Les phrases entraînent la grammaire du jour, pas la mémoire de l'histoire. Répétez les formules utiles à voix basse. Notez les pièges de registre, d'articles et d'accents. Quand un mot apparaît, rappelez d'abord la traduction, puis la règle. Prenez le temps de relire un paragraphe difficile. Les exercices reprennent les mêmes mots et structures. Si une réponse est fausse, lisez l'explication et revoyez la liste de sens. Utilisez le dictionnaire cliquable pour vérifier un sens. La répétition lente construit une vraie lecture en français. Encore un passage : combinez vocabulaire et grammaire dans des phrases complètes. Évitez de mémoriser seulement l'ordre des boutons. Cherchez le sens. Gardez une petite liste des mots difficiles et revoyez-en cinq demain. Relisez ce texte après les exercices. Patience ici accélère la suite du parcours.",
+      "Sur la terrasse, il fait beau. Je prends un café et un croissant. Tu veux de l'eau ? Oui, de l'eau, merci. C'est combien ? Sept euros. Je paie. Les articles un, du, de l'organisent la commande : un café, du thé, de l'eau.",
     ], V),
     conversation: {
       title: "Checkpoint: terrace practice",
@@ -1294,7 +1294,7 @@ return {
       "Avoir pour posséder : J'ai un frère. Être pour décrire : Mon frère est grand. Ne mélangez pas.",
       "mon + masculin (mon frère), ma + féminin (ma sœur), mes + pluriel (mes parents). son/sa/ses suivent le nom, pas le genre du possesseur.",
       "Chez mes parents = at my parents' home. Ma sœur s'appelle Sophie. Mon frère s'appelle Lucas.",
-      " Dans cette leçon, relisez chaque mot avec son sens anglais avant de répondre. Les phrases entraînent la grammaire du jour, pas la mémoire de l'histoire. Répétez les formules utiles à voix basse. Notez les pièges de registre, d'articles et d'accents. Quand un mot apparaît, rappelez d'abord la traduction, puis la règle. Prenez le temps de relire un paragraphe difficile. Les exercices reprennent les mêmes mots et structures. Si une réponse est fausse, lisez l'explication et revoyez la liste de sens. Utilisez le dictionnaire cliquable pour vérifier un sens. La répétition lente construit une vraie lecture en français. Encore un passage : combinez vocabulaire et grammaire dans des phrases complètes. Évitez de mémoriser seulement l'ordre des boutons. Cherchez le sens. Gardez une petite liste des mots difficiles et revoyez-en cinq demain. Relisez ce texte après les exercices. Patience ici accélère la suite du parcours.",
+      "Ma famille : mon père, ma mère, mon frère, ma sœur. Mon frère s'appelle Lucas. Ma sœur s'appelle Sophie. Mes parents habitent à Lyon. Mon père est français. Ma mère est italienne. Les possessifs mon, ma, mes décrivent qui appartient à qui.",
     ], V),
     conversation: {
       title: "Descriptions with être practice",
@@ -1507,7 +1507,7 @@ return {
       "Mes parents habitent à Lyon. Je vais chez mes parents le dimanche. J'ai aussi un oncle et une tante. Mon cousin s'appelle Lucas.",
       "Rappel sens : frère = brother, sœur = sister, père = father, mère = mother. Sans ces sens, mon frère est vide.",
       "Questions utiles : Tu as des frères et sœurs ? Comment s'appelle ta sœur ? Tes parents habitent où ?",
-      " Dans cette leçon, relisez chaque mot avec son sens anglais avant de répondre. Les phrases entraînent la grammaire du jour, pas la mémoire de l'histoire. Répétez les formules utiles à voix basse. Notez les pièges de registre, d'articles et d'accents. Quand un mot apparaît, rappelez d'abord la traduction, puis la règle. Prenez le temps de relire un paragraphe difficile. Les exercices reprennent les mêmes mots et structures. Si une réponse est fausse, lisez l'explication et revoyez la liste de sens. Utilisez le dictionnaire cliquable pour vérifier un sens. La répétition lente construit une vraie lecture en français. Encore un passage : combinez vocabulaire et grammaire dans des phrases complètes. Évitez de mémoriser seulement l'ordre des boutons. Cherchez le sens. Gardez une petite liste des mots difficiles et revoyez-en cinq demain. Relisez ce texte après les exercices. Patience ici accélère la suite du parcours.",
+      "Tu as des frères et sœurs ? Oui, j'ai un frère et une sœur. Comment s'appelle ta sœur ? Elle s'appelle Marie. Tes parents habitent où ? Ils habitent à Paris. Il est grand, elle est petite — être + adjectif pour décrire. Reliez les membres de la famille avec mon, ma, son, sa.",
     ], V),
     conversation: {
       title: "Checkpoint: family tree practice",
@@ -1720,7 +1720,7 @@ return {
       "Exemples : café (é), père (è), être (ê), Noël (ë). La cédille ç donne un son /s/ : français, ça.",
       "À (with grave) can mean “at/to”. A without accent is the verb form “has”. Où means “where”; ou means “or”.",
       "Apprenez les noms des signes. Quand vous lisez un mot nouveau, regardez les accents avant de deviner. Les lettres silencieuses viennent dans la leçon suivante.",
-      " Dans cette leçon, relisez chaque mot avec son sens anglais avant de répondre. Les phrases entraînent la grammaire du jour, pas la mémoire de l'histoire. Répétez les formules utiles à voix basse. Notez les pièges de registre, d'articles et d'accents. Quand un mot apparaît, rappelez d'abord la traduction, puis la règle. Prenez le temps de relire un paragraphe difficile. Les exercices reprennent les mêmes mots et structures. Si une réponse est fausse, lisez l'explication et revoyez la liste de sens. Utilisez le dictionnaire cliquable pour vérifier un sens. La répétition lente construit une vraie lecture en français. Encore un passage : combinez vocabulaire et grammaire dans des phrases complètes. Évitez de mémoriser seulement l'ordre des boutons. Cherchez le sens. Gardez une petite liste des mots difficiles et revoyez-en cinq demain. Relisez ce texte après les exercices. Patience ici accélère la suite du parcours.",
+      "L'alphabet français a vingt-six lettres, comme en anglais, mais les accents changent le son. é, è, ê, ç — chaque signe compte à l'écrit. Où habites-tu ? Où avec accent ; ou sans accent veut dire or. À Paris, on voit beaucoup d'accents sur les panneaux.",
     ], V),
     conversation: {
       title: "Alphabet & accents practice",
@@ -1933,7 +1933,7 @@ return {
       "Mais l'orthographe garde les lettres. petit / petite : on écrit t dans les deux. Au pluriel : petits, petites.",
       "Liaison : vous êtes — on peut entendre un /z/ entre vous et êtes. La lettre “silencieuse” revient devant une voyelle.",
       "Exemples utiles : francais/français spelling with ç; ils parlent ends with -ent often silent. Écoutez et regardez l'écrit ensemble.",
-      " Dans cette leçon, relisez chaque mot avec son sens anglais avant de répondre. Les phrases entraînent la grammaire du jour, pas la mémoire de l'histoire. Répétez les formules utiles à voix basse. Notez les pièges de registre, d'articles et d'accents. Quand un mot apparaît, rappelez d'abord la traduction, puis la règle. Prenez le temps de relire un paragraphe difficile. Les exercices reprennent les mêmes mots et structures. Si une réponse est fausse, lisez l'explication et revoyez la liste de sens. Utilisez le dictionnaire cliquable pour vérifier un sens. La répétition lente construit une vraie lecture en français. Encore un passage : combinez vocabulaire et grammaire dans des phrases complètes. Évitez de mémoriser seulement l'ordre des boutons. Cherchez le sens. Gardez une petite liste des mots difficiles et revoyez-en cinq demain. Relisez ce texte après les exercices. Patience ici accélère la suite du parcours.",
+      "À l'écrit : parents, français, vous êtes. À l'oral, les lettres finales sont souvent silencieuses. Vous êtes peut avoir une liaison. Le mot café garde le e à la fin à l'écrit. Écoutez et lisez ensemble : il parle, elle habite, ils sont.",
     ], V),
     conversation: {
       title: "Silent letters practice",
@@ -2146,7 +2146,7 @@ return {
       "Comment ça s'écrit ? On répond lettre par lettre. Les accents font partie de l'orthographe. Un é n'est pas un è.",
       "Dans vous et ils, les lettres finales restent à l'écrit. À l'oral, elles sont souvent silencieuses, sauf liaison.",
       "Checkpoint : reliez sons, accents et lettres silencieuses. Lisez à voix haute dans votre tête : café, père, être, français, vous êtes.",
-      " Dans cette leçon, relisez chaque mot avec son sens anglais avant de répondre. Les phrases entraînent la grammaire du jour, pas la mémoire de l'histoire. Répétez les formules utiles à voix basse. Notez les pièges de registre, d'articles et d'accents. Quand un mot apparaît, rappelez d'abord la traduction, puis la règle. Prenez le temps de relire un paragraphe difficile. Les exercices reprennent les mêmes mots et structures. Si une réponse est fausse, lisez l'explication et revoyez la liste de sens. Utilisez le dictionnaire cliquable pour vérifier un sens. La répétition lente construit une vraie lecture en français. Encore un passage : combinez vocabulaire et grammaire dans des phrases complètes. Évitez de mémoriser seulement l'ordre des boutons. Cherchez le sens. Gardez une petite liste des mots difficiles et revoyez-en cinq demain. Relisez ce texte après les exercices. Patience ici accélère la suite du parcours.",
+      "Comment ça s'écrit ? M-A-R-I-E. Mon nom est Dubois : D-U-B-O-I-S. Les lettres et les accents servent à épeler. Français avec ç ; père avec accent grave. Répétez : Je m'appelle…, Comment tu t'appelles ?, Enchanté.",
     ], V),
     conversation: {
       title: "Checkpoint: spelling names practice",

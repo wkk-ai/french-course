@@ -1,8 +1,9 @@
 import type { LessonContent } from '@/lib/course'
 import { MODULE1_CHAPTER_IDS, MODULE1_LESSONS } from '@/lib/module1-content'
 import { FACTORY_CHAPTER_IDS, FACTORY_LESSONS, PHASE1_CHAPTER_IDS, PHASE1_LESSONS } from '@/lib/phase1/content'
-import { PATHWAY_BY_CHAPTER_ID, PATHWAY_MODULES } from '@/lib/pathway/catalog'
+import { PATHWAY_BY_CHAPTER_ID } from '@/lib/pathway/catalog'
 import { deepenLessonToModule1Bar } from '@/lib/pathway/deepen-lesson'
+import { BUNDLED_CHAPTER_IDS as CATALOG_CHAPTER_IDS } from '@/lib/bundled-chapter-ids'
 
 function roleFor(chapterId: string, title?: string): 'A' | 'B' | 'C' | 'D' {
   const hit = PATHWAY_BY_CHAPTER_ID.get(chapterId)
@@ -28,9 +29,7 @@ export const BUNDLED_LESSONS: Record<string, LessonContent> = withDepth({
 })
 
 /** Pathway order for every chapter that has bundled content. */
-export const BUNDLED_CHAPTER_IDS: string[] = PATHWAY_MODULES.flatMap((module) =>
-  module.subchapters.map((sub) => sub.id).filter((id) => Boolean(BUNDLED_LESSONS[id])),
-)
+export const BUNDLED_CHAPTER_IDS: string[] = CATALOG_CHAPTER_IDS.filter((id) => Boolean(BUNDLED_LESSONS[id]))
 
 /** @deprecated Prefer BUNDLED_CHAPTER_IDS */
 export const AUTHORED_CHAPTER_IDS = BUNDLED_CHAPTER_IDS
@@ -40,3 +39,4 @@ export function hasBundledLesson(chapterId: string): boolean {
 }
 
 export { MODULE1_CHAPTER_IDS, MODULE1_LESSONS, PHASE1_CHAPTER_IDS, PHASE1_LESSONS, FACTORY_CHAPTER_IDS, FACTORY_LESSONS }
+export { CATALOG_CHAPTER_IDS }

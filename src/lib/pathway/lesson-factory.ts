@@ -2,6 +2,9 @@ import type { LessonContent, LessonExercise, VocabularyWord } from '@/lib/course
 import { conversationLine, readingParagraphs } from '@/lib/lesson-text'
 import type { Phase1Theme } from '@/lib/phase1/theme-bank'
 
+const THEORY_JARGON_RE = /Hand-crafted focus|Enqueue reviewable lemmas|prove chunk/i
+const ENGLISH_LEAK_IN_READING_RE = /\b(hello|goodbye|thank you|past tense|clickable dictionary)\b/i
+
 export type DeepTheme = Phase1Theme & {
   role?: 'A' | 'B' | 'C' | 'D'
   moduleTitle?: string
@@ -37,17 +40,64 @@ function meaningsBlock(meanings: Array<[string, string]>): string {
 }
 
 function chunksBlock(chunks: Array<[string, string]>): string {
-  if (!chunks.length) return '- *(none tagged — reuse lesson focus lines as chunks)*'
+  if (!chunks.length) return '- *(reuse the focus lines as whole phrases)*'
   return chunks.map(([fr, en]) => `- *${fr}* = ${en}`).join('\n')
+}
+
+function meaningDistractors(
+  meanings: Array<[string, string]>,
+  correctEn: string,
+  index: number,
+): [string, string] {
+  const pool = meanings.map(([, en]) => en).filter((en) => en !== correctEn)
+  const first = pool[index % Math.max(1, pool.length)] ?? 'autre sens'
+  const second = pool[(index + 1) % Math.max(1, pool.length)] ?? 'un autre mot'
+  return [first, second]
+}
+
+function wrongFrenchLines(theme: DeepTheme, index: number): [string, string] {
+  const focus = theme.focus
+  const lineA = focus[(index + 1) % Math.max(1, focus.length)] ?? 'Je ne comprends pas.'
+  const lineB = focus[(index + 2) % Math.max(1, focus.length)] ?? "C'est difficile."
+  return [lineA, lineB]
+}
+
+function learnerBriefPad(body: string, theme: DeepTheme, min: number): string {
+  if (body.length >= min) return body
+
+  let padded = body
+  padded += `\n\n**8. Extra practice with meanings**\n`
+  for (const [fr, en] of theme.meanings.slice(0, 12)) {
+    padded += `- Say *${fr}* aloud, then "${en}", then use it in one new sentence.\n`
+  }
+  padded += `\n**9. Register reminder**\n`
+  padded += `With a stranger, a teacher, or staff, use *vous* and *Bonjour*. `
+  padded += `With a close friend who says *tu*, you can answer with *tu* and *Salut*.\n`
+
+  let i = 0
+  while (padded.length < min && theme.focus.length > 0) {
+    const line = theme.focus[i % theme.focus.length]
+    padded += `- Practice aloud: *${line}*. Try it with *je*, *tu*, *il/elle*, and *nous*.\n`
+    i += 1
+    if (i > theme.focus.length * 4) break
+  }
+
+  return padded
+}
+
+function sanitizeChunks(chunks: Array<[string, string]>): Array<[string, string]> {
+  return chunks.map(([fr, en]) => [fr, /prove chunk/i.test(en) ? 'useful phrase — say it whole' : en])
 }
 
 function buildBrief(theme: DeepTheme): NonNullable<LessonContent['brief']> {
   const role = roleOf(theme)
-  const chunks = theme.chunks ?? theme.focus.slice(0, 8).map((line) => [line, 'useful chunk — say it whole'] as [string, string])
+  const chunks = sanitizeChunks(
+    theme.chunks ?? theme.focus.slice(0, 8).map((line) => [line, 'useful phrase — say it whole'] as [string, string]),
+  )
   const traps = theme.traps ?? [
-    'Do not quiz story plot or character names — quiz French forms and meanings only.',
+    'Do not mix up name introductions (C\'est…) with descriptions (Il/Elle est… + adjective).',
     'Never put a French content word in a grammar example before its English meaning appears above.',
-    'Store verbs as infinitives (*habiter*, not *habite*) for the dictionary and conjugations.',
+    'City uses habiter à; many feminine countries use habiter en.',
   ]
   const trio = theme.registerTrio ?? [
     'Bonjour, comment allez-vous ?',
@@ -55,6 +105,7 @@ function buildBrief(theme: DeepTheme): NonNullable<LessonContent['brief']> {
     'Hé, ça va ? (recognition only until later phases)',
   ]
   const extra = (theme.theorySections ?? [])
+    .filter((section) => !THEORY_JARGON_RE.test(section.body) && !THEORY_JARGON_RE.test(section.heading))
     .map((section) => `**${section.heading}**\n${section.body}`)
     .join('\n\n')
 
@@ -69,7 +120,7 @@ function buildBrief(theme: DeepTheme): NonNullable<LessonContent['brief']> {
     `**2. Why this matters**\n` +
     `This pattern shows up constantly in real French. If the meanings are shaky, the drills collapse. ` +
     `Take time on the list above. Say each French word aloud, then the English, then a short sentence. ` +
-    `The reading and dialogue reuse these lemmas on purpose so Review can enqueue them later.\n\n` +
+    `The reading and dialogue reuse these words on purpose.\n\n` +
     `**3. Grammar pattern (only after meanings)**\n` +
     `${theme.grammar}\n\n` +
     `Focus lines to produce (meanings already learned):\n` +
@@ -87,31 +138,13 @@ function buildBrief(theme: DeepTheme): NonNullable<LessonContent['brief']> {
     `**7. Practice order**\n` +
     `1) Meanings list until automatic\n` +
     `2) Focus lines aloud\n` +
-    `3) Reading with clickable dictionary\n` +
+    `3) Reading — tap any word you do not know\n` +
     `4) Dialogue\n` +
-    `5) Exercises — French forms and meanings only, never plot memory\n`
+    `5) Exercises — French forms and meanings only\n`
 
   if (extra) body += `\n${extra}\n`
 
-  // Enforce Module-1 depth bar by expanding practice/spiral notes (still pedagogical, not fluff-only).
-  const min = briefMinChars(role)
-  if (body.length < min) {
-    body +=
-      `\n**8. Deep practice notes**\n` +
-      `Return to the meanings list after every wrong answer. ` +
-      `Rewrite each focus line with a new subject pronoun. ` +
-      `Mark silent letters and liaison points when you notice them. ` +
-      `Tomorrow, review five hard lemmas before starting the next sub-chapter. ` +
-      `If a verb appears, open CONJUGATE on the infinitive lemma — not a conjugated surface form. ` +
-      `Spiral one older pattern from earlier modules into two new sentences today. ` +
-      `Keep a tiny notebook of chunks; say them as music, not word-by-word translation. ` +
-      `When unsure between two forms, re-read the trap list before guessing.\n`
-    while (body.length < min) {
-      body +=
-        ` Re-read section 1, then produce three new sentences with today’s grammar. ` +
-        `Check spacing after punctuation and around guillemets in any typed answer. `
-    }
-  }
+  body = learnerBriefPad(body, theme, briefMinChars(role))
 
   return {
     title: theme.title,
@@ -121,45 +154,39 @@ function buildBrief(theme: DeepTheme): NonNullable<LessonContent['brief']> {
 }
 
 function defaultReadingFr(theme: DeepTheme): string[] {
-  const meaningSentences = theme.meanings
+  const focus = theme.focus
+  const dialogueSample = theme.dialogue
     .slice(0, 8)
-    .map(([fr, en]) => `Le mot ${fr} signifie « ${en} » en anglais.`)
+    .map((line) => `${line.speaker} : « ${line.text} »`)
     .join(' ')
-  const focus = theme.focus.join(' ')
   return [
-    `Aujourd'hui, nous travaillons cette idée : ${theme.grammar}. ${meaningSentences}`,
-    `Voici des phrases utiles pour parler. ${focus} Répétez chaque phrase à voix haute. Cherchez d'abord le sens de chaque mot nouveau.`,
-    theme.dialogue
-      .slice(0, 10)
-      .map((line) => `${line.speaker} dit : « ${line.text} »`)
-      .join(' ') +
-      ' Ces répliques entraînent la grammaire du jour, pas la mémoire d\'une histoire.',
-    `Attention aux pièges. On quiz le français — formes et sens — jamais le scénario. ` +
-      `Relisez les mots difficiles. Utilisez le dictionnaire cliquable. ` +
-      `Les verbes s'apprennent à l'infinitif pour la conjugaison complète.`,
-    `Encore une lecture courte pour installer les structures. ${focus} ` +
-      `Combinez vocabulaire et grammaire dans des phrases complètes. ` +
-      `Si une réponse est fausse, revenez à la liste de sens avant de continuer. ` +
-      `La répétition lente construit une vraie lecture en français. ` +
-      `Notez huit chunks et revoyez-en cinq demain. Patience ici accélère la suite du parcours. ` +
-      `Dans la conversation, écoutez le registre : vous avec un inconnu, tu avec un ami. ` +
-      `Gardez les formules de politesse : bonjour, merci, s'il vous plaît, au revoir, à bientôt.`,
+    `Aujourd'hui, nous travaillons : ${theme.grammar}. ${focus[0] ?? ''} ${focus[1] ?? ''}`,
+    `${focus.slice(2, 5).join(' ')} ${dialogueSample}`,
+    `${focus.slice(0, 4).join(' ')} On répète les phrases du jour à voix haute.`,
+    `${theme.meanings
+      .slice(0, 6)
+      .map(([fr]) => `Le mot « ${fr} » revient dans la leçon.`)
+      .join(' ')} ${focus[4] ?? ''} ${focus[5] ?? ''}`,
+    `${focus.slice(6, 10).join(' ')} ${theme.dialogue.slice(-2).map((line) => line.text).join(' ')}`,
   ]
 }
 
 function buildReading(theme: DeepTheme, prefix: string, vocabulary: VocabularyWord[]) {
-  const paragraphs = (theme.readingFr?.length ? theme.readingFr : defaultReadingFr(theme)).slice()
-  // Guarantee ~220+ reading words for chapter bar.
+  const authored = theme.readingFr ?? []
+  const readingSource =
+    authored.length > 0 && !authored.some((paragraph) => ENGLISH_LEAK_IN_READING_RE.test(paragraph))
+      ? authored
+      : defaultReadingFr(theme)
+  const paragraphs = readingSource.slice()
   const joined = paragraphs.join(' ')
   const approxWords = joined.split(/\s+/).filter(Boolean).length
   if (approxWords < 230) {
     paragraphs.push(
-      `Pour finir, relisez tout le texte une fois sans précipitation. ` +
-        `Chaque mot utile doit avoir un sens anglais clair avant les exercices. ` +
-        `Les phrases suivantes consolident encore la leçon : ${theme.focus.join(' ')} ` +
-        `Travaillez lentement. La précision aujourd'hui évite les erreurs demain. ` +
-        `Quand vous voyez un verbe, rappelez l'infinitif. Quand vous voyez un nom, rappelez le genre si vous le connaissez. ` +
-        `Le but n'est pas de finir en une minute : le but est de comprendre et de pouvoir produire.`,
+      `Pour finir, voici encore des phrases sur le thème. ${theme.focus.join(' ')} ` +
+        `${theme.dialogue
+          .slice(-4)
+          .map((line) => line.text)
+          .join(' ')}`,
     )
   }
   return readingParagraphs(prefix, paragraphs, vocabulary)
@@ -176,29 +203,28 @@ function topicExercises(theme: DeepTheme, prefix: string): LessonExercise[] {
   }))
 
   const meaningDrills: LessonExercise[] = theme.meanings.map(([fr, en], index) => {
-    const distractors = theme.meanings
-      .filter(([other]) => other !== fr)
-      .map(([, otherEn]) => otherEn)
-      .slice(0, 2)
-    while (distractors.length < 2) distractors.push('a plot detail', 'a character name')
+    const [d1, d2] = meaningDistractors(theme.meanings, en, index)
     return {
       id: `${prefix}-m${index + 1}`,
       category: 'vocab-meaning',
       prompt: `${fr} =`,
-      options: [en, distractors[0], distractors[1]],
+      options: [en, d1, d2],
       answer: 0,
       explanation: en,
     }
   })
 
-  const focusDrills: LessonExercise[] = theme.focus.map((line, index) => ({
-    id: `${prefix}-f${index + 1}`,
-    category: theme.ruleSlugs[0] ?? 'grammar',
-    prompt: 'Choose the correct French line for this lesson:',
-    options: [line, 'Je suis Paris.', "C'est française."],
-    answer: 0,
-    explanation: line,
-  }))
+  const focusDrills: LessonExercise[] = theme.focus.map((line, index) => {
+    const [wrongA, wrongB] = wrongFrenchLines(theme, index)
+    return {
+      id: `${prefix}-f${index + 1}`,
+      category: theme.ruleSlugs[0] ?? 'grammar',
+      prompt: 'Choose the correct French line for this lesson:',
+      options: [line, wrongA, wrongB],
+      answer: 0,
+      explanation: line,
+    }
+  })
 
   const left = theme.meanings.slice(0, Math.min(4, theme.meanings.length)).map(([fr]) => fr)
   const right = theme.meanings.slice(0, Math.min(4, theme.meanings.length)).map(([, en]) => en)
@@ -213,18 +239,23 @@ function topicExercises(theme: DeepTheme, prefix: string): LessonExercise[] {
     pairs: left.map((_, index) => [index, index] as [number, number]),
   }
 
+  const meaningTf = (index: number): LessonExercise => {
+    const [fr, en] = theme.meanings[index % Math.max(1, theme.meanings.length)] ?? ['bonjour', 'bonjour']
+    return {
+      id: `${prefix}-tf${index + 1}`,
+      type: 'true-false',
+      category: 'true-false',
+      prompt: 'True or false',
+      statement: `“${fr}” means “${en}”.`,
+      answer: true,
+      explanation: 'From the meanings list',
+    }
+  }
+
   const trueFalse: LessonExercise[] =
     roleOf(theme) === 'D'
       ? [
-          {
-            id: `${prefix}-tf1`,
-            type: 'true-false',
-            category: 'true-false',
-            prompt: 'True or false',
-            statement: `“${theme.meanings[0]?.[0] ?? 'bonjour'}” means “${theme.meanings[0]?.[1] ?? 'hello'}”.`,
-            answer: true,
-            explanation: 'From the meanings list',
-          },
+          meaningTf(0),
           {
             id: `${prefix}-tf2`,
             type: 'true-false',
@@ -234,74 +265,41 @@ function topicExercises(theme: DeepTheme, prefix: string): LessonExercise[] {
             answer: true,
             explanation: theme.focus[0] ?? 'Focus line',
           },
-          {
-            id: `${prefix}-tf3`,
-            type: 'true-false',
-            category: 'true-false',
-            prompt: 'True or false',
-            statement: `“${theme.meanings[1]?.[0] ?? theme.meanings[0]?.[0] ?? 'merci'}” means “${theme.meanings[1]?.[1] ?? theme.meanings[0]?.[1] ?? 'thank you'}”.`,
-            answer: true,
-            explanation: 'From the meanings list',
-          },
+          meaningTf(1),
         ]
-      : [
-          {
-            id: `${prefix}-tf1`,
-            type: 'true-false',
-            category: 'true-false',
-            prompt: 'True or false',
-            statement: `“${theme.meanings[0]?.[0] ?? 'bonjour'}” means “${theme.meanings[0]?.[1] ?? 'hello'}”.`,
-            answer: true,
-            explanation: 'From the meanings list',
-          },
-          {
-            id: `${prefix}-tf2`,
-            type: 'true-false',
-            category: 'true-false',
-            prompt: 'True or false',
-            statement: 'Exercises should test French forms and meanings, not story plot memory.',
-            answer: true,
-            explanation: 'Quiz French only',
-          },
-          {
-            id: `${prefix}-tf3`,
-            type: 'true-false',
-            category: 'true-false',
-            prompt: 'True or false',
-            statement: 'You should learn English meanings before studying grammar examples that use those words.',
-            answer: true,
-            explanation: 'Theory First',
-          },
-        ]
+      : [meaningTf(0), meaningTf(1), meaningTf(2)]
 
   const grammarCore: LessonExercise[] = [
     {
       id: `${prefix}-g1`,
       category: theme.ruleSlugs[0] ?? 'grammar',
       prompt: 'This lesson’s grammar focus is best described as:',
-      options: [theme.grammar, 'Only memorizing a story', 'Skipping meanings'],
+      options: [theme.grammar, 'Only memorizing isolated letters', 'Skipping word meanings'],
       answer: 0,
       explanation: theme.grammar,
     },
     {
       id: `${prefix}-g2`,
       category: 'vocab-meaning',
-      prompt: 'Before grammar drills, you should first:',
-      options: ['Learn word meanings', 'Memorize character names', 'Skip the brief'],
+      prompt: `${theme.meanings[1]?.[0] ?? theme.meanings[0]?.[0] ?? 'merci'} =`,
+      options: [
+        theme.meanings[1]?.[1] ?? theme.meanings[0]?.[1] ?? 'thanks',
+        theme.meanings[0]?.[1] ?? 'other',
+        theme.meanings[2]?.[1] ?? 'third',
+      ],
       answer: 0,
-      explanation: 'Meanings first',
+      explanation: theme.meanings[1]?.[1] ?? theme.meanings[0]?.[1] ?? 'From meanings list',
     },
     {
       id: `${prefix}-g3`,
-      category: 'vocab-meaning',
-      prompt: 'Useful chunks should be learned as:',
-      options: ['Whole phrases', 'Isolated letters only', 'Plot spoilers'],
+      category: theme.ruleSlugs[0] ?? 'grammar',
+      prompt: 'Choose the correct French line for this lesson:',
+      options: [theme.focus[0] ?? 'Je pratique.', ...wrongFrenchLines(theme, 0)],
       answer: 0,
-      explanation: 'Chunks as wholes',
+      explanation: theme.focus[0] ?? 'Focus line',
     },
   ]
 
-  // Cloze from first focus line if it has a clear verb/noun slot
   const clozeSource = theme.focus[0] ?? 'Je pratique.'
   const cloze: LessonExercise = {
     id: `${prefix}-cloze1`,
@@ -337,12 +335,13 @@ function topicExercises(theme: DeepTheme, prefix: string): LessonExercise[] {
   let n = combined.length
   while (combined.length < 25) {
     n += 1
-    const meaning = theme.meanings[(n - 1) % Math.max(1, theme.meanings.length)] ?? ['bonjour', 'hello']
+    const meaning = theme.meanings[(n - 1) % Math.max(1, theme.meanings.length)] ?? ['bonjour', 'bonjour']
+    const [d1, d2] = meaningDistractors(theme.meanings, meaning[1], n)
     combined.push({
       id: `${prefix}-pad${n}`,
       category: 'vocab-meaning',
       prompt: `${meaning[0]} =`,
-      options: [meaning[1], 'a character name', 'a plot detail'],
+      options: [meaning[1], d1, d2],
       answer: 0,
       explanation: meaning[1],
     })

@@ -1,4 +1,5 @@
 import type { SyntaxClass, VocabularyWord, WordToken } from '@/lib/course'
+import { conjugateVerb, isConjugableVerb } from '@/lib/french-conjugations'
 
 const PUNCT = new Set(['.', ',', '!', '?', ':', ';', '…', '—', '-', '«', '»', '(', ')', '"', "'"])
 
@@ -30,6 +31,31 @@ function normalizeLookup(text: string) {
     .replace(/^[«»"“”]+|[«»"“”]+$/g, '')
     .replace(/[.,!?;:]+$/g, '')
 }
+
+/** Strip leading French elision (l', d', j', …) for lookup. */
+export function stripElisionBase(text: string): string | null {
+  const norm = normalizeLookup(text)
+  const match = norm.match(/^(l'|d'|j'|n'|m'|t'|s'|c')(.+)$/i)
+  return match?.[2] ?? null
+}
+
+function registerSurface(map: Map<string, string>, surface: string, lemmaId: string) {
+  if (!surface || surface === '—') return
+  map.set(normalizeLookup(surface), lemmaId)
+  const stripped = stripElisionBase(surface)
+  if (stripped) map.set(stripped, lemmaId)
+}
+
+/** Resolve lemma id: full surface, then elision-stripped base. */
+export function lookupLemma(lookup: Map<string, string>, text: string): string | undefined {
+  const key = normalizeLookup(text)
+  const direct = lookup.get(key)
+  if (direct) return direct
+  const stripped = stripElisionBase(text)
+  return stripped ? lookup.get(stripped) : undefined
+}
+
+const VOCAB_MULTIWORD_PHRASES = ['au revoir', 'à bientôt', "s'il vous plaît", "s'il te plaît"]
 
 /** Split leading/trailing punctuation glued onto words (e.g. "Moi," → "Moi" + ","). */
 function splitGluedPunctuation(token: WordToken): WordToken[] {
@@ -437,6 +463,13 @@ export function buildLemmaLookup(vocabulary: VocabularyWord[]) {
     }
   }
 
+  for (const word of vocabulary) {
+    if (!isConjugableVerb(word)) continue
+    for (const row of conjugateVerb(word)) {
+      registerSurface(map, row.form, word.id)
+    }
+  }
+
   const phraseLemmas: Record<string, string> = {
     'en france': '10000000-0000-0000-0000-000000000093',
     'moi aussi': '10000000-0000-0000-0000-000000000084',
@@ -454,6 +487,16 @@ export function buildLemmaLookup(vocabulary: VocabularyWord[]) {
     'quelle heure': '10000000-0000-0000-0000-000000000153',
     'avoir l\'air': '10000000-0000-0000-0000-000000000232',
     'se présenter': '10000000-0000-0000-0000-000000000279',
+    'au revoir': '10000000-0000-0000-0000-000000000008',
+    'à bientôt': '10000000-0000-0000-0000-000000000081',
+    "s'il vous plaît": '10000000-0000-0000-0000-000000000036',
+    "s'il te plaît": '10000000-0000-0000-0000-000000000478',
+  }
+  for (const word of vocabulary) {
+    const norm = normalizeLookup(word.word)
+    if (word.word.includes(' ') || VOCAB_MULTIWORD_PHRASES.includes(norm)) {
+      phraseLemmas[norm] = word.id
+    }
   }
   for (const [phrase, id] of Object.entries(phraseLemmas)) {
     map.set(normalizeLookup(phrase), id)
@@ -466,7 +509,9 @@ const MULTIWORD = [
   'à bientôt',
   'au revoir',
   "s'il vous plaît",
+  "s'il te plaît",
   "s’il vous plaît",
+  "s’il te plaît",
   "de l'eau",
   "de l’eau",
   "c'est",
@@ -534,7 +579,7 @@ export function enrichTokens(tokens: WordToken[], vocabulary: VocabularyWord[]):
     if (matched) continue
 
     const token = expanded[i]
-    const lemmaId = token.lemmaId ?? lookup.get(normalizeLookup(token.text))
+    const lemmaId = token.lemmaId ?? lookupLemma(lookup, token.text)
     const syntax = isPunctuationToken(token.text) ? 'none' : syntaxForLemma(lemmaId, vocabularyById)
     merged.push(lemmaId ? { ...token, lemmaId, syntax } : { ...token, syntax })
     i += 1

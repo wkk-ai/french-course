@@ -1,4 +1,5 @@
 import type { LessonContent } from '@/lib/course'
+import { AUTHOR_PAD_DENYLIST, englishLeakInFrench, hasAuthorPad } from '@/lib/pathway/content-quality'
 
 function readingWordCount(lesson: LessonContent): number {
   let count = 0
@@ -8,6 +9,12 @@ function readingWordCount(lesson: LessonContent): number {
     }
   }
   return count
+}
+
+function readingPlainText(lesson: LessonContent): string {
+  return (lesson.reading ?? [])
+    .map((paragraph) => paragraph.tokens.map((token) => token.text).join(' '))
+    .join('\n')
 }
 
 /**
@@ -42,5 +49,16 @@ export function validateChapterContent(
   if (!lesson.brief?.ruleSlugs?.length) {
     return { ok: false, reason: 'ruleSlugs required' }
   }
+
+  const readingText = readingPlainText(lesson)
+  const haystack = `${brief}\n${readingText}`
+  if (hasAuthorPad(haystack)) {
+    const hit = AUTHOR_PAD_DENYLIST.find((phrase) => haystack.toLowerCase().includes(phrase.toLowerCase()))
+    return { ok: false, reason: `Authoring jargon detected: "${hit ?? 'pad'}"` }
+  }
+  if (englishLeakInFrench(readingText)) {
+    return { ok: false, reason: 'English leak in reading text' }
+  }
+
   return { ok: true }
 }
