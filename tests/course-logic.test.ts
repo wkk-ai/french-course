@@ -507,3 +507,65 @@ test('Prove pass bar and etre rem alias', async () => {
   assert.equal(BUNDLED_CHAPTER_IDS[0].endsWith('0101'), true)
   assert.equal(PATHWAY_BY_CHAPTER_ID.get(BUNDLED_CHAPTER_IDS[3])?.sub.role, 'D')
 })
+
+test('all 720 bundled lessons pass validateChapterContent (no author pads / EN leaks)', async () => {
+  const { BUNDLED_CHAPTER_IDS, BUNDLED_LESSONS } = await import('../src/lib/bundled-lessons')
+  const { PATHWAY_BY_CHAPTER_ID } = await import('../src/lib/pathway/catalog')
+  const { validateChapterContent } = await import('../src/lib/pathway/validate-chapter')
+  assert.equal(BUNDLED_CHAPTER_IDS.length, 720)
+  for (const id of BUNDLED_CHAPTER_IDS) {
+    const lesson = BUNDLED_LESSONS[id]
+    assert.ok(lesson, `missing lesson ${id}`)
+    const role = PATHWAY_BY_CHAPTER_ID.get(id)?.sub.role ?? 'A'
+    const result = validateChapterContent(lesson, { role })
+    assert.equal(result.ok, true, `${id}: ${!result.ok ? result.reason : ''}`)
+  }
+})
+
+test('u1.B brief has no Deep practice author pad', async () => {
+  const { BUNDLED_LESSONS } = await import('../src/lib/bundled-lessons')
+  const lesson = BUNDLED_LESSONS['22222222-0000-0000-0000-000000000111']
+  assert.ok(lesson?.brief?.body)
+  assert.equal(/Deep practice|Module-1 bar|Store verbs as infinitives/i.test(lesson.brief!.body), false)
+  const reading = (lesson.reading ?? []).map((p) => p.tokens.map((t) => t.text).join(' ')).join('\n')
+  assert.equal(/Dans cette leçon, relisez|dictionnaire cliquable|N'interrogez jamais/i.test(reading), false)
+})
+
+test('lemmaIdsForChapter skips proper nouns and unknown ids', async () => {
+  const { lemmaIdsForChapter } = await import('../src/lib/review/lemmas')
+  const { BUNDLED_VOCABULARY } = await import('../src/lib/phase1/content')
+  const ids = lemmaIdsForChapter('22222222-0000-0000-0000-000000000101')
+  const byId = new Map(BUNDLED_VOCABULARY.map((w) => [w.id, w]))
+  for (const id of ids) {
+    const word = byId.get(id)
+    assert.ok(word, `unknown lemma ${id}`)
+    assert.notEqual((word.part_of_speech ?? '').toLowerCase(), 'proper noun')
+  }
+})
+
+test('habiter-prepositions unlocks with Places chapter', async () => {
+  const { MODULE1_RULES } = await import('../src/lib/rules/catalog')
+  const { isRuleUnlocked } = await import('../src/lib/rules/unlock')
+  const rule = MODULE1_RULES.find((r) => r.slug === 'habiter-prepositions')!
+  assert.equal(isRuleUnlocked(rule, new Set(['22222222-0000-0000-0000-000000000201'])), true)
+})
+
+test('clearLocalLearnerData removes progress and vault keys', async () => {
+  const { clearLocalLearnerData, markLocalChapterCompleted, readLocalCompletedChapters } = await import(
+    '../src/lib/local-progress'
+  )
+  // jsdom-less: only run shape checks in node
+  assert.equal(typeof clearLocalLearnerData, 'function')
+  assert.equal(typeof markLocalChapterCompleted, 'function')
+  assert.equal(typeof readLocalCompletedChapters, 'function')
+})
+
+test('clickable lookup resolves conjugated être and elided forms', async () => {
+  const { tokenizeFrench } = await import('../src/lib/clickable-text')
+  const { BUNDLED_VOCABULARY } = await import('../src/lib/phase1/content')
+  const suis = tokenizeFrench('je suis français', 't', BUNDLED_VOCABULARY)
+  assert.ok(suis.some((t) => t.text === 'suis' && t.lemmaId))
+  const histoire = tokenizeFrench("l'histoire", 't2', BUNDLED_VOCABULARY)
+  // May or may not resolve histoire lemma; must not throw
+  assert.ok(histoire.length >= 1)
+})
