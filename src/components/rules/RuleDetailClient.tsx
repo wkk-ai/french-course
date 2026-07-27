@@ -12,6 +12,7 @@ import {
   masteryStage,
   type RuleMasteryStage,
 } from '@/lib/rules/unlock'
+import { mergeCompletedChapterIds } from '@/lib/local-progress'
 import { createClient } from '@/utils/supabase/client'
 
 type TabId = 'quick' | 'deep' | 'examples' | 'try'
@@ -72,7 +73,7 @@ export function RuleDetailClient({ rule }: { rule: GrammarRuleDocument }) {
             .in('grammar_category', rule.masteryCategories),
         ])
         if (cancelled) return
-        const completed = new Set((progress ?? []).map((row) => row.chapter_id))
+        const completed = mergeCompletedChapterIds((progress ?? []).map((row) => row.chapter_id))
         const isOpen = isRuleUnlocked(rule, completed)
         let totalAttempts = 0
         let correctAttempts = 0
@@ -116,6 +117,7 @@ export function RuleDetailClient({ rule }: { rule: GrammarRuleDocument }) {
   }
 
   if (!unlocked) {
+    // Locked: generic message only — deepDive/examples/drills never hit the DOM.
     return (
       <div className="tactile-card mt-6 space-y-4 p-6">
         <h1 className="text-headline-lg">Not available yet</h1>
@@ -270,6 +272,13 @@ export function RuleDetailClient({ rule }: { rule: GrammarRuleDocument }) {
                 answer={answers[drill.id]}
                 onAnswer={(value) => setAnswers((current) => ({ ...current, [drill.id]: value }))}
                 onMistake={() => {}}
+                onRetry={() =>
+                  setAnswers((current) => {
+                    const next = { ...current }
+                    delete next[drill.id]
+                    return next
+                  })
+                }
               />
             </article>
           ))}

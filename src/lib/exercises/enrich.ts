@@ -468,6 +468,7 @@ export function buildRemediationExercises(categories: string[]): LessonExercise[
     'etre-present': 'être-present',
     etre: 'être-present',
     'être': 'être-present',
+    'etre-family': 'être-family',
     subjectPronouns: 'subject-pronouns',
     'subject_pronouns': 'subject-pronouns',
     'avoir-age': 'avoir-age',
@@ -476,6 +477,9 @@ export function buildRemediationExercises(categories: string[]): LessonExercise[
   // Mirror accented keys under ASCII so lesson slug mismatches still remediate.
   if (templates['être-present'] && !templates['etre-present']) {
     templates['etre-present'] = { ...templates['être-present'], category: 'etre-present' }
+  }
+  if (templates['être-family'] && !templates['etre-family']) {
+    templates['etre-family'] = { ...templates['être-family'], category: 'etre-family' }
   }
   for (const category of categories) {
     if (seen.has(category)) continue

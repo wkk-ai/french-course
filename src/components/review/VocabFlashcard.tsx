@@ -90,25 +90,25 @@ export function VocabFlashcard({
             type="button"
             disabled={disabled}
             onClick={() => onRate('again')}
-            className="tactile-button rounded-xl border-2 border-error/40 bg-error-container/30 py-4 font-bold text-on-error-container disabled:opacity-50"
+            className="tactile-button rounded-xl border-2 border-error/50 bg-error-container/40 py-4 font-bold text-on-error-container disabled:opacity-50"
           >
             Again
           </button>
           <button
             type="button"
             disabled={disabled}
-            onClick={() => onRate('easy')}
-            className="tactile-button rounded-xl border-primary-container bg-primary py-4 font-bold text-on-primary disabled:opacity-50"
+            onClick={() => onRate('hard')}
+            className="tactile-button rounded-xl border-2 border-warning/50 bg-warning/10 py-4 font-bold text-on-surface disabled:opacity-50"
           >
-            Easy
+            Hard
           </button>
           <button
             type="button"
             disabled={disabled}
-            onClick={() => onRate('hard')}
-            className="tactile-button rounded-xl border-2 border-surface-variant bg-surface-container-lowest py-4 font-bold text-on-surface disabled:opacity-50"
+            onClick={() => onRate('easy')}
+            className="tactile-button rounded-xl border-2 border-surface-variant bg-surface-container-lowest py-4 font-bold text-on-surface-variant disabled:opacity-50"
           >
-            Hard
+            Easy
           </button>
         </div>
       )}

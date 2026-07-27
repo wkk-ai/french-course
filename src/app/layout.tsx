@@ -32,7 +32,6 @@ export const viewport: Viewport = {
   themeColor: "#003e7a",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
 };
 
 export default function RootLayout({
@@ -41,7 +40,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className={`${nunitoSans.variable} ${sourceSerif.variable} antialiased h-full`}>
+    <html lang="en" className={`${nunitoSans.variable} ${sourceSerif.variable} antialiased h-full`}>
       <body className="font-ui bg-background text-on-surface h-full flex flex-col">
         <PwaRegistration />
         {children}

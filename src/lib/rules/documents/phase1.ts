@@ -706,7 +706,7 @@ export const PHASE1_RULE_DOCUMENTS: GrammarRuleDocument[] = [
       { french: "Où habites-tu ?", english: "Où habites-tu ?" },
       { french: "Nous habitons en Suisse.", english: "Nous habitons en Suisse." },
     ],
-    unlockChapterIds: ['22222222-0000-0000-0000-000000000603'],
+    unlockChapterIds: ['22222222-0000-0000-0000-000000000201'],
     linkedLessons: [{ chapterId: '22222222-0000-0000-0000-000000000201', lessonLabel: 'Phase I', title: "Habiter: à / en / au / aux" }],
     relatedRules: [
       { slug: 'etre-present', label: "Être present" },

@@ -13,16 +13,17 @@ import { enrichTokens, isPunctuationToken, tokenizeFrench } from '@/lib/clickabl
 import { CONJUGATION_TENSES, conjugationsForWord, isConjugableVerb } from '@/lib/french-conjugations'
 import { isCanonicalChapterId } from '@/lib/course-catalog'
 import { calculateLessonScore, didPassProve, PROVE_PASS_SCORE } from '@/lib/lesson-score'
-import { resolveLessonContent } from '@/lib/lesson-content'
 import { createClient } from '@/utils/supabase/client'
-import { BUNDLED_CHAPTER_IDS } from '@/lib/bundled-lessons'
+import { BUNDLED_CHAPTER_IDS } from '@/lib/bundled-chapter-ids'
 import { bumpLocalMistakeCount, enqueueLocalVocabulary } from '@/lib/local-vocab-vault'
 import { markLocalChapterCompleted, mergeCompletedChapterIds } from '@/lib/local-progress'
 import { BUNDLED_VOCABULARY } from '@/lib/phase1/content'
 import { PATHWAY_BY_CHAPTER_ID } from '@/lib/pathway/catalog'
 import { lemmaIdsForChapter, vocabularyRowsForLemmas } from '@/lib/review/lemmas'
+import { isReviewablePartOfSpeech } from '@/lib/exercises/validate'
 import type { LessonExercise } from '@/lib/exercises/types'
 
+const DRAFT_KEY = (id: string) => `french-course:lesson-draft:${id}`
 
 function lemmaIdFromExercise(exercise: LessonExercise): string | null {
   const candidates: string[] = []
@@ -35,9 +36,18 @@ function lemmaIdFromExercise(exercise: LessonExercise): string | null {
   for (const candidate of candidates) {
     const normalized = candidate.toLowerCase().trim()
     const match = BUNDLED_VOCABULARY.find((word) => word.word.toLowerCase() === normalized)
-    if (match) return match.id
+    if (match && isReviewablePartOfSpeech(match.part_of_speech)) return match.id
   }
   return null
+}
+
+function siblingRemediationLinks(chapterId: string): Array<{ id: string; label: string }> {
+  const hit = PATHWAY_BY_CHAPTER_ID.get(chapterId)
+  if (!hit) return []
+  const unit = hit.module.subchapters.filter((sub) => sub.unitIndex === hit.sub.unitIndex)
+  return unit
+    .filter((sub) => sub.role === 'B' || sub.role === 'C')
+    .map((sub) => ({ id: sub.id, label: `${sub.roleLabel}: ${sub.title}` }))
 }
 
 type Stage = 'brief' | 'reading' | 'conversation' | 'exercise'
@@ -88,13 +98,56 @@ export default function LessonClient({
       const target = event.target as Node | null
       if (!target) return
       if (popupRef.current?.contains(target)) return
-      // Allow clicking another word button to switch — those set activeWordId themselves.
       if (target instanceof Element && target.closest('[data-dict-word]')) return
       setActiveWordId(null)
     }
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setActiveWordId(null)
+        setConjugationWord(null)
+      }
+    }
     document.addEventListener('pointerdown', onPointerDown)
-    return () => document.removeEventListener('pointerdown', onPointerDown)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown)
+      document.removeEventListener('keydown', onKey)
+    }
   }, [activeWordId])
+
+  // Restore draft answers / stage
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem(DRAFT_KEY(chapterId))
+      if (!raw) return
+      const parsed = JSON.parse(raw) as { stage?: Stage; answers?: Record<string, ExerciseAnswer> }
+      if (parsed.stage) setStage(parsed.stage)
+      if (parsed.answers) setAnswers(parsed.answers)
+    } catch {
+      // ignore corrupt draft
+    }
+  }, [chapterId])
+
+  // Persist draft while working
+  useEffect(() => {
+    if (gate !== 'ready') return
+    try {
+      sessionStorage.setItem(DRAFT_KEY(chapterId), JSON.stringify({ stage, answers }))
+    } catch {
+      // quota
+    }
+  }, [chapterId, stage, answers, gate])
+
+  useEffect(() => {
+    const dirty = Object.keys(answers).length > 0 && stage !== 'brief'
+    if (!dirty) return
+    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault()
+      event.returnValue = ''
+    }
+    window.addEventListener('beforeunload', onBeforeUnload)
+    return () => window.removeEventListener('beforeunload', onBeforeUnload)
+  }, [answers, stage])
 
   useEffect(() => {
     let cancelled = false
@@ -121,7 +174,7 @@ export default function LessonClient({
       const completed = mergeCompletedChapterIds(
         (progress ?? []).filter((item) => item.status === 'completed').map((item) => item.chapter_id),
       )
-      const orderedAuthored = BUNDLED_CHAPTER_IDS.filter((id) => isCanonicalChapterId(id) && resolveLessonContent(id, {}))
+      const orderedAuthored = BUNDLED_CHAPTER_IDS.filter((id) => isCanonicalChapterId(id))
       const firstIncomplete = orderedAuthored.find((id) => !completed.has(id))
       const allowed = completed.has(chapterId) || firstIncomplete === chapterId || orderedAuthored.length === 0
 
@@ -159,17 +212,24 @@ export default function LessonClient({
       })) ?? [],
     [content.conversation, vocabulary],
   )
-  const exercises = useMemo(() => {
-    const base = content.exercises ?? []
-    const remediation = buildRemediationExercises(remediationCategories)
-    const existingIds = new Set(base.map((exercise) => exercise.id))
-    return [...base, ...remediation.filter((exercise) => !existingIds.has(exercise.id))]
-  }, [content.exercises, remediationCategories])
   const isProve = PATHWAY_BY_CHAPTER_ID.get(chapterId)?.sub.role === 'D'
-  const answeredAll = exercises.length > 0 && exercises.every((exercise) => isExerciseAnswered(exercise, answers[exercise.id]))
-  const liveScore = useMemo(() => calculateLessonScore(answers, exercises), [answers, exercises])
+  const baseExercises = useMemo(() => content.exercises ?? [], [content.exercises])
+  const remediationExercises = useMemo(() => {
+    if (isProve) return [] // Prove score must not include rem drills
+    const remediation = buildRemediationExercises(remediationCategories)
+    const existingIds = new Set(baseExercises.map((exercise) => exercise.id))
+    return remediation.filter((exercise) => !existingIds.has(exercise.id))
+  }, [baseExercises, remediationCategories, isProve])
+  const exercises = useMemo(() => [...baseExercises, ...remediationExercises], [baseExercises, remediationExercises])
+  const scoringExercises = baseExercises
+  const answeredAll =
+    scoringExercises.length > 0 &&
+    scoringExercises.every((exercise) => isExerciseAnswered(exercise, answers[exercise.id])) &&
+    remediationExercises.every((exercise) => isExerciseAnswered(exercise, answers[exercise.id]))
+  const liveScore = useMemo(() => calculateLessonScore(answers, scoringExercises), [answers, scoringExercises])
   const provePassed = !isProve || (answeredAll && didPassProve(liveScore))
-  const progress = stage === 'brief' ? 20 : stage === 'reading' ? 45 : stage === 'conversation' ? 70 : 90
+  const progress = stage === 'brief' ? 20 : stage === 'reading' ? 45 : stage === 'conversation' ? 70 : answeredAll ? 100 : 90
+  const remediateLinks = useMemo(() => siblingRemediationLinks(chapterId), [chapterId])
 
   const syntaxClass = (token: WordToken) => {
     if (!xRayEnabled) return ''
@@ -440,16 +500,17 @@ export default function LessonClient({
   }
 
   const completeLesson = async () => {
+    if (loading) return
     if (!answeredAll) return
     if (isProve && !didPassProve(liveScore)) {
       setError(
-        `Prove needs ${PROVE_PASS_SCORE}%+. You scored ${liveScore}%. Go back to Apply/Integrate, then retry Prove.`,
+        `Prove needs ${PROVE_PASS_SCORE}%+. You scored ${liveScore}%. Open Apply/Integrate below, then retry Prove.`,
       )
       return
     }
     setLoading(true)
     setError(null)
-    const grammarResults = exercises.map((exercise) => ({
+    const grammarResults = scoringExercises.map((exercise) => ({
       category: exercise.category,
       correct: isExerciseCorrect(exercise, answers[exercise.id]),
       context: `Lesson exercise: ${exercise.prompt}`,
@@ -459,7 +520,7 @@ export default function LessonClient({
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Your session expired. Please sign in again.')
 
-      const score = calculateLessonScore(answers, exercises)
+      const score = calculateLessonScore(answers, scoringExercises)
       const wordsRead = wordsReadInLesson
       const pathway = PATHWAY_BY_CHAPTER_ID.get(chapterId)
       if (pathway) {
@@ -476,8 +537,6 @@ export default function LessonClient({
         })
       }
 
-      // Words are recorded client-side (local date) so the home card updates even if RPC is stale.
-      // Pass 0 here to avoid double-counting when complete_chapter also upserts daily stats.
       const { error: rpcError } = await supabase.rpc('complete_chapter', {
         p_chapter_id: chapterId,
         p_score: score,
@@ -487,7 +546,30 @@ export default function LessonClient({
 
       await enqueueLessonVocabulary(user.id)
       await recordDailyReading(user.id, wordsRead)
+
+      // Resolve open mistake categories that were answered correctly this lesson.
+      const correctCats = [
+        ...new Set(
+          scoringExercises
+            .filter((exercise) => isExerciseCorrect(exercise, answers[exercise.id]))
+            .map((exercise) => exercise.category),
+        ),
+      ]
+      if (correctCats.length) {
+        await supabase
+          .from('user_mistakes')
+          .update({ is_resolved: true })
+          .eq('user_id', user.id)
+          .eq('is_resolved', false)
+          .in('grammar_category', correctCats)
+      }
+
       markLocalChapterCompleted(chapterId)
+      try {
+        sessionStorage.removeItem(DRAFT_KEY(chapterId))
+      } catch {
+        // ignore
+      }
 
       if (rpcError) {
         const { error: progressError } = await supabase.from('user_chapter_progress').upsert({
@@ -498,13 +580,11 @@ export default function LessonClient({
           completed_at: new Date().toISOString(),
         }, { onConflict: 'user_id,chapter_id' })
         if (progressError) {
-          // Local mark already saved — home unlock still advances offline.
           console.warn('complete_chapter fallback failed', progressError.message)
         }
 
-        // Fallback path: still push wrong answers into Review.
         await Promise.all(
-          exercises
+          scoringExercises
             .filter((exercise) => !isExerciseCorrect(exercise, answers[exercise.id]))
             .map((exercise) =>
               recordMistake(exercise.category, `Lesson exercise: ${exercise.prompt}`, lemmaIdFromExercise(exercise)),
@@ -515,7 +595,7 @@ export default function LessonClient({
       router.push('/')
       router.refresh()
     } catch (caughtError) {
-      markLocalChapterCompleted(chapterId)
+      // Do NOT mark local complete on auth/pre-save failure.
       setError(caughtError instanceof Error ? caughtError.message : 'We could not save this lesson. Please try again.')
     } finally {
       setLoading(false)
@@ -525,15 +605,29 @@ export default function LessonClient({
   if (gate !== 'ready') {
     return (
       <main className="mx-auto flex min-h-screen max-w-[680px] items-center justify-center p-6">
-        <p className="text-on-surface-variant">{gate === 'locked' ? 'This lesson is not unlocked yet.' : 'Loading lesson…'}</p>
+        <p className="text-on-surface-variant">
+          {gate === 'locked' ? 'This lesson is not unlocked yet.' : gate === 'login' ? 'Redirecting to sign in…' : 'Loading lesson…'}
+        </p>
       </main>
     )
   }
 
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-[680px] flex-col">
-      <header className="flex items-center justify-between p-4">
-        <Link href="/" aria-label="Leave lesson" className="rounded-lg p-1 text-on-surface-variant hover:bg-surface-container-low"><X className="size-6" /></Link>
+      <header className="sticky top-0 z-40 flex items-center justify-between bg-surface-container-lowest p-4 pt-safe">
+        <Link
+          href="/"
+          aria-label="Leave lesson"
+          className="flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 text-on-surface-variant hover:bg-surface-container-low"
+          onClick={(event) => {
+            if (Object.keys(answers).length === 0) return
+            if (!window.confirm('Leave this lesson? Your answers are saved on this device until you finish or clear them.')) {
+              event.preventDefault()
+            }
+          }}
+        >
+          <X className="size-6" />
+        </Link>
         <div className="mx-4 flex-1"><div className="h-3 overflow-hidden rounded-full bg-surface-container-high"><div className="h-full rounded-full bg-success transition-all" style={{ width: `${progress}%` }} /></div></div>
         <div className="flex items-center gap-1 rounded-full bg-surface-container px-3 py-1"><Flame className="size-4 fill-warning/20 text-warning" /><span className="text-sm font-bold">Lesson</span></div>
       </header>
@@ -663,9 +757,19 @@ export default function LessonClient({
                 : 'Mixed drills: multiple choice, fill-in, matching, word order, and more. Answer each once — wrong answers feed Review.'}
             </p>
             {isProve && answeredAll && (
-              <p className={`rounded-lg p-3 text-sm ${provePassed ? 'bg-success/15 text-tertiary' : 'bg-error-container text-on-error-container'}`}>
-                Score {liveScore}% {provePassed ? '· pass' : `· need ${PROVE_PASS_SCORE}%+`}
-              </p>
+              <div className={`space-y-2 rounded-lg p-3 text-sm ${provePassed ? 'bg-success/15 text-tertiary' : 'bg-error-container text-on-error-container'}`}>
+                <p>Score {liveScore}% {provePassed ? '· pass' : `· need ${PROVE_PASS_SCORE}%+`}</p>
+                {!provePassed && remediateLinks.length > 0 && (
+                  <div className="flex flex-col gap-2">
+                    <p className="font-semibold">Remediate, then retry Prove:</p>
+                    {remediateLinks.map((link) => (
+                      <Link key={link.id} href={`/lesson/${link.id}/`} className="underline font-bold text-primary">
+                        {link.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
             )}
             {exercises.map((exercise, exerciseIndex) => (
               <ExerciseCard
@@ -683,6 +787,13 @@ export default function LessonClient({
                     lemmaIdFromExercise(exercise),
                   )
                 }
+                onRetry={() =>
+                  setAnswers((current) => {
+                    const next = { ...current }
+                    delete next[exercise.id]
+                    return next
+                  })
+                }
               />
             ))}
             {error && <p role="alert" className="rounded-lg bg-error-container p-3 text-sm text-on-error-container">{error}</p>}
@@ -694,7 +805,7 @@ export default function LessonClient({
                 type="button"
                 disabled={!answeredAll || loading || (isProve && !provePassed)}
                 onClick={completeLesson}
-                className="tactile-button flex-[2] rounded-xl border-[#46a302] bg-success py-4 font-bold text-on-primary disabled:cursor-not-allowed disabled:opacity-50"
+                className="tactile-button flex-[2] rounded-xl border-[#46a302] bg-success py-4 font-bold text-[#0b3d0b] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {loading ? 'SAVING…' : isProve ? 'PASS PROVE' : 'COMPLETE LESSON'}
               </button>

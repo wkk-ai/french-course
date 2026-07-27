@@ -24,3 +24,12 @@ export function markLocalChapterCompleted(chapterId: string) {
 export function mergeCompletedChapterIds(remote: Iterable<string>): Set<string> {
   return new Set([...remote, ...readLocalCompletedChapters()])
 }
+
+export function clearLocalLearnerData() {
+  if (typeof window === 'undefined') return
+  localStorage.removeItem(KEY)
+  localStorage.removeItem('ladf-vocab-vault-v1')
+  for (const key of Object.keys(localStorage)) {
+    if (key.startsWith('french-course:lesson-draft:')) localStorage.removeItem(key)
+  }
+}

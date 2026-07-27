@@ -12,31 +12,40 @@ type GrammarMastery = { grammar_category: string; total_attempts: number; correc
 type ChapterProgress = { status: string; completed_at: string | null }
 type GrammarRuleSummary = { slug: string; title: string; category: string }
 
-export default function CenterClient({ today }: { today: string }) {
+export default function CenterClient() {
+  const [today] = useState(() => new Date().toISOString())
   const [vocabProgress, setVocabProgress] = useState<VocabProgress[]>([])
   const [grammarMastery, setGrammarMastery] = useState<GrammarMastery[]>([])
   const [chapterProgress, setChapterProgress] = useState<ChapterProgress[]>([])
   const [grammarRules, setGrammarRules] = useState<GrammarRuleSummary[]>([])
+  const [booting, setBooting] = useState(true)
 
   useEffect(() => {
     let cancelled = false
     ;(async () => {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user || cancelled) return
+      try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user || cancelled) {
+          if (!cancelled) setBooting(false)
+          return
+        }
 
-      const [vocabRes, grammarRes, chapterRes, rulesRes] = await Promise.all([
-        supabase.from('user_vocab_progress').select('created_at, last_reviewed_at').eq('user_id', user.id).order('created_at', { ascending: true }),
-        supabase.from('user_grammar_mastery').select('grammar_category, total_attempts, correct_attempts, updated_at').eq('user_id', user.id),
-        supabase.from('user_chapter_progress').select('status, completed_at').eq('user_id', user.id),
-        supabase.from('grammar_rules').select('slug, title, category'),
-      ])
-      if (cancelled) return
-      setVocabProgress(vocabRes.data ?? [])
-      setGrammarMastery(grammarRes.data ?? [])
-      setChapterProgress(chapterRes.data ?? [])
-      setGrammarRules(rulesRes.data ?? [])
-    })().catch(() => {})
+        const [vocabRes, grammarRes, chapterRes, rulesRes] = await Promise.all([
+          supabase.from('user_vocab_progress').select('created_at, last_reviewed_at').eq('user_id', user.id).order('created_at', { ascending: true }),
+          supabase.from('user_grammar_mastery').select('grammar_category, total_attempts, correct_attempts, updated_at').eq('user_id', user.id),
+          supabase.from('user_chapter_progress').select('status, completed_at').eq('user_id', user.id),
+          supabase.from('grammar_rules').select('slug, title, category'),
+        ])
+        if (cancelled) return
+        setVocabProgress(vocabRes.data ?? [])
+        setGrammarMastery(grammarRes.data ?? [])
+        setChapterProgress(chapterRes.data ?? [])
+        setGrammarRules(rulesRes.data ?? [])
+      } finally {
+        if (!cancelled) setBooting(false)
+      }
+    })()
     return () => {
       cancelled = true
     }
@@ -104,6 +113,17 @@ export default function CenterClient({ today }: { today: string }) {
 
   const completedChapters = chapterProgress.filter(cp => cp.status === 'completed').length;
   const totalVocab = vocabProgress.length;
+
+  if (booting) {
+    return (
+      <div className="flex flex-col gap-8">
+        <div>
+          <h1 className="text-headline-lg text-on-surface">Command Center</h1>
+          <p className="text-body-reading text-on-surface-variant mt-2">Loading your stats…</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col gap-8">

@@ -6,9 +6,11 @@ import { ExerciseCard } from '@/components/lesson/ExerciseCard'
 import { VocabFlashcard } from '@/components/review/VocabFlashcard'
 import type { ExerciseAnswer } from '@/lib/exercises/types'
 import { isExerciseCorrect } from '@/lib/exercises/grading'
-import { BUNDLED_CHAPTER_IDS } from '@/lib/bundled-lessons'
+import { BUNDLED_CHAPTER_IDS } from '@/lib/bundled-chapter-ids'
 import { BUNDLED_VOCABULARY } from '@/lib/phase1/content'
+import { isReviewablePartOfSpeech } from '@/lib/exercises/validate'
 import { getAllLocalVocabulary, enqueueLocalVocabulary, scoreLocalVocabulary } from '@/lib/local-vocab-vault'
+import { mergeCompletedChapterIds } from '@/lib/local-progress'
 import { buildFlashcardDeck, countPoolByFilter, FLASHCARD_FILTERS, flashcardQuality } from '@/lib/review/flashcards'
 import { buildReviewSession, emptySessionMessage } from '@/lib/review/session'
 import { lemmaIdsForChapter, vocabularyRowsForLemmas } from '@/lib/review/lemmas'
@@ -81,7 +83,9 @@ export default function ReviewClient() {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
-      const local = getAllLocalVocabulary().map((item) => enrichPoolItem(item, 'local'))
+      const local = getAllLocalVocabulary()
+        .map((item) => enrichPoolItem(item, 'local'))
+        .filter((item) => isReviewablePartOfSpeech(item.part_of_speech))
       setPool(local)
       return
     }
@@ -121,7 +125,7 @@ export default function ReviewClient() {
       )
     })
 
-    const completedIds = (completedResult.data ?? []).map((row) => row.chapter_id)
+    const completedIds = [...mergeCompletedChapterIds((completedResult.data ?? []).map((row) => row.chapter_id))]
     const authoredCompleted = completedIds.filter((id) => BUNDLED_CHAPTER_IDS.includes(id))
     const remoteIds = new Set(remote.map((item) => item.vocab_id))
     let localItems = getAllLocalVocabulary()
@@ -186,7 +190,8 @@ export default function ReviewClient() {
       .filter((item) => !remoteIds.has(item.vocab_id) && !remote.some((entry) => entry.vocab_id === item.vocab_id))
       .map((item) => enrichPoolItem(item, 'local'))
 
-    setPool([...remote, ...local])
+    const combined = [...remote, ...local].filter((item) => isReviewablePartOfSpeech(item.part_of_speech))
+    setPool(combined)
   }, [])
 
   useEffect(() => {
@@ -196,7 +201,11 @@ export default function ReviewClient() {
         await loadPool()
       } catch {
         if (!cancelled) {
-          setPool(getAllLocalVocabulary().map((item) => enrichPoolItem(item, 'local')))
+          setPool(
+            getAllLocalVocabulary()
+              .map((item) => enrichPoolItem(item, 'local'))
+              .filter((item) => isReviewablePartOfSpeech(item.part_of_speech)),
+          )
         }
       } finally {
         if (!cancelled) setBooting(false)

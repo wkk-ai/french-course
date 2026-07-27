@@ -4,8 +4,9 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { ChevronRight, Search } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
-import type { GrammarRuleDocument } from '@/lib/rules/types'
+import type { PublicGrammarRule } from '@/lib/rules/public'
 import { isRuleUnlocked, masteryLabel, masteryStage } from '@/lib/rules/unlock'
+import { mergeCompletedChapterIds } from '@/lib/local-progress'
 
 const categoryColorMap: Record<string, string> = {
   Verbs: 'bg-syntax-verb',
@@ -20,7 +21,7 @@ type Mastery = {
   correct_attempts: number
 }
 
-export default function RulesClient({ rules }: { rules: GrammarRuleDocument[] }) {
+export default function RulesClient({ rules }: { rules: PublicGrammarRule[] }) {
   const [activeCategory, setActiveCategory] = useState('All')
   const [searchQuery, setSearchQuery] = useState('')
   const [mastery, setMastery] = useState<Mastery[]>([])
@@ -42,7 +43,7 @@ export default function RulesClient({ rules }: { rules: GrammarRuleDocument[] })
       ])
       if (cancelled) return
       setMastery(masteryData ?? [])
-      setCompleted(new Set((progress ?? []).map((row) => row.chapter_id)))
+      setCompleted(mergeCompletedChapterIds((progress ?? []).map((row) => row.chapter_id)))
       setBooting(false)
     })().catch(() => {
       if (!cancelled) setBooting(false)
@@ -71,7 +72,7 @@ export default function RulesClient({ rules }: { rules: GrammarRuleDocument[] })
     return matchesCategory && matchesSearch
   })
 
-  const getStage = (rule: GrammarRuleDocument) => {
+  const getStage = (rule: PublicGrammarRule) => {
     const rows = mastery.filter((item) => rule.masteryCategories.includes(item.grammar_category))
     const total = rows.reduce((sum, row) => sum + (row.total_attempts ?? 0), 0)
     const correct = rows.reduce((sum, row) => sum + (row.correct_attempts ?? 0), 0)

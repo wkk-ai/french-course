@@ -21,10 +21,10 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     const path = normalizePath(pathname)
 
     const ensureSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
+      const { data: { user } } = await supabase.auth.getUser()
       if (cancelled) return
 
-      if (!session) {
+      if (!user) {
         if (path !== '/login') {
           router.replace('/login/')
         } else {

@@ -13,7 +13,8 @@ export function lemmaIdsForChapter(chapterId: string): string[] {
   const add = (lemmaId: string | undefined) => {
     if (!lemmaId) return
     const word = byId.get(lemmaId)
-    if (word && !isReviewablePartOfSpeech(word.part_of_speech)) return
+    if (!word) return
+    if (!isReviewablePartOfSpeech(word.part_of_speech)) return
     ids.add(lemmaId)
   }
   for (const paragraph of lesson.reading ?? []) {

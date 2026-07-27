@@ -19,26 +19,28 @@ export function lessonLabelForChapter(chapterId: string): string {
   return index >= 0 ? `Lesson ${index + 1}` : 'Lesson'
 }
 
-export function isRuleUnlocked(rule: GrammarRuleDocument, completedChapterIds: Set<string>): boolean {
-  // Prefer chapters that actually teach this slug in their brief; fall back to document unlock ids.
-  const fromBriefs = unlockChaptersForSlug(rule.slug)
-  const unlockIds = fromBriefs.length ? fromBriefs : rule.unlockChapterIds
+export function isRuleUnlocked(
+  rule: Pick<GrammarRuleDocument, 'slug' | 'unlockChapterIds'>,
+  completedChapterIds: Set<string>,
+): boolean {
+  // Union brief.ruleSlugs hits + document unlock ids (document can unlock earlier than a late brief).
+  const unlockIds = [...new Set([...unlockChaptersForSlug(rule.slug), ...rule.unlockChapterIds])]
   if (!unlockIds.length) return true
   return unlockIds.some((id) => completedChapterIds.has(id))
 }
 
 /** First unlock chapter for teaser copy — never spoil locked titles in UI that shows this. */
 export function unlockTeaser(rule: GrammarRuleDocument): string {
-  const fromBriefs = unlockChaptersForSlug(rule.slug)
-  const first = fromBriefs[0] ?? rule.unlockChapterIds[0]
+  const ids = resolvedUnlockChapterIds(rule)
+  const first = ids[0]
   if (!first) return 'Available now'
   return `Unlock in ${lessonLabelForChapter(first)}`
 }
 
-/** Resolved unlock chapter ids (brief.ruleSlugs wins). */
+/** Resolved unlock chapter ids (document + brief.ruleSlugs, earliest pathway order first). */
 export function resolvedUnlockChapterIds(rule: GrammarRuleDocument): string[] {
-  const fromBriefs = unlockChaptersForSlug(rule.slug)
-  return fromBriefs.length ? fromBriefs : rule.unlockChapterIds
+  const ids = [...new Set([...rule.unlockChapterIds, ...unlockChaptersForSlug(rule.slug)])]
+  return ids.sort((a, b) => BUNDLED_CHAPTER_IDS.indexOf(a) - BUNDLED_CHAPTER_IDS.indexOf(b))
 }
 
 export type RuleMasteryStage = 'locked' | 'introduced' | 'practiced' | 'solid'

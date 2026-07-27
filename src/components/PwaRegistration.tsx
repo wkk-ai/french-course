@@ -2,11 +2,10 @@
 
 import { useEffect } from 'react'
 
-/** Clears stale caches; offline PWA caching is disabled until content shipping is stable. */
+/** Clears stale caches. Offline PWA deferred — do not re-register sw.js. */
 export function PwaRegistration() {
   useEffect(() => {
     if (!('serviceWorker' in navigator)) return
-    const base = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
     navigator.serviceWorker
       .getRegistrations()
       .then((registrations) => Promise.all(registrations.map((registration) => registration.unregister())))
@@ -14,8 +13,7 @@ export function PwaRegistration() {
     if ('caches' in window) {
       caches.keys().then((keys) => Promise.all(keys.map((key) => caches.delete(key)))).catch(() => {})
     }
-    // One-shot cleanup worker for clients that still have the old cache-first SW.
-    navigator.serviceWorker.register(`${base}/sw.js`).catch(() => {})
+    // Offline support deferred: unregister only, no new SW registration.
   }, [])
 
   return null

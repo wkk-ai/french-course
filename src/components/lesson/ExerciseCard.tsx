@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { ExerciseAnswer, LessonExercise } from '@/lib/exercises/types'
 import { exerciseType } from '@/lib/exercises/types'
 import { correctAnswerLabel, isExerciseCorrect } from '@/lib/exercises/grading'
@@ -48,6 +48,7 @@ export function ExerciseCard({
   answer,
   onAnswer,
   onMistake,
+  onRetry,
   allowHints = true,
 }: {
   exercise: LessonExercise
@@ -56,16 +57,36 @@ export function ExerciseCard({
   answer: ExerciseAnswer | undefined
   onAnswer: (value: ExerciseAnswer) => void
   onMistake: () => void
+  onRetry?: () => void
   /** Prove (D) turns hints off. */
   allowHints?: boolean
 }) {
   const locked = answer !== undefined
   const correct = locked && isExerciseCorrect(exercise, answer)
   const [hintShown, setHintShown] = useState(false)
+  const [draftText, setDraftText] = useState('')
   const [orderBank, setOrderBank] = useState<string[]>(() => ('type' in exercise && exercise.type === 'order' ? shuffle(exercise.words) : []))
   const [orderPicked, setOrderPicked] = useState<string[]>(() => (answer?.kind === 'order' ? answer.value : []))
   const [matchSelection, setMatchSelection] = useState<{ side: 'left' | 'right'; index: number } | null>(null)
   const [matchPairs, setMatchPairs] = useState<Record<number, number>>(() => (answer?.kind === 'match' ? answer.value : {}))
+
+  useEffect(() => {
+    setDraftText('')
+    setHintShown(false)
+  }, [exercise.id])
+
+  const isMcqExercise =
+    exercise.type === 'register' ||
+    exercise.type === 'dialogue' ||
+    !exercise.type ||
+    exercise.type === 'mcq' ||
+    exercise.type === 'reading' ||
+    exercise.type === 'minimal-pair'
+
+  const confirmDraftText = () => {
+    if (!draftText.trim()) return
+    submitText(draftText)
+  }
 
   const usedRight = useMemo(() => new Set(Object.values(matchPairs)), [matchPairs])
   const matchRightOrder = useMemo(() => {
@@ -163,16 +184,25 @@ export function ExerciseCard({
           <p className="text-body-reading">{exercise.text.replace(/___+/g, '______')}</p>
           <input
             type="text"
+            value={draftText}
             disabled={locked}
             placeholder="Type your answer…"
             className="mt-3 w-full rounded-lg border-2 border-surface-variant bg-surface-container-lowest px-3 py-2 text-sm disabled:opacity-70"
+            onChange={(event) => setDraftText(event.target.value)}
             onKeyDown={(event) => {
-              if (event.key === 'Enter') submitText((event.target as HTMLInputElement).value)
-            }}
-            onBlur={(event) => {
-              if (event.target.value.trim()) submitText(event.target.value)
+              if (event.key === 'Enter') confirmDraftText()
             }}
           />
+          {!locked && (
+            <button
+              type="button"
+              onClick={confirmDraftText}
+              disabled={!draftText.trim()}
+              className="tactile-button mt-3 rounded-lg border-primary-container bg-primary px-4 py-2 text-sm font-bold text-on-primary disabled:opacity-50"
+            >
+              Confirm
+            </button>
+          )}
         </div>
       )}
 
@@ -181,16 +211,25 @@ export function ExerciseCard({
           <p className="text-sm text-on-surface-variant">{exercise.direction === 'en-fr' ? 'English → French' : 'French → English'}</p>
           <input
             type="text"
+            value={draftText}
             disabled={locked}
             placeholder="Type your translation…"
             className="mt-3 w-full rounded-lg border-2 border-surface-variant bg-surface-container-lowest px-3 py-2 text-sm disabled:opacity-70"
+            onChange={(event) => setDraftText(event.target.value)}
             onKeyDown={(event) => {
-              if (event.key === 'Enter') submitText((event.target as HTMLInputElement).value)
-            }}
-            onBlur={(event) => {
-              if (event.target.value.trim()) submitText(event.target.value)
+              if (event.key === 'Enter') confirmDraftText()
             }}
           />
+          {!locked && (
+            <button
+              type="button"
+              onClick={confirmDraftText}
+              disabled={!draftText.trim()}
+              className="tactile-button mt-3 rounded-lg border-primary-container bg-primary px-4 py-2 text-sm font-bold text-on-primary disabled:opacity-50"
+            >
+              Confirm
+            </button>
+          )}
         </div>
       )}
 
@@ -201,16 +240,25 @@ export function ExerciseCard({
           </p>
           <input
             type="text"
+            value={draftText}
             disabled={locked}
             placeholder="Type the conjugated form…"
             className="mt-3 w-full rounded-lg border-2 border-surface-variant bg-surface-container-lowest px-3 py-2 text-sm disabled:opacity-70"
+            onChange={(event) => setDraftText(event.target.value)}
             onKeyDown={(event) => {
-              if (event.key === 'Enter') submitText((event.target as HTMLInputElement).value)
-            }}
-            onBlur={(event) => {
-              if (event.target.value.trim()) submitText(event.target.value)
+              if (event.key === 'Enter') confirmDraftText()
             }}
           />
+          {!locked && (
+            <button
+              type="button"
+              onClick={confirmDraftText}
+              disabled={!draftText.trim()}
+              className="tactile-button mt-3 rounded-lg border-primary-container bg-primary px-4 py-2 text-sm font-bold text-on-primary disabled:opacity-50"
+            >
+              Confirm
+            </button>
+          )}
         </div>
       )}
 
@@ -382,10 +430,21 @@ export function ExerciseCard({
       )}
 
       {locked && (
-        <p className={`mt-4 text-sm ${correct ? 'text-tertiary' : 'text-secondary'}`}>
-          {correct ? 'Correct. ' : `Not quite — the answer is “${correctAnswerLabel(exercise)}”. `}
-          {exercise.explanation}
-        </p>
+        <div className="mt-4 space-y-3">
+          <p className={`text-sm ${correct ? 'text-tertiary' : 'text-secondary'}`}>
+            {correct ? 'Correct. ' : `Not quite — the answer is “${correctAnswerLabel(exercise)}”. `}
+            {exercise.explanation}
+          </p>
+          {!correct && isMcqExercise && onRetry && (
+            <button
+              type="button"
+              onClick={onRetry}
+              className="tactile-button rounded-lg border-2 border-surface-variant bg-surface-container-low px-4 py-2 text-sm font-bold text-on-surface"
+            >
+              Try again
+            </button>
+          )}
+        </div>
       )}
     </article>
   )

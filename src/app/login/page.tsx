@@ -4,6 +4,21 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 
+function friendlyAuthError(err: unknown): string {
+  if (!(err instanceof Error)) return 'Sign-in failed. Please try again.';
+  const msg = err.message.toLowerCase();
+  if (msg.includes('invalid login') || msg.includes('invalid credentials') || msg.includes('invalid email or password')) {
+    return 'Wrong email or password. Please try again.';
+  }
+  if (msg.includes('email not confirmed')) {
+    return 'Please confirm your email before signing in.';
+  }
+  if (msg.includes('too many requests')) {
+    return 'Too many attempts. Wait a moment and try again.';
+  }
+  return 'Sign-in failed. Please check your details and try again.';
+}
+
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -14,13 +29,14 @@ export default function LoginPage() {
 
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) router.replace('/');
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) router.replace('/');
     });
   }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     setLoading(true);
     setError(null);
 
@@ -34,7 +50,7 @@ export default function LoginPage() {
       router.push('/');
       router.refresh();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Authentication failed');
+      setError(friendlyAuthError(err));
     } finally {
       setLoading(false);
     }
@@ -50,6 +66,9 @@ export default function LoginPage() {
           <h1 className="text-headline-md text-on-surface">L&apos;Art du Français</h1>
           <p className="text-body-ui text-on-surface-variant mt-1">
             Sign in to continue learning
+          </p>
+          <p className="mt-3 text-sm text-on-surface-variant/80">
+            Accounts are invite-only for now. Contact your teacher if you need access.
           </p>
         </div>
 
@@ -88,6 +107,13 @@ export default function LoginPage() {
           >
             {loading ? 'WAIT...' : 'SIGN IN'}
           </button>
+
+          <p className="text-center text-sm text-on-surface-variant">
+            <a href="mailto:support@example.com?subject=Password%20reset%20request" className="font-semibold text-primary underline">
+              Forgot password?
+            </a>
+            {' '}Contact your teacher for help.
+          </p>
         </form>
       </div>
     </div>

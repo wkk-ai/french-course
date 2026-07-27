@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
-import { Check, Lock, Play, Star } from 'lucide-react'
+import { Clock, Lock, Play, Star } from 'lucide-react'
 import { hasLessonContent } from '@/lib/course'
 import {
   PATHWAY_BY_CHAPTER_ID,
@@ -12,7 +12,7 @@ import {
   type PathwaySubChapter,
 } from '@/lib/pathway/catalog'
 import { deriveChapterStatus } from '@/lib/progression'
-import { BUNDLED_CHAPTER_IDS } from '@/lib/bundled-lessons'
+import { BUNDLED_CHAPTER_IDS } from '@/lib/bundled-chapter-ids'
 import { mergeCompletedChapterIds } from '@/lib/local-progress'
 import { createClient } from '@/utils/supabase/client'
 
@@ -53,7 +53,7 @@ function ChapterCard({
     completed: { label: 'Completed', icon: <Star className="size-6 fill-success text-success" />, tone: 'text-success' },
     active: { label: 'Up next', icon: <Play className="size-6 fill-primary text-primary" />, tone: 'text-primary' },
     locked: { label: 'Locked', icon: <Lock className="size-6 text-on-surface-variant" />, tone: 'text-on-surface-variant' },
-    'coming-soon': { label: 'Coming soon', icon: <Check className="size-6 text-on-surface-variant" />, tone: 'text-on-surface-variant' },
+    'coming-soon': { label: 'Coming soon', icon: <Clock className="size-6 text-on-surface-variant" />, tone: 'text-on-surface-variant' },
   }[status]
 
   const card = (
@@ -98,33 +98,42 @@ export default function HomeClient({
 }) {
   const [progressByChapter, setProgressByChapter] = useState<Map<string, Progress['status']>>(new Map())
   const [wordsRead, setWordsRead] = useState(0)
+  const [progressReady, setProgressReady] = useState(false)
 
   useEffect(() => {
     let cancelled = false
     ;(async () => {
-      const supabase = createClient()
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-      if (!user || cancelled) return
+      try {
+        const supabase = createClient()
+        const {
+          data: { user },
+        } = await supabase.auth.getUser()
 
-      const now = new Date()
-      const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
-      const [{ data: progress }, { data: todayStats }] = await Promise.all([
-        supabase.from('user_chapter_progress').select('chapter_id, status').eq('user_id', user.id),
-        supabase.from('user_daily_reading_stats').select('words_read').eq('user_id', user.id).eq('date', today).maybeSingle(),
-      ])
-      if (cancelled) return
-      const remoteCompleted = (progress as Progress[] | null)?.filter((item) => item.status === 'completed').map((item) => item.chapter_id) ?? []
-      const merged = mergeCompletedChapterIds(remoteCompleted)
-      const map = new Map<string, Progress['status']>()
-      for (const [id, status] of (progress as Progress[] | null)?.map((item) => [item.chapter_id, item.status] as const) ?? []) {
-        map.set(id, status)
+        if (!user) {
+          if (!cancelled) setProgressReady(true)
+          return
+        }
+
+        const now = new Date()
+        const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+        const [{ data: progress }, { data: todayStats }] = await Promise.all([
+          supabase.from('user_chapter_progress').select('chapter_id, status').eq('user_id', user.id),
+          supabase.from('user_daily_reading_stats').select('words_read').eq('user_id', user.id).eq('date', today).maybeSingle(),
+        ])
+        if (cancelled) return
+        const remoteCompleted = (progress as Progress[] | null)?.filter((item) => item.status === 'completed').map((item) => item.chapter_id) ?? []
+        const merged = mergeCompletedChapterIds(remoteCompleted)
+        const map = new Map<string, Progress['status']>()
+        for (const [id, status] of (progress as Progress[] | null)?.map((item) => [item.chapter_id, item.status] as const) ?? []) {
+          map.set(id, status)
+        }
+        for (const id of merged) map.set(id, 'completed')
+        setProgressByChapter(map)
+        setWordsRead(todayStats?.words_read ?? 0)
+      } finally {
+        if (!cancelled) setProgressReady(true)
       }
-      for (const id of merged) map.set(id, 'completed')
-      setProgressByChapter(map)
-      setWordsRead(todayStats?.words_read ?? 0)
-    })().catch(() => {})
+    })()
     return () => {
       cancelled = true
     }
@@ -194,7 +203,10 @@ export default function HomeClient({
       </section>
 
       <section className="flex flex-col gap-8">
-        {courseModules.map((module) => {
+        {!progressReady ? (
+          <p className="py-8 text-center text-on-surface-variant">Loading…</p>
+        ) : (
+        courseModules.map((module) => {
           const pathwayModule = PATHWAY_BY_MODULE_ID.get(module.id)
           const units = pathwayModule ? unitsForModule(pathwayModule) : []
           const playableCount = pathwayModule
@@ -255,7 +267,8 @@ export default function HomeClient({
               )}
             </div>
           )
-        })}
+        })
+        )}
       </section>
     </div>
   )

@@ -27,7 +27,8 @@ function readStore(): VaultStore {
 
 function writeStore(store: VaultStore) {
   if (typeof window === 'undefined') return
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(store))
+  const fresh = readStore()
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...fresh, ...store }))
 }
 
 /** Spread new lemmas across days so Review stays infinite without dumping everything due today. */
