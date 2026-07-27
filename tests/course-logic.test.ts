@@ -597,11 +597,25 @@ test('irregular conjugations: dormir and écrire are not false regulars', async 
 
 test('past participles like vu / allé resolve to infinitive lemmas', async () => {
   const { tokenizeFrench } = await import('../src/lib/clickable-text')
-  const { BUNDLED_VOCABULARY } = await import('../src/lib/phase1/content')
+  const { BUNDLED_VOCABULARY } = await import('../src/lib/bundled-vocabulary')
   const vu = tokenizeFrench('j’ai vu Marie', 'pp1', BUNDLED_VOCABULARY)
   assert.ok(vu.some((t) => t.text === 'vu' && t.lemmaId), 'vu should map to voir')
   const alle = tokenizeFrench('elle est allée', 'pp2', BUNDLED_VOCABULARY)
   assert.ok(alle.some((t) => t.text === 'allée' && t.lemmaId), 'allée should map to aller')
+})
+
+test('outils séparés and similar content words resolve for dictionary tap', async () => {
+  const { tokenizeFrench } = await import('../src/lib/clickable-text')
+  const { BUNDLED_VOCABULARY } = await import('../src/lib/bundled-vocabulary')
+  const tokens = tokenizeFrench(
+    'Habiter et être restent deux outils séparés.',
+    'tap',
+    BUNDLED_VOCABULARY,
+  )
+  const outils = tokens.find((t) => t.text === 'outils')
+  const separes = tokens.find((t) => t.text === 'séparés')
+  assert.ok(outils?.lemmaId, 'outils must be in dictionary')
+  assert.ok(separes?.lemmaId, 'séparés must be in dictionary')
 })
 
 test('bundled tap coverage stays under 5% (proper nouns allowlisted)', async () => {

@@ -353,9 +353,26 @@ export default function LessonClient({
   }
 
   const renderTokens = (tokens: WordToken[]) => (
-    <p className="text-body-reading leading-relaxed">
+    <p className="text-body-reading leading-relaxed select-none [-webkit-user-select:none] [-webkit-touch-callout:none]">
       {tokens.map((token, index) => {
-        const word = token.lemmaId ? vocabularyById.get(token.lemmaId) : undefined
+        const isWord = /[A-Za-zÀ-ÿŒœÆæ]/.test(token.text) && !isPunctuationToken(token.text)
+        const word =
+          (token.lemmaId ? vocabularyById.get(token.lemmaId) : undefined) ??
+          (isWord
+            ? ({
+                id: `missing:${token.text.normalize('NFC').toLowerCase()}`,
+                word: token.text,
+                base_translation: 'Not in the dictionary yet — tap reported for fix.',
+                meanings: ['Not in the dictionary yet'],
+                part_of_speech: 'unknown',
+                gender: null,
+                register: 'Courant',
+                ipa_pronunciation: null,
+                is_idiom: false,
+                is_slang: false,
+                idiom_explanation: null,
+              } satisfies VocabularyWord)
+            : undefined)
         const active = token.id === activeWordId
         const spaceBefore = needsSpaceBefore(tokens, index)
         const meanings = word?.meanings?.length
@@ -363,10 +380,13 @@ export default function LessonClient({
           : word?.base_translation
             ? word.base_translation.split(';').map((part) => part.trim()).filter(Boolean)
             : []
-        const showConjugate = word ? isConjugableVerb(word) : false
+        const showConjugate = word && word.part_of_speech !== 'unknown' ? isConjugableVerb(word) : false
+        const known = Boolean(token.lemmaId && vocabularyById.get(token.lemmaId))
         const clickableClass = showConjugate
           ? 'cursor-pointer rounded px-0.5 text-left hover:bg-syntax-verb/10'
-          : 'cursor-pointer rounded px-0.5 text-left hover:bg-surface-container-high'
+          : known
+            ? 'cursor-pointer rounded px-0.5 text-left hover:bg-surface-container-high'
+            : 'cursor-pointer rounded px-0.5 text-left underline decoration-dotted decoration-on-surface-variant/40 hover:bg-surface-container-high'
         return (
           <span key={token.id} className="relative inline">
             {spaceBefore ? ' ' : null}
@@ -376,10 +396,12 @@ export default function LessonClient({
                 data-dict-word
                 ref={active ? dictAnchorRef : undefined}
                 onClick={(event) => {
+                  event.preventDefault()
                   dictAnchorRef.current = event.currentTarget
                   setActiveWordId(active ? null : token.id)
                 }}
-                className={`transition-colors ${clickableClass} ${syntaxClass(token)} ${active ? 'bg-surface-container-high' : ''}`}
+                onContextMenu={(event) => event.preventDefault()}
+                className={`transition-colors select-none [-webkit-user-select:none] ${clickableClass} ${syntaxClass(token)} ${active ? 'bg-surface-container-high' : ''}`}
               >
                 {token.text}
               </button>
@@ -402,15 +424,22 @@ export default function LessonClient({
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <p className="font-bold">{word.word}</p>
-                    {word.part_of_speech && <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wide text-on-surface-variant">{word.part_of_speech}{showConjugate ? ' · conjugable' : ''}</p>}
+                    {word.part_of_speech && word.part_of_speech !== 'unknown' && (
+                      <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wide text-on-surface-variant">
+                        {word.part_of_speech}
+                        {showConjugate ? ' · conjugable' : ''}
+                      </p>
+                    )}
                     {word.ipa_pronunciation && <p className="mt-1 text-xs text-ink-medium">/{word.ipa_pronunciation}/</p>}
                   </div>
-                  <span
-                    title={`Register: ${word.register} — how formal the word sounds`}
-                    className="rounded-full bg-primary px-2 py-1 text-[10px] font-bold text-on-primary"
-                  >
-                    {registerDisplay(word.register)}
-                  </span>
+                  {word.part_of_speech !== 'unknown' && (
+                    <span
+                      title={`Register: ${word.register} — how formal the word sounds`}
+                      className="rounded-full bg-primary px-2 py-1 text-[10px] font-bold text-on-primary"
+                    >
+                      {registerDisplay(word.register)}
+                    </span>
+                  )}
                 </div>
                 {meanings.length > 1 ? (
                   <ul className="mt-3 list-disc space-y-1 pl-4 text-sm text-on-surface-variant">
@@ -421,7 +450,7 @@ export default function LessonClient({
                 ) : (
                   <p className="mt-3 text-sm text-on-surface-variant">{meanings[0] ?? word.base_translation}</p>
                 )}
-                {word.example && (
+                {word.example && word.part_of_speech !== 'unknown' && (
                   <div className="mt-3 rounded-lg bg-surface-container-low p-3 text-sm">
                     <p className="font-medium">{word.example.french}</p>
                     <p className="mt-1 text-on-surface-variant">{word.example.english}</p>
