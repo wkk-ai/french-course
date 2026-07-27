@@ -68,20 +68,33 @@ for (const bank of banks) {
 console.log('cross-bank overlapping ids:', cross)
 
 console.log('\n=== Duplicate surface lemmas (same word, different ids) ===')
+function surfaceKey(word: string) {
+  if ([...word].length === 1 && /[A-Za-zÀ-ÿ]/.test(word)) return `letter:${word}`
+  return word.normalize('NFC').toLowerCase().replace(/’/g, "'")
+}
 const byWord = new Map<string, { id: string; bank: string }[]>()
 for (const bank of banks) {
   for (const w of bank.words) {
-    const key = w.word.normalize('NFC').toLowerCase()
+    const key = surfaceKey(w.word)
     const list = byWord.get(key) ?? []
     list.push({ id: w.id, bank: bank.name })
     byWord.set(key, list)
   }
 }
 const dupWords = [...byWord.entries()].filter(([, rows]) => new Set(rows.map((r) => r.id)).size > 1)
-console.log('duplicate lemma surfaces:', dupWords.length)
+console.log('duplicate lemma surfaces across raw banks:', dupWords.length)
 for (const [word, rows] of dupWords.slice(0, 25)) {
   console.log(`  ${word}: ${rows.map((r) => `${r.bank}:${r.id.slice(-4)}`).join(', ')}`)
 }
+
+const bundledKeys = new Map<string, string>()
+let bundledDup = 0
+for (const w of BUNDLED_VOCABULARY) {
+  const key = surfaceKey(w.word)
+  if (bundledKeys.has(key)) bundledDup += 1
+  else bundledKeys.set(key, w.id)
+}
+console.log('BUNDLED_VOCABULARY surface dups:', bundledDup)
 
 console.log('\n=== Lesson dedupe drop check ===')
 const lessonVocab = resolveVocabularyForLesson([], [])
@@ -135,9 +148,16 @@ console.log(
   JSON.stringify({
     idCollisions: idCollisions.length,
     crossBankOverlaps: cross,
-    duplicateSurfaces: dupWords.length,
+    rawBankDuplicateSurfaces: dupWords.length,
+    bundledSurfaceDups: bundledDup,
     droppedSurfacesAfterDedupe: droppedWords.length,
     missingHardcodedIds: missingHard.length,
-    ok: idCollisions.length === 0 && cross === 0 && droppedWords.length === 0 && missingHard.length === 0,
+    ok:
+      idCollisions.length === 0 &&
+      cross === 0 &&
+      dupWords.length === 0 &&
+      bundledDup === 0 &&
+      droppedWords.length === 0 &&
+      missingHard.length === 0,
   }),
 )

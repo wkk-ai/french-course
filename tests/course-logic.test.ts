@@ -635,6 +635,22 @@ test('bundled vocabulary ids are unique', async () => {
   assert.equal(collisions.length, 0, collisions.slice(0, 10).join('; '))
 })
 
+test('bundled vocabulary has one row per lemma surface', async () => {
+  const { BUNDLED_VOCABULARY } = await import('../src/lib/bundled-vocabulary')
+  const seen = new Map<string, string>()
+  const dups: string[] = []
+  for (const word of BUNDLED_VOCABULARY) {
+    const key =
+      [...word.word].length === 1 && /[A-Za-zÀ-ÿ]/.test(word.word)
+        ? `letter:${word.word}`
+        : word.word.normalize('NFC').toLowerCase().replace(/’/g, "'")
+    const prior = seen.get(key)
+    if (prior) dups.push(`${key}: ${prior} vs ${word.id}`)
+    else seen.set(key, word.id)
+  }
+  assert.equal(dups.length, 0, dups.slice(0, 10).join('; '))
+})
+
 test('bundled tap coverage stays near zero (proper nouns allowlisted)', async () => {
   const { BUNDLED_CHAPTER_IDS, BUNDLED_LESSONS } = await import('../src/lib/bundled-lessons')
   const { BUNDLED_VOCABULARY } = await import('../src/lib/phase1/content')
