@@ -405,5 +405,21 @@ export function buildRemediationExercises(categories: string[]): LessonExercise[
     seen.add(category)
     result.push({ ...template, id: `${template.id}-${result.length}` })
   }
+  // Generic fallback so unknown mistake categories still get rem practice.
+  for (const category of categories) {
+    if (result.length >= 3) break
+    if (seen.has(category)) continue
+    seen.add(category)
+    result.push({
+      id: `remediation-generic-${result.length}`,
+      type: 'translate',
+      category,
+      source: 'remediation',
+      direction: 'fr-en',
+      prompt: `Extra practice (${category}): translate — Je comprends.`,
+      answers: ['I understand', 'I understand.'],
+      explanation: 'Repair the pattern you missed, then retry the lesson drills.',
+    })
+  }
   return result.slice(0, 3)
 }

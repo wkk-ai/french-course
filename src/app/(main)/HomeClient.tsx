@@ -185,31 +185,32 @@ export default function HomeClient({
     <div className="flex flex-col gap-8 pb-8">
       <section className="tactile-card p-5">
         <p className="text-label-caps text-on-surface-variant">TODAY&apos;S READING</p>
-        <div className="mt-2 flex items-end justify-between gap-4">
-          <div className="min-w-0">
-            <h1 className="text-headline-md">Bienvenue</h1>
-            <p className="mt-1 text-body-ui text-on-surface-variant">{dailyLabel}</p>
+        <div className="mt-2">
+          <h1 className="text-headline-md">Bienvenue</h1>
+          <p className="mt-1 text-body-ui text-on-surface-variant">{dailyLabel}</p>
+        </div>
+        <div className="mt-4">
+          <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-on-surface-variant">Daily reading goal</p>
+          <div className="h-2 overflow-hidden rounded-full bg-surface-container-high">
+            <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${dailyPct}%` }} />
           </div>
-          <div className="shrink-0 text-right">
-            <p className="text-label-caps text-on-surface-variant">PATHWAY</p>
+        </div>
+      </section>
+
+      <section className="tactile-card p-5">
+        <p className="text-label-caps text-on-surface-variant">PATHWAY</p>
+        <div className="mt-2 flex items-end justify-between gap-4">
+          <div>
             <p className="text-headline-lg text-success">{mastery}%</p>
-            <p className="text-xs text-on-surface-variant">
-              {authoredDone}/{authoredTotal || 0} playable
+            <p className="text-sm text-on-surface-variant">
+              {authoredDone}/{authoredTotal || 0} playable chapters done
             </p>
           </div>
         </div>
-        <div className="mt-4 space-y-2">
-          <div>
-            <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-on-surface-variant">Pathway progress</p>
-            <div className="h-2 overflow-hidden rounded-full bg-surface-container-high">
-              <div className="h-full rounded-full bg-success transition-all" style={{ width: `${mastery}%` }} />
-            </div>
-          </div>
-          <div>
-            <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-on-surface-variant">Daily reading goal</p>
-            <div className="h-2 overflow-hidden rounded-full bg-surface-container-high">
-              <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${dailyPct}%` }} />
-            </div>
+        <div className="mt-4">
+          <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-on-surface-variant">Pathway progress</p>
+          <div className="h-2 overflow-hidden rounded-full bg-surface-container-high">
+            <div className="h-full rounded-full bg-success transition-all" style={{ width: `${mastery}%` }} />
           </div>
         </div>
       </section>

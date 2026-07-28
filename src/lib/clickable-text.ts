@@ -6,9 +6,29 @@ const PUNCT = new Set(['.', ',', '!', '?', ':', ';', '…', '—', '-', '«', '�
 export function syntaxFromPartOfSpeech(partOfSpeech: string | null | undefined): SyntaxClass {
   if (!partOfSpeech) return 'none'
   const pos = partOfSpeech.toLowerCase()
+  // Check adverb before verb — "adverb" contains the substring "verb".
+  if (pos.includes('adverb')) return 'adj'
   if (pos.includes('verb')) return 'verb'
   if (pos.includes('adj')) return 'adj'
-  if (pos.includes('noun') || pos.includes('determiner') || pos.includes('article')) return 'noun'
+  if (
+    pos.includes('noun') ||
+    pos.includes('determiner') ||
+    pos.includes('article') ||
+    pos.includes('pronoun') ||
+    pos.includes('proper')
+  ) {
+    return 'noun'
+  }
+  // Color function words so X-Ray is not mostly blank.
+  if (
+    pos.includes('preposition') ||
+    pos.includes('conjunction') ||
+    pos.includes('interjection') ||
+    pos.includes('phrase') ||
+    pos.includes('particle')
+  ) {
+    return 'adj'
+  }
   return 'none'
 }
 

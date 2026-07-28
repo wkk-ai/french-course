@@ -55,14 +55,14 @@ Last updated: **2026-07-27** (dictionary tap miss driven to 0% across 720 lesson
 | ID | Status | Bug |
 |----|--------|-----|
 | R1-20 | fixed | Rem alias incomplete (`etre-family` etc.) |
-| R1-21 | open | Many exercise categories have no remediation template |
-| R1-22 | open | Daily “articles completed” can double-count |
+| R1-21 | fixed | Many exercise categories have no remediation template |
+| R1-22 | fixed | Daily “articles completed” can double-count |
 | R1-23 | fixed | Home flashes wrong “Up next” before progress loads |
 | R1-24 | fixed | Center / XP ignore local completes |
-| R1-25 | open | No signup / forgot password |
+| R1-25 | fixed | No signup / forgot password |
 | R1-26 | fixed | Pinch-zoom blocked (`maximumScale: 1`) — also Round 2 P0 |
-| R1-27 | open | Rules “Try it” never records mistakes |
-| R1-28 | open | RichText thin (no numbered lists / `#` headings) |
+| R1-27 | fixed | Rules “Try it” never records mistakes |
+| R1-28 | fixed | RichText thin (no numbered lists / `#` headings) |
 
 ### Checked OK (Round 1)
 
@@ -102,11 +102,11 @@ Last updated: **2026-07-27** (dictionary tap miss driven to 0% across 720 lesson
 | R2-14 | fixed | Top bar / lesson header ignore notch; X under Dynamic Island | Hard to hit Close |
 | R2-15 | fixed | Sign-out / Close / X-Ray tap targets &lt; 44px | Fat-finger misses |
 | R2-16 | fixed | Review session: bottom nav still live — leave mid-run loses session | ReviewSessionLock hides nav; sticky Exit + beforeunload/Back confirm |
-| R2-17 | open | XP / streak / Center chapters = remote only | Local finishes invisible in chrome |
-| R2-18 | open | Center “Reading Activity” ≠ reading words; “Words learned” = any queued lemma | Misleading stats |
+| R2-17 | fixed | XP / streak / Center chapters = remote only | Local finishes invisible in chrome |
+| R2-18 | fixed | Center “Reading Activity” ≠ reading words; “Words learned” = any queued lemma | Misleading stats |
 | R2-19 | fixed | White text on lime Complete/Pass (`bg-success` + `text-on-primary`) | Hard to read CTA |
 | R2-20 | fixed | Dict popup: no X, no Escape; conjugate sheet: backdrop/Esc don’t close; no focus trap | Trap / hard exit |
-| R2-21 | open | Browser Back mid-lesson exits whole lesson; reopen always Theory | Stage not in URL |
+| R2-21 | fixed | Browser Back mid-lesson exits whole lesson; reopen always Theory | Stage not in URL |
 | R2-22 | fixed | `lang="fr"` while chrome is English | Screen readers mispronounce UI |
 | R2-23 | fixed | Center heatmap `today` frozen at **build time** (static export) | Wrong week until redeploy |
 | R2-24 | fixed | Multi-tab Review vault last-write-wins clobber | `subscribeLocalVault` + always mirror scores locally |
@@ -119,13 +119,13 @@ Last updated: **2026-07-27** (dictionary tap miss driven to 0% across 720 lesson
 | ID | Status | Bug |
 |----|--------|-----|
 | R2-28 | fixed | Progress bar jumps 20→45→70→90, never 100; flame chip says “Lesson” like streak |
-| R2-29 | open | One tap skips Reading / Dialogue — no “read first” gate |
-| R2-30 | open | X-Ray: most words stay plain (`syntax: none`) — looks broken |
+| R2-29 | fixed | One tap skips Reading / Dialogue — no “read first” gate |
+| R2-30 | fixed | X-Ray: most words stay plain (`syntax: none`) — looks broken |
 | R2-31 | fixed | Home “Coming soon” uses check icon → looks finished |
-| R2-32 | open | “Today’s reading” card also shows Pathway % — mixed jobs |
+| R2-32 | fixed | “Today’s reading” card also shows Pathway % — mixed jobs |
 | R2-33 | fixed | Nav icon = house, label = Learn |
 | R2-34 | fixed | Login shows raw server error string |
-| R2-35 | open | Vocab growth chart labels collide (`W1` every month) |
+| R2-35 | fixed | Vocab growth chart labels collide (`W1` every month) |
 | R2-36 | fixed | Soft 404: no `not-found.tsx`; empty lesson shell soft dead-end | `src/app/not-found.tsx` + lesson `notFound()` |
 | R2-37 | fixed | Center / TopBar flash zeros before fetch |
 | R2-38 | fixed | Lesson auth-fail gate says “Loading lesson…” while redirecting |

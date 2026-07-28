@@ -17,6 +17,39 @@ import { createClient } from '@/utils/supabase/client'
 
 type TabId = 'quick' | 'deep' | 'examples' | 'try'
 
+async function recordRuleMistake(category: string, context: string) {
+  try {
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    const { data: existing } = await supabase
+      .from('user_mistakes')
+      .select('id, error_count')
+      .eq('user_id', user.id)
+      .eq('grammar_category', category)
+      .eq('is_resolved', false)
+      .is('vocab_id', null)
+      .maybeSingle()
+    if (existing) {
+      await supabase
+        .from('user_mistakes')
+        .update({ error_count: existing.error_count + 1, last_error_at: new Date().toISOString(), error_context: context })
+        .eq('id', existing.id)
+      return
+    }
+    await supabase.from('user_mistakes').insert({
+      user_id: user.id,
+      grammar_category: category,
+      error_context: context,
+      error_count: 1,
+      is_resolved: false,
+      last_error_at: new Date().toISOString(),
+    })
+  } catch {
+    // Best-effort mistake logging.
+  }
+}
+
 function RuleTableView({ table }: { table: RuleTable }) {
   return (
     <div className="mt-3 overflow-x-auto rounded-lg border-2 border-surface-variant">
@@ -271,7 +304,12 @@ export function RuleDetailClient({ rule }: { rule: GrammarRuleDocument }) {
                 total={rule.drills.length}
                 answer={answers[drill.id]}
                 onAnswer={(value) => setAnswers((current) => ({ ...current, [drill.id]: value }))}
-                onMistake={() => {}}
+                onMistake={() =>
+                  void recordRuleMistake(
+                    drill.exercise.category || rule.masteryCategories[0] || rule.slug,
+                    `Rules Try it: ${drill.title} — ${drill.exercise.prompt}`,
+                  )
+                }
                 onRetry={() =>
                   setAnswers((current) => {
                     const next = { ...current }

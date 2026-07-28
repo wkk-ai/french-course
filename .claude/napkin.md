@@ -64,35 +64,35 @@
 
 ## Domain Behavior Guardrails
 
-1. **[2026-07-27] Prove score polluted by remediation extras**
+1. **[2026-07-28] Lesson Back / skip / Center stats**
+   Do instead: stage in `?stage=` + `pushState`/`popstate`; gate Continue until reading/dialogue end sentinel; Center heatmap = `user_daily_reading_stats.words_read`; Words = reviewed (not queue); chart labels `Mon W1 '26`; articles via `shouldCountDailyArticle`.
+
+2. **[2026-07-27] Prove score polluted by remediation extras**
    Do instead: never append `buildRemediationExercises` into Prove (D) scoring set; gate score on chapter drills only (`allowHints={!isProve}` stays).
 
-2. **[2026-07-27] Sign-out leaves local progress + vault for next account**
+3. **[2026-07-27] Sign-out leaves local progress + vault for next account**
    Do instead: clear `french-course:completed-chapters` + `ladf-vocab-vault-v1` on sign-out, or scope both keys by `user.id`.
 
-3. **[2026-07-27] AuthGate hard-kicks mid-lesson on session loss**
+4. **[2026-07-27] AuthGate hard-kicks mid-lesson on session loss**
    Do instead: soft banner + draft answers to sessionStorage before `/login/`; don’t unmount lesson on first `SIGNED_OUT`.
 
-4. **[2026-07-27] Rules/Review ignore local completed chapters**
+5. **[2026-07-27] Rules/Review ignore local completed chapters**
    Do instead: unlock + Review backfill via `mergeCompletedChapterIds` (same as Home/LessonClient), not remote-only `user_chapter_progress`.
 
-5. **[2026-07-27] Center `today` baked at static export build**
+6. **[2026-07-27] Center `today` baked at static export build**
    Do instead: compute heatmap “today” in client (`new Date()`), never from SSG page props.
 
-6. **[2026-07-25] Home progress flash before remote load**
+7. **[2026-07-25] Home progress flash before remote load**
    Do instead: boot Home with loading state until progress merge finishes (don’t paint false “Up next”).
 
-7. **[2026-07-27] `completeLesson` catch marks local complete on any throw**
+8. **[2026-07-27] `completeLesson` catch marks local complete on any throw**
    Do instead: mark local only after enqueue intent succeeds; never on pre-save auth failure.
 
-8. **[2026-07-27] Multi-tab local vault last-write-wins**
+9. **[2026-07-27] Multi-tab local vault last-write-wins**
    Do instead: CAS merge on write (`mergeVaultItem`); `subscribeLocalVault` + ReviewClient storage listener.
 
-9. **[2026-07-27] Typed drills lock on blur forever**
-   Do instead: cloze/translate/conjugation need Confirm; no `onBlur` auto-submit; allow edit until Confirm.
-
-10. **[2026-07-27] Dict popup clips off-screen**
-    Do instead: clamp/flip popup to viewport (edges + first lines); avoid fixed `bottom-full left-1/2 w-72` only.
+10. **[2026-07-27] Typed drills lock on blur forever**
+    Do instead: cloze/translate/conjugation need Confirm; no `onBlur` auto-submit; allow edit until Confirm.
 
 ## Shell & Command Reliability
 

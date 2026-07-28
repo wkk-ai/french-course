@@ -16,7 +16,7 @@ import { calculateLessonScore, didPassProve, PROVE_PASS_SCORE } from '@/lib/less
 import { createClient } from '@/utils/supabase/client'
 import { BUNDLED_CHAPTER_IDS } from '@/lib/bundled-chapter-ids'
 import { bumpLocalMistakeCount, enqueueLocalVocabulary } from '@/lib/local-vocab-vault'
-import { markLocalChapterCompleted, mergeCompletedChapterIds } from '@/lib/local-progress'
+import { markLocalChapterCompleted, mergeCompletedChapterIds, shouldCountDailyArticle } from '@/lib/local-progress'
 import { BUNDLED_VOCABULARY } from '@/lib/bundled-vocabulary'
 import { PATHWAY_BY_CHAPTER_ID } from '@/lib/pathway/catalog'
 import { lemmaIdsFromLesson, vocabularyRowsForLemmas } from '@/lib/review/lemmas-from-lesson'
@@ -52,6 +52,12 @@ function siblingRemediationLinks(chapterId: string): Array<{ id: string; label: 
 
 type Stage = 'brief' | 'reading' | 'conversation' | 'exercise'
 
+const STAGES: Stage[] = ['brief', 'reading', 'conversation', 'exercise']
+
+function isStage(value: string | null | undefined): value is Stage {
+  return Boolean(value && (STAGES as string[]).includes(value))
+}
+
 const REGISTER_LABEL: Record<string, string> = {
   Courant: 'Everyday',
   Soutenu: 'Formal',
@@ -79,6 +85,10 @@ export default function LessonClient({
   rules: GrammarRule[]
 }) {
   const [stage, setStage] = useState<Stage>('brief')
+  const [readingReachedEnd, setReadingReachedEnd] = useState(false)
+  const [conversationReachedEnd, setConversationReachedEnd] = useState(false)
+  const readingEndRef = useRef<HTMLDivElement | null>(null)
+  const conversationEndRef = useRef<HTMLDivElement | null>(null)
   const [xRayEnabled, setXRayEnabled] = useState(false)
   const [activeWordId, setActiveWordId] = useState<string | null>(null)
   const popupRef = useRef<HTMLDivElement | null>(null)
@@ -136,18 +146,67 @@ export default function LessonClient({
     setDictPopupPos({ top, left })
   }, [activeWordId])
 
-  // Restore draft answers / stage
+  // Restore draft answers / stage (URL wins over draft when present)
   useEffect(() => {
     try {
+      const params = new URLSearchParams(window.location.search)
+      const fromUrl = params.get('stage')
+      if (isStage(fromUrl)) {
+        if (fromUrl === 'conversation' && !hasConversation) setStage('exercise')
+        else setStage(fromUrl)
+      }
       const raw = sessionStorage.getItem(DRAFT_KEY(chapterId))
       if (!raw) return
       const parsed = JSON.parse(raw) as { stage?: Stage; answers?: Record<string, ExerciseAnswer>; exerciseIndex?: number }
-      if (parsed.stage) setStage(parsed.stage)
+      if (!isStage(fromUrl) && parsed.stage) setStage(parsed.stage)
       if (parsed.answers) setAnswers(parsed.answers)
       if (typeof parsed.exerciseIndex === 'number' && parsed.exerciseIndex >= 0) setExerciseIndex(parsed.exerciseIndex)
     } catch {
       // ignore corrupt draft
     }
+  }, [chapterId, hasConversation])
+
+  const goToStage = (next: Stage, historyMode: 'push' | 'replace' = 'push') => {
+    let target = next
+    if (target === 'conversation' && !hasConversation) target = 'exercise'
+    setStage(target)
+    try {
+      const url = new URL(window.location.href)
+      url.searchParams.set('stage', target)
+      if (historyMode === 'replace') window.history.replaceState({ stage: target }, '', url.toString())
+      else window.history.pushState({ stage: target }, '', url.toString())
+    } catch {
+      // ignore
+    }
+  }
+
+  useEffect(() => {
+    const onPop = (event: PopStateEvent) => {
+      const fromState = typeof event.state?.stage === 'string' ? event.state.stage : null
+      const fromUrl = new URLSearchParams(window.location.search).get('stage')
+      const next = isStage(fromState) ? fromState : isStage(fromUrl) ? fromUrl : null
+      if (next) {
+        setStage(next === 'conversation' && !hasConversation ? 'exercise' : next)
+        return
+      }
+    }
+    window.addEventListener('popstate', onPop)
+    // Seed history so the first Back stays inside the lesson stages when possible.
+    try {
+      const url = new URL(window.location.href)
+      if (!url.searchParams.get('stage')) {
+        url.searchParams.set('stage', 'brief')
+        window.history.replaceState({ stage: 'brief' }, '', url.toString())
+      }
+    } catch {
+      // ignore
+    }
+    return () => window.removeEventListener('popstate', onPop)
+  }, [hasConversation])
+
+  useEffect(() => {
+    setReadingReachedEnd(false)
+    setConversationReachedEnd(false)
   }, [chapterId])
 
   // Persist draft while working
@@ -276,6 +335,36 @@ export default function LessonClient({
     if (stage !== 'exercise') return
     exerciseSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }, [exerciseIndex, stage])
+
+  useEffect(() => {
+    if (stage !== 'reading' || !readingEndRef.current) return
+    const node = readingEndRef.current
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) setReadingReachedEnd(true)
+      },
+      { threshold: 0.2 },
+    )
+    observer.observe(node)
+    const rect = node.getBoundingClientRect()
+    if (rect.top < window.innerHeight) setReadingReachedEnd(true)
+    return () => observer.disconnect()
+  }, [stage, readingParagraphs])
+
+  useEffect(() => {
+    if (stage !== 'conversation' || !conversationEndRef.current) return
+    const node = conversationEndRef.current
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) setConversationReachedEnd(true)
+      },
+      { threshold: 0.2 },
+    )
+    observer.observe(node)
+    const rect = node.getBoundingClientRect()
+    if (rect.top < window.innerHeight) setConversationReachedEnd(true)
+    return () => observer.disconnect()
+  }, [stage, conversationLines])
 
   const syntaxClass = (token: WordToken) => {
     if (!xRayEnabled) return ''
@@ -552,6 +641,7 @@ export default function LessonClient({
 
   const recordDailyReading = async (userId: string, words: number) => {
     if (words <= 0) return
+    const countArticle = shouldCountDailyArticle(chapterId)
     try {
       const supabase = createClient()
       const today = localDateString()
@@ -566,7 +656,7 @@ export default function LessonClient({
           .from('user_daily_reading_stats')
           .update({
             words_read: (existing.words_read ?? 0) + words,
-            articles_completed: (existing.articles_completed ?? 0) + 1,
+            articles_completed: (existing.articles_completed ?? 0) + (countArticle ? 1 : 0),
           })
           .eq('user_id', userId)
           .eq('date', today)
@@ -576,7 +666,7 @@ export default function LessonClient({
         user_id: userId,
         date: today,
         words_read: words,
-        articles_completed: 1,
+        articles_completed: countArticle ? 1 : 0,
       })
     } catch {
       // Daily reading stats are best-effort.
@@ -740,7 +830,7 @@ export default function LessonClient({
                 </div>
               </div>
             )}
-            <button type="button" onClick={() => setStage('reading')} className="tactile-button mt-2 flex items-center justify-center gap-2 rounded-xl border-primary-container bg-primary py-4 font-bold text-on-primary">
+            <button type="button" onClick={() => goToStage('reading')} className="tactile-button mt-2 flex items-center justify-center gap-2 rounded-xl border-primary-container bg-primary py-4 font-bold text-on-primary">
               START READING <ChevronRight className="size-5" />
             </button>
           </section>
@@ -756,7 +846,7 @@ export default function LessonClient({
                   <span className={`block size-4 rounded-full bg-white transition-transform ${xRayEnabled ? 'translate-x-5' : ''}`} />
                 </button>
               </div>
-              <p className="mb-4 pr-28 text-sm text-on-surface-variant">Tap any word for meaning. Verbs include a <span className="font-semibold text-primary">Conjugate</span> button. Turn on X-Ray to color nouns, verbs, and adjectives.</p>
+              <p className="mb-4 pr-28 text-sm text-on-surface-variant">Tap any word for meaning. Verbs include a <span className="font-semibold text-primary">Conjugate</span> button. Turn on X-Ray to color nouns/pronouns, verbs, and other words.</p>
               <div className="mt-2 space-y-6">
                 {(() => {
                   const blocks: ReactNode[] = []
@@ -783,23 +873,28 @@ export default function LessonClient({
                   flushList()
                   return blocks
                 })()}
+                <div ref={readingEndRef} aria-hidden className="h-1 w-full" />
               </div>
               {xRayEnabled && (
                 <div className="mt-8 flex flex-wrap gap-4 border-t border-surface-variant pt-4 text-syntax-label text-on-surface-variant">
-                  <span><i className="mr-1 inline-block size-3 rounded-full bg-syntax-noun" />Noun / article</span>
+                  <span><i className="mr-1 inline-block size-3 rounded-full bg-syntax-noun" />Noun / pronoun</span>
                   <span><i className="mr-1 inline-block size-3 rounded-full bg-syntax-verb" />Verb</span>
-                  <span><i className="mr-1 inline-block size-3 rounded-full bg-syntax-adj" />Adjective</span>
+                  <span><i className="mr-1 inline-block size-3 rounded-full bg-syntax-adj" />Adj / other</span>
                 </div>
               )}
             </div>
+            {!readingReachedEnd && (
+              <p className="mt-4 text-sm text-on-surface-variant">Scroll to the end of the reading before continuing.</p>
+            )}
             <div className="mt-6 flex gap-3">
-              <button type="button" onClick={() => setStage('brief')} className="tactile-button flex-1 rounded-xl border-2 border-surface-variant bg-surface-container-lowest py-4 font-bold text-on-surface">
+              <button type="button" onClick={() => goToStage('brief')} className="tactile-button flex-1 rounded-xl border-2 border-surface-variant bg-surface-container-lowest py-4 font-bold text-on-surface">
                 BACK
               </button>
               <button
                 type="button"
-                onClick={() => setStage(hasConversation ? 'conversation' : 'exercise')}
-                className="tactile-button flex-[2] flex items-center justify-center gap-2 rounded-xl border-primary-container bg-primary py-4 font-bold text-on-primary"
+                disabled={!readingReachedEnd}
+                onClick={() => goToStage(hasConversation ? 'conversation' : 'exercise')}
+                className="tactile-button flex-[2] flex items-center justify-center gap-2 rounded-xl border-primary-container bg-primary py-4 font-bold text-on-primary disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {hasConversation ? 'OPEN CONVERSATION' : 'PRACTICE THE RULES'} <ChevronRight className="size-5" />
               </button>
@@ -821,13 +916,22 @@ export default function LessonClient({
                   <div className="mt-2">{renderTokens(line.tokens)}</div>
                 </article>
               ))}
+              <div ref={conversationEndRef} aria-hidden className="h-1 w-full" />
             </div>
             <p className="text-sm text-on-surface-variant">Dialogue words are tappable too — try a verb for Conjugate.</p>
+            {!conversationReachedEnd && (
+              <p className="text-sm text-on-surface-variant">Scroll through the dialogue before continuing.</p>
+            )}
             <div className="flex gap-3">
-              <button type="button" onClick={() => setStage('reading')} className="tactile-button flex-1 rounded-xl border-2 border-surface-variant bg-surface-container-lowest py-4 font-bold text-on-surface">
+              <button type="button" onClick={() => goToStage('reading')} className="tactile-button flex-1 rounded-xl border-2 border-surface-variant bg-surface-container-lowest py-4 font-bold text-on-surface">
                 BACK
               </button>
-              <button type="button" onClick={() => setStage('exercise')} className="tactile-button flex-[2] flex items-center justify-center gap-2 rounded-xl border-primary-container bg-primary py-4 font-bold text-on-primary">
+              <button
+                type="button"
+                disabled={!conversationReachedEnd}
+                onClick={() => goToStage('exercise')}
+                className="tactile-button flex-[2] flex items-center justify-center gap-2 rounded-xl border-primary-container bg-primary py-4 font-bold text-on-primary disabled:cursor-not-allowed disabled:opacity-50"
+              >
                 PRACTICE THE RULES <ChevronRight className="size-5" />
               </button>
             </div>
@@ -913,7 +1017,7 @@ export default function LessonClient({
             )}
             {error && <p role="alert" className="rounded-lg bg-error-container p-3 text-sm text-on-error-container">{error}</p>}
             <div className="flex gap-3">
-              <button type="button" onClick={() => setStage(hasConversation ? 'conversation' : 'reading')} className="tactile-button flex-1 rounded-xl border-2 border-surface-variant bg-surface-container-lowest py-4 font-bold text-on-surface">
+              <button type="button" onClick={() => goToStage(hasConversation ? 'conversation' : 'reading')} className="tactile-button flex-1 rounded-xl border-2 border-surface-variant bg-surface-container-lowest py-4 font-bold text-on-surface">
                 BACK
               </button>
               <button

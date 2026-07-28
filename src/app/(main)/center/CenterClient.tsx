@@ -6,19 +6,41 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis
 } from 'recharts';
+import { mergeCompletedChapterIds, readLocalCompletedChapters, subscribeCompletedChapters } from '@/lib/local-progress'
+import { getAllLocalVocabulary } from '@/lib/local-vocab-vault'
 
-type VocabProgress = { created_at: string; last_reviewed_at: string | null }
+type VocabProgress = { vocab_id?: string; created_at: string; last_reviewed_at: string | null }
 type GrammarMastery = { grammar_category: string; total_attempts: number; correct_attempts: number }
-type ChapterProgress = { status: string; completed_at: string | null }
+type ChapterProgress = { chapter_id?: string; status: string; completed_at: string | null }
 type GrammarRuleSummary = { slug: string; title: string; category: string }
+type DailyReading = { date: string; words_read: number }
+
+function weekLabel(date: Date): string {
+  const month = date.toLocaleString('en-US', { month: 'short' })
+  const weekOfMonth = Math.ceil(date.getDate() / 7)
+  const year = date.getFullYear()
+  return `${month} W${weekOfMonth} '${String(year).slice(2)}`
+}
 
 export default function CenterClient() {
   const [today] = useState(() => new Date().toISOString())
   const [vocabProgress, setVocabProgress] = useState<VocabProgress[]>([])
   const [grammarMastery, setGrammarMastery] = useState<GrammarMastery[]>([])
   const [chapterProgress, setChapterProgress] = useState<ChapterProgress[]>([])
+  const [dailyReading, setDailyReading] = useState<DailyReading[]>([])
   const [grammarRules, setGrammarRules] = useState<GrammarRuleSummary[]>([])
+  const [localCompleted, setLocalCompleted] = useState(0)
+  const [localReviewed, setLocalReviewed] = useState(0)
   const [booting, setBooting] = useState(true)
+
+  useEffect(() => {
+    const refreshLocal = () => {
+      setLocalCompleted(readLocalCompletedChapters().length)
+      setLocalReviewed(getAllLocalVocabulary().filter((item) => item.last_reviewed_at).length)
+    }
+    refreshLocal()
+    return subscribeCompletedChapters(refreshLocal)
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -31,17 +53,31 @@ export default function CenterClient() {
           return
         }
 
-        const [vocabRes, grammarRes, chapterRes, rulesRes] = await Promise.all([
-          supabase.from('user_vocab_progress').select('created_at, last_reviewed_at').eq('user_id', user.id).order('created_at', { ascending: true }),
+        const since = new Date()
+        since.setUTCDate(since.getUTCDate() - 30)
+        const sinceStr = since.toISOString().split('T')[0]
+
+        const [vocabRes, grammarRes, chapterRes, rulesRes, readingRes] = await Promise.all([
+          supabase.from('user_vocab_progress').select('vocab_id, created_at, last_reviewed_at').eq('user_id', user.id).order('created_at', { ascending: true }),
           supabase.from('user_grammar_mastery').select('grammar_category, total_attempts, correct_attempts, updated_at').eq('user_id', user.id),
-          supabase.from('user_chapter_progress').select('status, completed_at').eq('user_id', user.id),
+          supabase.from('user_chapter_progress').select('chapter_id, status, completed_at').eq('user_id', user.id),
           supabase.from('grammar_rules').select('slug, title, category'),
+          supabase
+            .from('user_daily_reading_stats')
+            .select('date, words_read')
+            .eq('user_id', user.id)
+            .gte('date', sinceStr),
         ])
         if (cancelled) return
         setVocabProgress(vocabRes.data ?? [])
         setGrammarMastery(grammarRes.data ?? [])
         setChapterProgress(chapterRes.data ?? [])
         setGrammarRules(rulesRes.data ?? [])
+        setDailyReading(readingRes.data ?? [])
+        setLocalCompleted(
+          mergeCompletedChapterIds((chapterRes.data ?? []).map((row) => row.chapter_id).filter((id): id is string => Boolean(id))).size,
+        )
+        setLocalReviewed(getAllLocalVocabulary().filter((item) => item.last_reviewed_at).length)
       } finally {
         if (!cancelled) setBooting(false)
       }
@@ -50,24 +86,22 @@ export default function CenterClient() {
       cancelled = true
     }
   }, [])
-  // Build vocab growth chart data from actual progress
+
   const vocabChartData = useMemo(() => {
     if (vocabProgress.length === 0) {
       return [{ name: 'Now', words: 0 }];
     }
-    // Group by week
     const weeks = new Map<string, number>();
     let cumulative = 0;
     vocabProgress.forEach((vp) => {
       const date = new Date(vp.created_at);
-      const weekKey = `W${Math.ceil((date.getDate()) / 7)}`;
+      const weekKey = weekLabel(date);
       cumulative++;
       weeks.set(weekKey, cumulative);
     });
     return Array.from(weeks.entries()).map(([name, words]) => ({ name, words }));
   }, [vocabProgress]);
 
-  // Build grammar radar chart data
   const grammarChartData = useMemo(() => {
     if (grammarMastery.length === 0) {
       return [{ subject: 'No Data', A: 0, fullMark: 100 }];
@@ -79,27 +113,19 @@ export default function CenterClient() {
     }));
   }, [grammarMastery, grammarRules]);
 
-  // Build activity heatmap from chapter progress
   const heatmapData = useMemo(() => {
+    const byDate = new Map(dailyReading.map((row) => [row.date, row.words_read ?? 0]))
     const days = Array.from({ length: 30 }, (_, i) => {
       const date = new Date(today);
       date.setUTCDate(date.getUTCDate() - (29 - i));
       const dateStr = date.toISOString().split('T')[0];
-      
-      // Count completions on this day
-      const completions = chapterProgress.filter(cp => 
-        cp.completed_at && cp.completed_at.startsWith(dateStr)
-      ).length;
-
-      const vocabReviews = vocabProgress.filter(vp => 
-        vp.last_reviewed_at && vp.last_reviewed_at.startsWith(dateStr)
-      ).length;
-
-      const intensity = Math.min(completions + Math.floor(vocabReviews / 3), 4);
-      return { date, intensity };
+      const words = byDate.get(dateStr) ?? 0
+      // 0 / ~75 / ~150 / ~225 / 300+ words
+      const intensity = words <= 0 ? 0 : words < 75 ? 1 : words < 150 ? 2 : words < 225 ? 3 : 4
+      return { date, intensity, words };
     });
     return days;
-  }, [chapterProgress, vocabProgress, today]);
+  }, [dailyReading, today]);
 
   const getIntensityClass = (intensity: number) => {
     switch(intensity) {
@@ -111,8 +137,28 @@ export default function CenterClient() {
     }
   };
 
-  const completedChapters = chapterProgress.filter(cp => cp.status === 'completed').length;
-  const totalVocab = vocabProgress.length;
+  const wordsLearned = useMemo(() => {
+    const reviewed = new Set<string>()
+    for (const vp of vocabProgress) {
+      if (vp.last_reviewed_at && vp.vocab_id) reviewed.add(vp.vocab_id)
+    }
+    for (const item of getAllLocalVocabulary()) {
+      if (item.last_reviewed_at) reviewed.add(item.vocab_id)
+    }
+    // Fallback when remote rows lack vocab_id in older clients.
+    if (reviewed.size === 0) {
+      return Math.max(
+        vocabProgress.filter((vp) => vp.last_reviewed_at).length,
+        localReviewed,
+      )
+    }
+    return reviewed.size
+  }, [vocabProgress, localReviewed])
+
+  const completedChapters = Math.max(
+    chapterProgress.filter(cp => cp.status === 'completed').length,
+    localCompleted,
+  )
 
   if (booting) {
     return (
@@ -132,11 +178,10 @@ export default function CenterClient() {
         <p className="text-body-reading text-on-surface-variant mt-2">Track your linguistic growth.</p>
       </div>
 
-      {/* Quick Stats */}
       <div className="grid grid-cols-2 gap-4">
         <div className="tactile-card p-4 text-center">
-          <p className="text-headline-lg text-primary font-bold">{totalVocab}</p>
-          <p className="text-label-caps text-on-surface-variant">WORDS LEARNED</p>
+          <p className="text-headline-lg text-primary font-bold">{wordsLearned}</p>
+          <p className="text-label-caps text-on-surface-variant">WORDS REVIEWED</p>
         </div>
         <div className="tactile-card p-4 text-center">
           <p className="text-headline-lg text-success font-bold">{completedChapters}</p>
@@ -144,7 +189,6 @@ export default function CenterClient() {
         </div>
       </div>
 
-      {/* Vocabulary Growth */}
       <section className="tactile-card p-6">
         <h2 className="text-body-ui font-bold text-on-surface mb-6">Vocabulary Growth</h2>
         <div className="h-[250px] w-full">
@@ -169,21 +213,20 @@ export default function CenterClient() {
         </div>
       </section>
 
-      {/* Reading Activity (Heatmap) */}
       <section className="tactile-card p-6">
         <h2 className="text-body-ui font-bold text-on-surface mb-4">Reading Activity (30 Days)</h2>
+        <p className="mb-3 text-sm text-on-surface-variant">Darker = more words read that day.</p>
         <div className="flex flex-wrap gap-2">
           {heatmapData.map((day, i) => (
             <div 
               key={i}
               className={`w-4 h-4 rounded-sm ${getIntensityClass(day.intensity)}`}
-              title={`${day.date.toDateString()}`}
+              title={`${day.date.toDateString()}: ${day.words} words`}
             />
           ))}
         </div>
       </section>
 
-      {/* Grammar Accuracy (Radar) */}
       {grammarMastery.length > 0 && (
         <section className="tactile-card p-6">
           <h2 className="text-body-ui font-bold text-on-surface mb-6">Grammar Accuracy</h2>

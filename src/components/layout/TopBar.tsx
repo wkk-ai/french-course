@@ -3,7 +3,8 @@
 import { Flame, LogOut, Trophy } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { clearLocalLearnerData, mergeCompletedChapterIds } from '@/lib/local-progress'
+import { clearLocalLearnerData, mergeCompletedChapterIds, readLocalStreak, subscribeCompletedChapters } from '@/lib/local-progress'
+import { getAllLocalVocabulary } from '@/lib/local-vocab-vault'
 import { createClient } from '@/utils/supabase/client'
 
 export default function TopBar() {
@@ -13,30 +14,38 @@ export default function TopBar() {
   const [email, setEmail] = useState<string | null>(null)
   const [booting, setBooting] = useState(true)
 
+  const refreshStats = async () => {
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
+    setEmail(user.email ?? null)
+    const [{ data: streakData }, { data: progressRows }, { count: vocabCount }] = await Promise.all([
+      supabase.from('user_streaks').select('current_streak').eq('user_id', user.id).single(),
+      supabase.from('user_chapter_progress').select('chapter_id, status').eq('user_id', user.id).eq('status', 'completed'),
+      supabase.from('user_vocab_progress').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
+    ])
+    const completedCount = mergeCompletedChapterIds((progressRows ?? []).map((row) => row.chapter_id)).size
+    const localVocab = getAllLocalVocabulary().length
+    setStreak(Math.max(streakData?.current_streak ?? 0, readLocalStreak()))
+    setXp(completedCount * 100 + Math.max(vocabCount ?? 0, localVocab) * 5)
+  }
+
   useEffect(() => {
     let cancelled = false
     ;(async () => {
       try {
-        const supabase = createClient()
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user || cancelled) return
-
-        setEmail(user.email ?? null)
-        const [{ data: streakData }, { data: progressRows }, { count: vocabCount }] = await Promise.all([
-          supabase.from('user_streaks').select('current_streak').eq('user_id', user.id).single(),
-          supabase.from('user_chapter_progress').select('chapter_id, status').eq('user_id', user.id).eq('status', 'completed'),
-          supabase.from('user_vocab_progress').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
-        ])
-        if (cancelled) return
-        const completedCount = mergeCompletedChapterIds((progressRows ?? []).map((row) => row.chapter_id)).size
-        setStreak(streakData?.current_streak ?? 0)
-        setXp(completedCount * 100 + (vocabCount ?? 0) * 5)
+        await refreshStats()
       } finally {
         if (!cancelled) setBooting(false)
       }
     })()
+    const unsub = subscribeCompletedChapters(() => {
+      void refreshStats()
+    })
     return () => {
       cancelled = true
+      unsub()
     }
   }, [])
 

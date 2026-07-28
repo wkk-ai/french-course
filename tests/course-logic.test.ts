@@ -106,6 +106,9 @@ test('typed answers ignore uppercase', () => {
 test('enrichTokens assigns X-Ray syntax from part of speech', () => {
   assert.equal(syntaxFromPartOfSpeech('verb'), 'verb')
   assert.equal(syntaxFromPartOfSpeech('noun'), 'noun')
+  assert.equal(syntaxFromPartOfSpeech('pronoun'), 'noun')
+  assert.equal(syntaxFromPartOfSpeech('adverb'), 'adj')
+  assert.equal(syntaxFromPartOfSpeech('preposition'), 'adj')
   const vocab = [{
     id: 'v1',
     word: 'être',
@@ -120,6 +123,13 @@ test('enrichTokens assigns X-Ray syntax from part of speech', () => {
   }]
   const tokens = enrichTokens([{ id: '1', text: 'suis', syntax: 'none' }], vocab)
   assert.equal(tokens[0]?.syntax, 'verb')
+})
+
+test('unknown rem categories still get a generic drill', () => {
+  const rem = buildRemediationExercises(['totally-unknown-category-xyz'])
+  assert.equal(rem.length, 1)
+  assert.equal(rem[0]?.source, 'remediation')
+  assert.equal(rem[0]?.category, 'totally-unknown-category-xyz')
 })
 
 test('infinite review session never empties when the pool has items', () => {
