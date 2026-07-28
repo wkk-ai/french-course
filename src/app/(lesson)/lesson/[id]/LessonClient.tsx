@@ -85,10 +85,6 @@ export default function LessonClient({
   rules: GrammarRule[]
 }) {
   const [stage, setStage] = useState<Stage>('brief')
-  const [readingReachedEnd, setReadingReachedEnd] = useState(false)
-  const [conversationReachedEnd, setConversationReachedEnd] = useState(false)
-  const readingEndRef = useRef<HTMLDivElement | null>(null)
-  const conversationEndRef = useRef<HTMLDivElement | null>(null)
   const [xRayEnabled, setXRayEnabled] = useState(false)
   const [activeWordId, setActiveWordId] = useState<string | null>(null)
   const popupRef = useRef<HTMLDivElement | null>(null)
@@ -203,11 +199,6 @@ export default function LessonClient({
     }
     return () => window.removeEventListener('popstate', onPop)
   }, [hasConversation])
-
-  useEffect(() => {
-    setReadingReachedEnd(false)
-    setConversationReachedEnd(false)
-  }, [chapterId])
 
   // Persist draft while working
   useEffect(() => {
@@ -335,36 +326,6 @@ export default function LessonClient({
     if (stage !== 'exercise') return
     exerciseSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }, [exerciseIndex, stage])
-
-  useEffect(() => {
-    if (stage !== 'reading' || !readingEndRef.current) return
-    const node = readingEndRef.current
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) setReadingReachedEnd(true)
-      },
-      { threshold: 0.2 },
-    )
-    observer.observe(node)
-    const rect = node.getBoundingClientRect()
-    if (rect.top < window.innerHeight) setReadingReachedEnd(true)
-    return () => observer.disconnect()
-  }, [stage, readingParagraphs])
-
-  useEffect(() => {
-    if (stage !== 'conversation' || !conversationEndRef.current) return
-    const node = conversationEndRef.current
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) setConversationReachedEnd(true)
-      },
-      { threshold: 0.2 },
-    )
-    observer.observe(node)
-    const rect = node.getBoundingClientRect()
-    if (rect.top < window.innerHeight) setConversationReachedEnd(true)
-    return () => observer.disconnect()
-  }, [stage, conversationLines])
 
   const syntaxClass = (token: WordToken) => {
     if (!xRayEnabled) return ''
@@ -873,7 +834,6 @@ export default function LessonClient({
                   flushList()
                   return blocks
                 })()}
-                <div ref={readingEndRef} aria-hidden className="h-1 w-full" />
               </div>
               {xRayEnabled && (
                 <div className="mt-8 flex flex-wrap gap-4 border-t border-surface-variant pt-4 text-syntax-label text-on-surface-variant">
@@ -883,18 +843,14 @@ export default function LessonClient({
                 </div>
               )}
             </div>
-            {!readingReachedEnd && (
-              <p className="mt-4 text-sm text-on-surface-variant">Scroll to the end of the reading before continuing.</p>
-            )}
             <div className="mt-6 flex gap-3">
               <button type="button" onClick={() => goToStage('brief')} className="tactile-button flex-1 rounded-xl border-2 border-surface-variant bg-surface-container-lowest py-4 font-bold text-on-surface">
                 BACK
               </button>
               <button
                 type="button"
-                disabled={!readingReachedEnd}
                 onClick={() => goToStage(hasConversation ? 'conversation' : 'exercise')}
-                className="tactile-button flex-[2] flex items-center justify-center gap-2 rounded-xl border-primary-container bg-primary py-4 font-bold text-on-primary disabled:cursor-not-allowed disabled:opacity-50"
+                className="tactile-button flex-[2] flex items-center justify-center gap-2 rounded-xl border-primary-container bg-primary py-4 font-bold text-on-primary"
               >
                 {hasConversation ? 'OPEN CONVERSATION' : 'PRACTICE THE RULES'} <ChevronRight className="size-5" />
               </button>
@@ -916,21 +872,16 @@ export default function LessonClient({
                   <div className="mt-2">{renderTokens(line.tokens)}</div>
                 </article>
               ))}
-              <div ref={conversationEndRef} aria-hidden className="h-1 w-full" />
             </div>
             <p className="text-sm text-on-surface-variant">Dialogue words are tappable too — try a verb for Conjugate.</p>
-            {!conversationReachedEnd && (
-              <p className="text-sm text-on-surface-variant">Scroll through the dialogue before continuing.</p>
-            )}
             <div className="flex gap-3">
               <button type="button" onClick={() => goToStage('reading')} className="tactile-button flex-1 rounded-xl border-2 border-surface-variant bg-surface-container-lowest py-4 font-bold text-on-surface">
                 BACK
               </button>
               <button
                 type="button"
-                disabled={!conversationReachedEnd}
                 onClick={() => goToStage('exercise')}
-                className="tactile-button flex-[2] flex items-center justify-center gap-2 rounded-xl border-primary-container bg-primary py-4 font-bold text-on-primary disabled:cursor-not-allowed disabled:opacity-50"
+                className="tactile-button flex-[2] flex items-center justify-center gap-2 rounded-xl border-primary-container bg-primary py-4 font-bold text-on-primary"
               >
                 PRACTICE THE RULES <ChevronRight className="size-5" />
               </button>

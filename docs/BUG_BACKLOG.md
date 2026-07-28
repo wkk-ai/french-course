@@ -119,7 +119,7 @@ Last updated: **2026-07-27** (dictionary tap miss driven to 0% across 720 lesson
 | ID | Status | Bug |
 |----|--------|-----|
 | R2-28 | fixed | Progress bar jumps 20→45→70→90, never 100; flame chip says “Lesson” like streak |
-| R2-29 | fixed | One tap skips Reading / Dialogue — no “read first” gate |
+| R2-29 | wontfix | One tap skips Reading / Dialogue — no “read first” gate (scroll gate removed; unreliable) |
 | R2-30 | fixed | X-Ray: most words stay plain (`syntax: none`) — looks broken |
 | R2-31 | fixed | Home “Coming soon” uses check icon → looks finished |
 | R2-32 | fixed | “Today’s reading” card also shows Pathway % — mixed jobs |

@@ -64,8 +64,8 @@
 
 ## Domain Behavior Guardrails
 
-1. **[2026-07-28] Lesson Back / skip / Center stats**
-   Do instead: stage in `?stage=` + `pushState`/`popstate`; gate Continue until reading/dialogue end sentinel; Center heatmap = `user_daily_reading_stats.words_read`; Words = reviewed (not queue); chart labels `Mon W1 '26`; articles via `shouldCountDailyArticle`.
+1. **[2026-07-28] Lesson Back / Center stats — no scroll gate**
+   Do instead: stage in `?stage=` + `pushState`/`popstate`; **never** block Continue on scroll-to-end (user rejected — unreliable). Center heatmap = `words_read`; Words = reviewed; chart `Mon W1 '26`; articles via `shouldCountDailyArticle`.
 
 2. **[2026-07-27] Prove score polluted by remediation extras**
    Do instead: never append `buildRemediationExercises` into Prove (D) scoring set; gate score on chapter drills only (`allowHints={!isProve}` stays).
