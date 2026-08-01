@@ -24,6 +24,8 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
+      - run: npm test
+      - run: npx tsx scripts/measure-content-pads.ts
       - run: npm run build
         env:
           NEXT_PUBLIC_BASE_PATH: /french-course

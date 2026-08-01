@@ -1,38 +1,12 @@
 import type { LessonContent, VocabularyWord } from '@/lib/course'
 import { isPunctuationToken, tokenizeFrench } from '@/lib/clickable-text'
-import { untappableSurfaces } from '@/lib/pathway/content-quality'
+import { isPathwayProperNoun, untappableSurfaces } from '@/lib/pathway/content-quality'
 
 export type TapCoverageStats = {
   totalWordTokens: number
   missTokens: number
   missRate: number
   uniqueMisses: number
-}
-
-function isProperNounAllowlisted(surface: string): boolean {
-  const PROPER_NOUN_ALLOWLIST = new Set([
-    'marc',
-    'marie',
-    'sophie',
-    'paul',
-    'thomas',
-    'pierre',
-    'paris',
-    'lyon',
-    'france',
-    'canada',
-    'belgique',
-    'suisse',
-    'luc',
-    'julie',
-    'claire',
-    'nicolas',
-    'emma',
-    'antoine',
-  ])
-  const trimmed = surface.trim().replace(/^[«»"'(\[]+/, '').replace(/[.,!?;:»"')\]]+$/, '')
-  if (!/^[A-ZÀ-Ÿ]/.test(trimmed)) return false
-  return PROPER_NOUN_ALLOWLIST.has(trimmed.normalize('NFC').toLowerCase())
 }
 
 /** Count alphabetic reading+dialogue tokens lacking lemmaId after enrichTokens. */
@@ -54,7 +28,7 @@ export function measureLessonTapCoverage(lesson: LessonContent, vocabulary: Voca
       if (isPunctuationToken(token.text)) continue
       if (!/[A-Za-zÀ-ÿŒœÆæ]/.test(token.text)) continue
       totalWordTokens += 1
-      if (!token.lemmaId && !isProperNounAllowlisted(token.text)) missTokens += 1
+      if (!token.lemmaId && !isPathwayProperNoun(token.text)) missTokens += 1
     }
   }
 

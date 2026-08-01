@@ -769,7 +769,7 @@ export default function LessonClient({
       </header>
 
       <main className="flex-1 p-4 pb-[calc(7rem+env(safe-area-inset-bottom))]">
-        <p className="text-label-caps text-primary">{isProve ? 'PROVE GATE · NO HINTS' : 'MODULE LESSON'}</p>
+        <p className="text-label-caps text-primary">{isProve ? 'PROVE · NO HINTS' : 'MODULE LESSON'}</p>
         <h1 className="mt-1 text-headline-md">{title}</h1>
 
         {stage === 'brief' && content.brief && (
@@ -893,7 +893,7 @@ export default function LessonClient({
           <section ref={exerciseSectionRef} className="mt-8 space-y-5">
             <p className="text-body-reading text-on-surface-variant">
               {isProve
-                ? `Prove gate: no hints. Score at least ${PROVE_PASS_SCORE}% to pass. Fail → remediate Apply/Integrate, then retry.`
+                ? `Score at least ${PROVE_PASS_SCORE}% to pass, with no hints. If you miss it, reopen Apply and Integrate, then try again.`
                 : 'Mixed drills: multiple choice, fill-in, matching, word order, and more. Answer each once — wrong answers feed Review.'}
             </p>
             {exercises.length > 0 && (

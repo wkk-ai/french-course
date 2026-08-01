@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "eslint",
     "test": "tsx --test tests/**/*.test.ts",
+    "test:content": "tsx scripts/measure-content-pads.ts",
     "configure:github": "python3 scripts/configure-github-pages.py"
   },
   "dependencies": {

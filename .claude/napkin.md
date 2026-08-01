@@ -8,8 +8,8 @@
 
 ## Execution & Validation (Highest Priority)
 
-1. **[2026-07-27] Depth padders leak author/AI notes into Theory + Reading**
-   Do instead: never pad brief/reading with authoring jargon (“Deep practice (Module-1 bar)”, “Store verbs as infinitives”, “Dans cette leçon, relisez…”, “dictionnaire cliquable”, “Hand-crafted focus”, “Enqueue reviewable lemmas”, “Lecture de consolidation”). Meet depth with real learner content; CI denylist those phrases on all 720. Measured: author pad 716/720 briefs; meta FR pad 717/720 readings; consol template ×525.
+1. **[2026-08-01] Author pads / length theater — permanent craft lock**
+   Do instead: `craft-from-theme` builds factory lessons; no `learnerBriefPad` / `topicFillerFrench` / inventory `defaultReadingFr`. Denylist includes live needles. Pages runs `npm test` + `measure-content-pads` before build. Done only at `failing: 0 / 720` + `docs/CRAFT_MATRIX.md`. Never resurrect length-inflation helpers. Theme schema via `theme-craft-schema.ts`.
 
 2. **[2026-07-27] Reading tap “Not in the dictionary” / vocab id hygiene**
    Do instead: (1) namespaces M1 `1–295`, P1 `400–499`, LATER `600–841`, CORE `4000+`, TAP `5000+`; (2) one surface → one id (`dedupeVocabularySurfaces` + `scripts/dedupe-vocab-banks.ts`); (3) CI unique ids + unique surfaces; (4) `npx tsx scripts/audit-vocab-ids.ts` after vocab edits.
@@ -47,8 +47,8 @@
 2. **[2026-07-24] Always commit + push when finished (this chat / this product)**
    Do instead: end every completed change set with commit → push → Pages deploy so the user can check live.
 
-3. **[2026-07-25] All modules must match Module-1 deepest bar (not thin factory)**
-   Do instead: every sub-chapter passes `validateChapterContent` (meanings-first brief depth by role, ≥220 reading words, ≥12 dialogue, ≥22 exercises, no story-memory). Deepen via `deepenLessonToModule1Bar` + deep `readingFr`/theory themes. Never ship snack/factory-pad-only lessons. Honesty: M01 Learn A = deepest hand; M02–M36 + D = theme+bar, not equal prose craft.
+3. **[2026-07-25] All modules must match Module-1 Learn A craft (not length theater)**
+   Do instead: every sub-chapter passes craft `validateChapterContent` + `measure-content-pads` = 0/720. Factory builds via `craft-from-theme` (no Practice order / lemma-loop pads). Never mark fixed from char count alone. M01 Learn A (`…0101`) is the craft rubric for all 720.
 
 4. **[2026-07-25] Review = vocab + grammar only**
    Do instead: no character/plot quizzes; no Marc/Marie/Paris flashcards; names OK in reading clickable dict, not in Review/Flashcards.

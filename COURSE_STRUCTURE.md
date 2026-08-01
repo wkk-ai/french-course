@@ -15,7 +15,7 @@
 
 **Playable now:** all **720** core A/B/C/D sub-chapters (catalog + `BUNDLED_LESSONS`), each meeting `validateChapterContent` (meanings-first brief, ≥220 reading words, ≥12 dialogue, ≥22 exercises).
 
-**Still uneven authorship:** Module 1 **Learn A** (and its BC cores) remain the deepest hand-written lessons. M02–M36 + Prove D are theme-factory + deepen to the same bar — not equal prose craft to M01 A. Specialty tracks / micro-skills / placement still target-only.
+**Authorship:** all **720** must pass Module-1 Learn A craft CI (`validateChapterContent` + `measure-content-pads` + `docs/CRAFT_MATRIX.md`). Module 1 Learn A remains the gold hand sample; factory themes build via `craft-from-theme`. Specialty tracks / micro-skills / placement still target-only.
 
 | Layer | Complete Edition target | Shipped |
 | --- | ---: | ---: |

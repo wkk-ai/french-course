@@ -26,7 +26,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ## Content + Review
 - Bundled `BUNDLED_LESSONS` (all 36 modules × A/B/C/D = 720) **wins** over thin DB stubs in `resolveLessonContent`.
-- Pathway UI: `src/lib/pathway/catalog.ts`. Every module playable at **Module-1 depth bar** (`validateChapterContent`). Prove (D) is mandatory per unit.
+- Pathway UI: `src/lib/pathway/catalog.ts`. Every module playable at **Module-1 Learn A craft** (`validateChapterContent` + measure pads). Prove (D) is mandatory per unit.
 - Lesson complete must enqueue lemmas for Review (remote and/or local vault); wrong answers → `user_mistakes`.
 - Before done: check missing lemmas after enrich, conjugate on infinitives, spacing, Review queue after complete, depth CI on all bundled lessons.
 

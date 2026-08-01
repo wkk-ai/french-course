@@ -32,6 +32,23 @@ export const AUTHOR_PAD_DENYLIST: string[] = [
   'Relisez vite les sens',
   'Contrôle final : expliquez la règle',
   'Épreuve (Prove)',
+  // Live factory pads (must stay banned)
+  'Practice order',
+  'read-only if early',
+  'useful phrase — say it whole',
+  'Prove gate',
+  'remediate B/C',
+  'Pass → unit complete',
+  'Fail → remediate',
+  'revient dans la leçon',
+  'Nous parlons encore de',
+  'On répète les phrases',
+  'Extra practice with meanings',
+  'Voici encore du français sur',
+  'Je pratique :',
+  'Je comprends la règle',
+  'Aujourd\'hui, nous travaillons le français de la leçon',
+  'Familier (read-only if early)',
 ]
 
 const PROPER_NOUN_ALLOWLIST = new Set([
@@ -53,14 +70,42 @@ const PROPER_NOUN_ALLOWLIST = new Set([
   'nicolas',
   'emma',
   'antoine',
+  'camille',
+  'julien',
+  'léa',
+  'lea',
+  'hugo',
+  'manon',
+  'louis',
+  'nina',
+  'adam',
+  'jade',
+  'chloé',
+  'chloe',
+  'lille',
+  'nantes',
+  'bordeaux',
+  'strasbourg',
+  'nice',
+  'rennes',
+  'toulouse',
+  'marseille',
+  'montréal',
+  'montreal',
 ])
+
+export function isPathwayProperNoun(surface: string): boolean {
+  const trimmed = surface.trim().replace(/^[«»"'(\[]+/, '').replace(/[.,!?;:»"')\]]+$/, '')
+  if (!/^[A-ZÀ-Ÿ]/.test(trimmed)) return false
+  return PROPER_NOUN_ALLOWLIST.has(trimmed.normalize('NFC').toLowerCase())
+}
 
 const EN_GRAMMAR_LEAK =
   /\b(past tense|past participle|with avoir|with être|you finished|I ate|I have eaten|still \/ again|to eat|to finish|to speak|to see|to take|to do\/make|to write|to buy|goodbye|see you soon|please informal)\b/i
 
 const EN_GLOSS_LEAK = /signifie\s*«/i
 const EN_TITLE_IN_FR =
-  /\b(Emotions|Grammar|Prices|Elections|Friendship|Conflict|Headlines|Borders|Relatives|Concession|Passive|Citizen|Debate|Advice|Health|Jobs|Reciprocal|Compare|Laws|Report|scene|story|drill|news|nouns|tone|switch|Final|global|texts|diploma|Office|Studies|Tech|Climate|Poetry|Idioms|News|Essay|Data|Results|Research|Companies|Consumer|Hypothesis|Opinion|Global|Phase|Drills|Literary|Comprehension|onboarding|markers|openers|triggers|lexicon|skeleton|rewrite|Analysis|Character|Tone|Recycling|Proposals|Planet|Regret|Cool|Ciao|Bravo|light|advice|future|form|for|In|The|First|reading|hunt|certificate|against|For|skim|Long|trio|decoder|produce|object|hypothesis|climate|proposals|connectors|history|discourse|forms|bureaucracy|legal|boilerplate|media|synthesis|deep|comparison|production|passive|regular|events|formation|habits|setting|futures|relative|relatives|economy|consequence|idioms|awareness|common|words|mix|brother|with|to|final|Witness|Memory|Thesis|Support|Counter|Meetings|Reports|Objectives|Project|Forms|Applications|Contracts|Boilerplate|Disputes|Feature|Investigation|Editorial|Synthesis|Varieties|Norms|Africa|Americas|Diversity|Tale|Chapter|Ending|Food|Shopping|Fill|many|gaps|Formal|informal|postcard|Write|from|prompts|Version|Exact|Mix|lenses|MRS|VANDERTRAMP|Agent|some|tea|water|cup|onecup|DR|Agreement|Promises|Comparatives|Numbers|days|and|Possessives|kinship|demonstratives|Yesterday|narrative|recap|review|Error|correction|Announcement|choice|Letter|Predictions|Promise|letter|Gift|scenario|Narrative|Biography|Register|ladder|Checkpoint|where|never|Tense|Weekend)\b/i
+  /\b(Emotions|Grammar|Prices|Elections|Friendship|Conflict|Headlines|Borders|Relatives|Concession|Passive|Citizen|Debate|Advice|Health|Jobs|Reciprocal|Compare|Laws|Report|scene|story|drill|news|nouns|tone|switch|texts|diploma|Office|Studies|Tech|Climate|Poetry|Idioms|News|Essay|Data|Results|Research|Companies|Consumer|Hypothesis|Opinion|Global|Phase|Drills|Literary|Comprehension|onboarding|markers|openers|triggers|lexicon|skeleton|rewrite|Analysis|Character|Tone|Recycling|Proposals|Planet|Regret|Witness|Memory|Thesis|Support|Counter|Meetings|Reports|Objectives|Project|Forms|Applications|Contracts|Boilerplate|Disputes|Feature|Investigation|Editorial|Synthesis|Varieties|Norms|Africa|Americas|Diversity|Food|Shopping|Consequence|Yesterday|narrative|recap|Error|correction|Announcement|Letter|Predictions|Promise|Gift|scenario|Narrative|Biography|Register|ladder|Checkpoint|Tense|Weekend|Prove|Apply|Integrate)\b/i
 
 export function hasAuthorPad(text: string): boolean {
   const lower = text.toLowerCase()
@@ -77,9 +122,7 @@ export function englishLeakInFrench(text: string): boolean {
 }
 
 function isProperNounAllowlisted(surface: string): boolean {
-  const trimmed = surface.trim().replace(/^[«»"'(\[]+/, '').replace(/[.,!?;:»"')\]]+$/, '')
-  if (!/^[A-ZÀ-Ÿ]/.test(trimmed)) return false
-  return PROPER_NOUN_ALLOWLIST.has(trimmed.normalize('NFC').toLowerCase())
+  return isPathwayProperNoun(surface)
 }
 
 function collectUntappable(text: string, prefix: string, vocabulary: VocabularyWord[], out: Set<string>) {

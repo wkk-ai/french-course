@@ -17,7 +17,7 @@ function roleFor(chapterId: string, title?: string): 'A' | 'B' | 'C' | 'D' {
 function withDepth(lessons: Record<string, LessonContent>): Record<string, LessonContent> {
   const out: Record<string, LessonContent> = {}
   for (const [id, lesson] of Object.entries(lessons)) {
-    out[id] = deepenLessonToModule1Bar(lesson, roleFor(id, lesson.brief?.title))
+    out[id] = deepenLessonToModule1Bar(lesson, roleFor(id, lesson.brief?.title), id)
   }
   return out
 }
