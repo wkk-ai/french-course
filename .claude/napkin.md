@@ -9,7 +9,7 @@
 ## Execution & Validation (Highest Priority)
 
 1. **[2026-08-01] Author pads / length theater — permanent craft lock**
-   Do instead: `craft-from-theme` builds factory lessons; no `learnerBriefPad` / `topicFillerFrench` / inventory `defaultReadingFr`. Denylist includes live needles. Pages runs `npm test` + `measure-content-pads` before build. Done only at `failing: 0 / 720` + `docs/CRAFT_MATRIX.md`. Never resurrect length-inflation helpers. Theme schema via `theme-craft-schema.ts`.
+   Do instead: `craft-from-theme` builds factory lessons with shared name/place world + multi-scene templates; no pad emitters. Pages runs `npm test` + `measure-content-pads` before build. Done only at `failing: 0 / 720` + `docs/CRAFT_MATRIX.md`. Never resurrect length-inflation helpers. Theme schema via `theme-craft-schema.ts`. Rules full body loads from `/rules-data/*.json` after unlock.
 
 2. **[2026-07-27] Reading tap “Not in the dictionary” / vocab id hygiene**
    Do instead: (1) namespaces M1 `1–295`, P1 `400–499`, LATER `600–841`, CORE `4000+`, TAP `5000+`; (2) one surface → one id (`dedupeVocabularySurfaces` + `scripts/dedupe-vocab-banks.ts`); (3) CI unique ids + unique surfaces; (4) `npx tsx scripts/audit-vocab-ids.ts` after vocab edits.
