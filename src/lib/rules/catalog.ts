@@ -10,6 +10,7 @@ import {
   POSSESSIVE_ADJECTIVES,
   SILENT_FINALS,
 } from '@/lib/rules/documents/module1-rest'
+import { RULE_EXAMPLE_EN_OVERLAY } from '@/lib/rules/example-en-overlay'
 import type { GrammarRuleDocument } from '@/lib/rules/types'
 
 export const MODULE1_RULE_DOCUMENTS: GrammarRuleDocument[] = [
@@ -23,12 +24,18 @@ export const MODULE1_RULE_DOCUMENTS: GrammarRuleDocument[] = [
   SILENT_FINALS,
 ]
 
+function withExampleOverlay(rule: GrammarRuleDocument): GrammarRuleDocument {
+  const overlay = RULE_EXAMPLE_EN_OVERLAY[rule.slug]
+  if (!overlay?.length) return rule
+  return { ...rule, examples: overlay.map((example, index) => ({ ...(rule.examples?.[index] ?? {}), ...example })) }
+}
+
 /** All bundled grammar docs (Module 1 + Phase I + later phases). */
 export const ALL_RULE_DOCUMENTS: GrammarRuleDocument[] = [
   ...MODULE1_RULE_DOCUMENTS,
   ...PHASE1_RULE_DOCUMENTS,
   ...LATER_RULE_DOCUMENTS,
-]
+].map(withExampleOverlay)
 
 export function getRuleBySlug(slug: string): GrammarRuleDocument | undefined {
   return ALL_RULE_DOCUMENTS.find((rule) => rule.slug === slug)

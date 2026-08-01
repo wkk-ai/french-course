@@ -190,7 +190,7 @@ export default function CenterClient() {
       </div>
 
       <section className="tactile-card p-6">
-        <h2 className="text-body-ui font-bold text-on-surface mb-6">Vocabulary Growth</h2>
+        <h2 className="text-body-ui font-bold text-on-surface mb-6">Words added to Review (queue)</h2>
         <div className="h-[250px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={vocabChartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>

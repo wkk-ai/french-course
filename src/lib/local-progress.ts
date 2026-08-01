@@ -109,6 +109,13 @@ export function clearLocalLearnerData() {
     if (key.startsWith('french-course:lesson-draft:')) localStorage.removeItem(key)
     if (key.startsWith('french-course:daily-articles:')) localStorage.removeItem(key)
   }
+  try {
+    for (const key of Object.keys(sessionStorage)) {
+      if (key.startsWith('french-course:lesson-draft:')) sessionStorage.removeItem(key)
+    }
+  } catch {
+    // sessionStorage may be blocked
+  }
 }
 
 /** Cross-tab sync when another tab marks a chapter complete locally. */

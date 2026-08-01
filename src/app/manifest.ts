@@ -8,9 +8,9 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "L'Art du Français",
     short_name: 'Art du Français',
-    description: 'A reading-first French course for grammar and vocabulary.',
+    description: 'A reading-first French course for grammar and vocabulary. Install for quick access; offline study is not available yet.',
     start_url: `${basePath}/`,
-    display: 'standalone',
+    display: 'browser',
     background_color: '#f9f9f9',
     theme_color: '#003e7a',
     icons: [

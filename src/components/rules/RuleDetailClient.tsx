@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { ExerciseCard } from '@/components/lesson/ExerciseCard'
 import { RichText } from '@/components/RichText'
 import type { ExerciseAnswer } from '@/lib/exercises/types'
+import type { PublicGrammarRule } from '@/lib/rules/public'
 import type { GrammarRuleDocument, RuleTable } from '@/lib/rules/types'
 import {
   isRuleUnlocked,
@@ -16,6 +17,8 @@ import { mergeCompletedChapterIds } from '@/lib/local-progress'
 import { createClient } from '@/utils/supabase/client'
 
 type TabId = 'quick' | 'deep' | 'examples' | 'try'
+
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
 
 async function recordRuleMistake(category: string, context: string) {
   try {
@@ -76,12 +79,14 @@ function RuleTableView({ table }: { table: RuleTable }) {
   )
 }
 
-export function RuleDetailClient({ rule }: { rule: GrammarRuleDocument }) {
+export function RuleDetailClient({ teaser }: { teaser: PublicGrammarRule }) {
   const [tab, setTab] = useState<TabId>('quick')
   const [answers, setAnswers] = useState<Record<string, ExerciseAnswer>>({})
   const [unlocked, setUnlocked] = useState(false)
   const [stage, setStage] = useState<RuleMasteryStage>('locked')
   const [booting, setBooting] = useState(true)
+  const [rule, setRule] = useState<GrammarRuleDocument | null>(null)
+  const [loadError, setLoadError] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -103,11 +108,14 @@ export function RuleDetailClient({ rule }: { rule: GrammarRuleDocument }) {
             .from('user_grammar_mastery')
             .select('grammar_category, total_attempts, correct_attempts')
             .eq('user_id', user.id)
-            .in('grammar_category', rule.masteryCategories),
+            .in('grammar_category', teaser.masteryCategories),
         ])
         if (cancelled) return
         const completed = mergeCompletedChapterIds((progress ?? []).map((row) => row.chapter_id))
-        const isOpen = isRuleUnlocked(rule, completed)
+        const isOpen = isRuleUnlocked(
+          { slug: teaser.slug, unlockChapterIds: teaser.unlockChapterIds },
+          completed,
+        )
         let totalAttempts = 0
         let correctAttempts = 0
         for (const row of masteryRows ?? []) {
@@ -116,10 +124,17 @@ export function RuleDetailClient({ rule }: { rule: GrammarRuleDocument }) {
         }
         setUnlocked(isOpen)
         setStage(masteryStage(isOpen, correctAttempts, totalAttempts))
+        if (isOpen) {
+          const res = await fetch(`${basePath}/rules-data/${teaser.slug}.json`)
+          if (!res.ok) throw new Error('missing rule payload')
+          const full = (await res.json()) as GrammarRuleDocument
+          if (!cancelled) setRule(full)
+        }
       } catch {
         if (!cancelled) {
           setUnlocked(false)
           setStage('locked')
+          setLoadError(true)
         }
       } finally {
         if (!cancelled) setBooting(false)
@@ -128,7 +143,7 @@ export function RuleDetailClient({ rule }: { rule: GrammarRuleDocument }) {
     return () => {
       cancelled = true
     }
-  }, [rule])
+  }, [teaser])
 
   const tabs = useMemo(
     () =>
@@ -149,14 +164,16 @@ export function RuleDetailClient({ rule }: { rule: GrammarRuleDocument }) {
     )
   }
 
-  if (!unlocked) {
-    // Locked: generic message only — deepDive/examples/drills never hit the DOM.
+  if (!unlocked || !rule) {
     return (
       <div className="tactile-card mt-6 space-y-4 p-6">
-        <h1 className="text-headline-lg">Not available yet</h1>
+        <h1 className="text-headline-lg">{loadError ? teaser.title : 'Not available yet'}</h1>
         <p className="text-body-reading text-on-surface-variant">
-          This grammar page unlocks after you finish the lesson that teaches it. Keep learning — it will appear in your rulebook when ready.
+          {loadError
+            ? 'Could not load this grammar page. Try again after refreshing.'
+            : 'This grammar page unlocks after you finish the lesson that teaches it. Keep learning — it will appear in your rulebook when ready.'}
         </p>
+        <p className="text-sm text-on-surface-variant">{teaser.summary}</p>
         <Link href="/rules/" className="tactile-button inline-flex rounded-lg border-2 border-surface-variant bg-surface-container-low px-4 py-2 text-sm font-bold text-on-surface">
           Back to rulebook
         </Link>

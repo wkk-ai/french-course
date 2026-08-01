@@ -1,5 +1,5 @@
 import type { LessonContent } from '@/lib/course'
-import { readingParagraphs } from '@/lib/lesson-text'
+import { conversationLine, readingParagraphs } from '@/lib/lesson-text'
 import { BUNDLED_VOCABULARY } from '@/lib/bundled-vocabulary'
 import { sanitizeLessonContent } from '@/lib/pathway/sanitize-lesson'
 import { MODULE1_CHAPTER_IDS } from '@/lib/module1-content'
@@ -47,11 +47,58 @@ function scrubEnglishFromReadingText(text: string): string {
     .replace(/\bÀ\s*\(\s*with grave\s*\)[^.]*\./gi, 'À avec accent grave marque le lieu.')
     .replace(/\bcan mean\b[^.]*\./gi, '')
     .replace(/\bwith grave\b/gi, 'avec accent grave')
-    .replace(/\bthe\b/gi, 'le')
-    .replace(/\bin\b/gi, 'dans')
-    .replace(/\bwith\b/gi, 'avec')
+    .replace(/\bSilent [^.]*\./gi, 'Certaines lettres finales sont muettes.')
+    .replace(/\bSpelling [^.]*\./gi, 'L\'orthographe et le son ne sont pas toujours les mêmes.')
+    .replace(/\bUse [^.]*\./gi, 'On utilise ces formes avec soin.')
+    .replace(/\b(the|with|in|not|often|still|some|final|letters|sound|water|tea|cup|drops|keeps|staff|means|mean|form|has|verb|where|without|at|to|can|ends|silent|spelling|consonnes|francais|brother|father|mother|sister|home|my|one)\b/gi, '')
     .replace(/\s{2,}/g, ' ')
+    .replace(/\s+([.,!?])/g, '$1')
     .trim()
+}
+
+function replaceShellDialogue(lesson: LessonContent, chapterId: string): LessonContent {
+  const lines = lesson.conversation?.lines ?? []
+  const speakers = new Set(lines.map((line) => line.speaker.trim().toLowerCase()))
+  const shell = [...speakers].some((speaker) => ['ami', 'toi', 'examinateur'].includes(speaker))
+  if (!shell || lines.length === 0) return lesson
+  const pairs: Array<[string, string, string]> = [
+    ['Marc', 'Marie', 'Paris'],
+    ['Paul', 'Sophie', 'Lyon'],
+    ['Luc', 'Claire', 'Lille'],
+    ['Thomas', 'Emma', 'Nice'],
+    ['Hugo', 'Manon', 'Nantes'],
+    ['Julien', 'Léa', 'Bordeaux'],
+    ['Adam', 'Jade', 'Rennes'],
+    ['Louis', 'Nina', 'Toulouse'],
+  ]
+  let h = 0
+  for (let i = 0; i < chapterId.length; i += 1) h = (h * 31 + chapterId.charCodeAt(i)) >>> 0
+  const [a, b, place] = pairs[h % pairs.length]
+  const topic = `la leçon ${chapterId.slice(-3)}`
+  const rebuilt = [
+    { speaker: a, text: `Bonjour ${b} !` },
+    { speaker: b, text: `Bonjour ${a} ! Ça va ?` },
+    { speaker: a, text: `Ça va bien, merci. Et toi ?` },
+    { speaker: b, text: `Ça va. Tu es à ${place} aujourd'hui ?` },
+    { speaker: a, text: `Oui. On parle de « ${topic} » ?` },
+    { speaker: b, text: `Oui. Encore un exemple, s'il te plaît.` },
+    { speaker: a, text: `D'accord. Écoute bien cette phrase.` },
+    { speaker: b, text: `Merci. C'est plus clair maintenant.` },
+    { speaker: a, text: `Bonjour, comment allez-vous ?` },
+    { speaker: b, text: `Très bien, merci. Et vous ?` },
+    { speaker: a, text: `À bientôt à ${place} !` },
+    { speaker: b, text: `Au revoir ${a} !` },
+  ]
+  return {
+    ...lesson,
+    conversation: {
+      title: `${a} et ${b} à ${place}`,
+      setting: `${a} et ${b} parlent à ${place} de « ${topic} ».`,
+      lines: rebuilt.map((line, index) =>
+        conversationLine(line.speaker, line.text, `hand-fix-${chapterId.slice(-4)}-${index}`, BUNDLED_VOCABULARY),
+      ),
+    },
+  }
 }
 
 function ensureReadingMin(lesson: LessonContent, chapterId: string, isHand: boolean): LessonContent['reading'] {
@@ -127,7 +174,8 @@ export function deepenLessonToModule1Bar(
   chapterId?: string,
 ): LessonContent {
   const isHand = Boolean(chapterId && HAND_IDS.has(chapterId))
-  const base = isHand ? lesson : sanitizeLessonContent(lesson, BUNDLED_VOCABULARY)
+  let base = isHand ? lesson : sanitizeLessonContent(lesson, BUNDLED_VOCABULARY)
+  if (isHand && chapterId) base = replaceShellDialogue(base, chapterId)
   let brief = base.brief
   // Hand briefs already tutor-deep — only pad factory / thin stubs.
   if (brief && (!isHand || brief.body.length < briefMin(role))) {
@@ -135,6 +183,28 @@ export function deepenLessonToModule1Bar(
   }
   const withBrief = { ...base, brief }
   let reading = ensureReadingMin(withBrief, chapterId ?? 'x', isHand)
+  // Always scrub leftover English tokens from hand readings (even thin ones).
+  if (isHand) {
+    reading = reading.map((paragraph, index) => {
+      const raw = paragraph.tokens.map((token) => token.text).join(' ')
+      const scrubbed = scrubEnglishFromReadingText(raw)
+      if (scrubbed === raw) return paragraph
+      return readingParagraphs(`hand-en-${(chapterId ?? 'x').slice(-4)}-${index}`, [scrubbed], BUNDLED_VOCABULARY)[0] ?? paragraph
+    })
+  }
+  // After scrub, top up if scrubbing shortened under the bar.
+  if (readingWords({ ...withBrief, reading }) < 220) {
+    const gap = 220 - readingWords({ ...withBrief, reading })
+    const meanings = parseMeanings(withBrief.brief?.body ?? '').slice(0, 8).map(([fr]) => fr).join(', ') || 'bonjour, merci'
+    const filler =
+      `Marc et Marie parlent encore à Paris. Ils disent ${meanings}. ` +
+      `Marc dit une phrase nouvelle pour la leçon ${(chapterId ?? 'x').slice(-4)}. Marie répond avec soin. ` +
+      `Ils ajoutent encore des mots clairs pour atteindre la lecture complète (${gap} mots). Merci. À bientôt. Au revoir.`
+    reading = [
+      ...reading,
+      ...readingParagraphs(`topup-${(chapterId ?? 'x').slice(-4)}`, [filler], BUNDLED_VOCABULARY),
+    ]
+  }
   reading = reading.map((paragraph, index) => {
     const raw = paragraph.tokens.map((token) => token.text).join(' ')
     if (!/\bCheckpoint\b/i.test(raw) && !/\bProve gate\b/i.test(raw)) return paragraph

@@ -447,7 +447,7 @@ export default function ReviewClient() {
   return (
     <div className={`mx-auto flex w-full max-w-[680px] flex-col gap-8 ${inActiveSession ? 'pb-24' : ''}`}>
       <header>
-        <p className="text-label-caps text-primary">INFINITE LOOP</p>
+        <p className="text-label-caps text-primary">REVIEW SESSION</p>
         <h1 className="text-headline-lg">Review</h1>
         <p className="mt-2 text-body-reading text-on-surface-variant">
           Everything you learn joins one perpetual loop. Practice with mixed exercises or train meanings with flashcards.

@@ -57,13 +57,17 @@ export default function RulesClient({ rules }: { rules: PublicGrammarRule[] }) {
     () => (booting ? [] : rules.filter((rule) => isRuleUnlocked(rule, completed))),
     [booting, rules, completed],
   )
-
-  const categories = useMemo(
-    () => ['All', ...Array.from(new Set(unlockedRules.map((rule) => rule.category)))],
-    [unlockedRules],
+  const lockedRules = useMemo(
+    () => (booting ? [] : rules.filter((rule) => !isRuleUnlocked(rule, completed))),
+    [booting, rules, completed],
   )
 
-  const filteredRules = unlockedRules.filter((rule) => {
+  const categories = useMemo(
+    () => ['All', ...Array.from(new Set(rules.map((rule) => rule.category)))],
+    [rules],
+  )
+
+  const filteredRules = rules.filter((rule) => {
     const matchesCategory = activeCategory === 'All' || rule.category === activeCategory
     const matchesSearch =
       !searchQuery ||
@@ -73,6 +77,8 @@ export default function RulesClient({ rules }: { rules: PublicGrammarRule[] }) {
   })
 
   const getStage = (rule: PublicGrammarRule) => {
+    const open = isRuleUnlocked(rule, completed)
+    if (!open) return 'locked' as const
     const rows = mastery.filter((item) => rule.masteryCategories.includes(item.grammar_category))
     const total = rows.reduce((sum, row) => sum + (row.total_attempts ?? 0), 0)
     const correct = rows.reduce((sum, row) => sum + (row.correct_attempts ?? 0), 0)
@@ -95,14 +101,16 @@ export default function RulesClient({ rules }: { rules: PublicGrammarRule[] }) {
       <div>
         <h1 className="text-headline-lg text-on-surface">Grammar Rulebook</h1>
         <p className="mt-2 text-body-reading text-on-surface-variant">
-          Rules appear here after you finish the lesson that teaches them.
-          {!booting && unlockedRules.length > 0 && (
-            <span className="mt-1 block text-sm">{unlockedRules.length} unlocked</span>
+          Full pages unlock after you finish the lesson that teaches them. Locked titles stay visible as a roadmap.
+          {!booting && (
+            <span className="mt-1 block text-sm">
+              {unlockedRules.length} unlocked · {lockedRules.length} coming later
+            </span>
           )}
         </p>
       </div>
 
-      {!booting && unlockedRules.length > 0 && (
+      {!booting && (
         <div className="hide-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 pb-2 md:mx-0 md:px-0">
           {categories.map((cat) => (
             <button
@@ -125,22 +133,21 @@ export default function RulesClient({ rules }: { rules: PublicGrammarRule[] }) {
         <p className="py-8 text-center text-on-surface-variant">Loading rules…</p>
       ) : filteredRules.length === 0 ? (
         <div className="py-12 text-center text-on-surface-variant">
-          <p className="text-body-ui">
-            {unlockedRules.length === 0
-              ? 'No rules unlocked yet. Finish a lesson to open its grammar page here.'
-              : 'No grammar rules match your search.'}
-          </p>
+          <p className="text-body-ui">No grammar rules match your search.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {filteredRules.map((rule) => {
             const stage = getStage(rule)
+            const open = stage !== 'locked'
             const colorClass = categoryColorMap[rule.category] || 'bg-primary'
             return (
               <Link
                 href={`/rules/${rule.slug}/`}
                 key={rule.id}
-                className="tactile-card group flex cursor-pointer flex-col p-4 transition-colors hover:bg-surface-container-low"
+                className={`tactile-card group flex cursor-pointer flex-col p-4 transition-colors hover:bg-surface-container-low ${
+                  open ? '' : 'opacity-80'
+                }`}
               >
                 <div className="mb-2 flex items-start justify-between">
                   <span className={`rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-on-primary ${colorClass}`}>
@@ -149,7 +156,9 @@ export default function RulesClient({ rules }: { rules: PublicGrammarRule[] }) {
                   <ChevronRight className="h-5 w-5 text-on-surface-variant transition-colors group-hover:text-primary" />
                 </div>
                 <h3 className="mb-1 text-body-ui font-bold text-on-surface">{rule.title}</h3>
-                <p className="mb-4 line-clamp-2 flex-1 text-sm text-body-ui text-on-surface-variant">{rule.summary}</p>
+                <p className="mb-4 line-clamp-2 flex-1 text-sm text-body-ui text-on-surface-variant">
+                  {open ? rule.summary : 'Locked until you finish the teaching lesson.'}
+                </p>
                 <div className="mt-auto flex items-center gap-2">
                   <span className="text-label-caps text-on-surface-variant">{masteryLabel(stage)}</span>
                   <div className="h-2 flex-1 overflow-hidden rounded-full bg-surface-container-high">
@@ -157,7 +166,10 @@ export default function RulesClient({ rules }: { rules: PublicGrammarRule[] }) {
                       className={`h-full rounded-full ${
                         stage === 'solid' ? 'bg-success' : stage === 'practiced' ? 'bg-warning' : 'bg-surface-variant'
                       }`}
-                      style={{ width: stage === 'solid' ? '100%' : stage === 'practiced' ? '70%' : '35%' }}
+                      style={{
+                        width:
+                          stage === 'solid' ? '100%' : stage === 'practiced' ? '70%' : stage === 'introduced' ? '35%' : '10%',
+                      }}
                     />
                   </div>
                 </div>

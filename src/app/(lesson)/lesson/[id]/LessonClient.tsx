@@ -311,7 +311,12 @@ export default function LessonClient({
     remediationExercises.every((exercise) => isExerciseAnswered(exercise, answers[exercise.id]))
   const liveScore = useMemo(() => calculateLessonScore(answers, scoringExercises), [answers, scoringExercises])
   const provePassed = !isProve || (answeredAll && didPassProve(liveScore))
-  const progress = stage === 'brief' ? 20 : stage === 'reading' ? 45 : stage === 'conversation' ? 70 : answeredAll ? 100 : 90
+  const progress =
+    stage === 'brief' ? 15
+    : stage === 'reading' ? 30
+    : stage === 'conversation' ? 45
+    : answeredAll ? 100
+    : 50 + Math.round((Object.keys(answers).length / Math.max(1, content.exercises?.length ?? 1)) * 45)
   const remediateLinks = useMemo(() => siblingRemediationLinks(chapterId), [chapterId])
 
   useEffect(() => {
@@ -639,7 +644,7 @@ export default function LessonClient({
     if (!answeredAll) return
     if (isProve && !didPassProve(liveScore)) {
       setError(
-        `Prove needs ${PROVE_PASS_SCORE}%+. You scored ${liveScore}%. Open Apply/Integrate below, then retry Prove.`,
+        `You need ${PROVE_PASS_SCORE}%+ to pass. You scored ${liveScore}%. Open the practice and review chapters below, then try this check again.`,
       )
       return
     }
@@ -765,11 +770,11 @@ export default function LessonClient({
           <X className="size-6" />
         </Link>
         <div className="mx-4 flex-1"><div className="h-3 overflow-hidden rounded-full bg-surface-container-high"><div className="h-full rounded-full bg-success transition-all" style={{ width: `${progress}%` }} /></div></div>
-        <div className="flex items-center gap-1 rounded-full bg-surface-container px-3 py-1"><Flame className="size-4 fill-warning/20 text-warning" /><span className="text-sm font-bold">Lesson</span></div>
+        <div className="flex items-center gap-1 rounded-full bg-surface-container px-3 py-1"><Flame className="size-4 fill-warning/20 text-warning" /><span className="text-sm font-bold">In lesson</span></div>
       </header>
 
       <main className="flex-1 p-4 pb-[calc(7rem+env(safe-area-inset-bottom))]">
-        <p className="text-label-caps text-primary">{isProve ? 'PROVE · NO HINTS' : 'MODULE LESSON'}</p>
+        <p className="text-label-caps text-primary">{isProve ? 'CHECK · NO HINTS' : 'LESSON'}</p>
         <h1 className="mt-1 text-headline-md">{title}</h1>
 
         {stage === 'brief' && content.brief && (
@@ -893,7 +898,7 @@ export default function LessonClient({
           <section ref={exerciseSectionRef} className="mt-8 space-y-5">
             <p className="text-body-reading text-on-surface-variant">
               {isProve
-                ? `Score at least ${PROVE_PASS_SCORE}% to pass, with no hints. If you miss it, reopen Apply and Integrate, then try again.`
+                ? `Score at least ${PROVE_PASS_SCORE}% to pass, with no hints. If you miss it, reopen the practice and review chapters in this unit, then try again.`
                 : 'Mixed drills: multiple choice, fill-in, matching, word order, and more. Answer each once — wrong answers feed Review.'}
             </p>
             {exercises.length > 0 && (
@@ -931,7 +936,7 @@ export default function LessonClient({
                 <p>Score {liveScore}% {provePassed ? '· pass' : `· need ${PROVE_PASS_SCORE}%+`}</p>
                 {!provePassed && remediateLinks.length > 0 && (
                   <div className="flex flex-col gap-2">
-                    <p className="font-semibold">Remediate, then retry Prove:</p>
+                    <p className="font-semibold">Practice first, then retry this check:</p>
                     {remediateLinks.map((link) => (
                       <Link key={link.id} href={`/lesson/${link.id}/`} className="underline font-bold text-primary">
                         {link.label}
@@ -977,7 +982,7 @@ export default function LessonClient({
                 onClick={completeLesson}
                 className="tactile-button flex-[2] rounded-xl border-[#46a302] bg-success py-4 font-bold text-[#0b3d0b] disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {loading ? 'SAVING…' : isProve ? 'PASS PROVE' : 'COMPLETE LESSON'}
+                {loading ? 'SAVING…' : isProve ? 'PASS CHECK' : 'COMPLETE LESSON'}
               </button>
             </div>
           </section>
