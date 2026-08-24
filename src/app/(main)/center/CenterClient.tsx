@@ -1,12 +1,11 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { createClient } from '@/utils/supabase/client';
-import { 
+import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis
 } from 'recharts';
-import { mergeCompletedChapterIds, readLocalCompletedChapters, subscribeCompletedChapters } from '@/lib/local-progress'
+import { mergeCompletedChapterIds, readLocalCompletedChapters, readLocalDailyReadingHistory, subscribeCompletedChapters } from '@/lib/local-progress'
 import { getAllLocalVocabulary } from '@/lib/local-vocab-vault'
 
 type VocabProgress = { vocab_id?: string; created_at: string; last_reviewed_at: string | null }
@@ -25,10 +24,10 @@ function weekLabel(date: Date): string {
 export default function CenterClient() {
   const [today] = useState(() => new Date().toISOString())
   const [vocabProgress, setVocabProgress] = useState<VocabProgress[]>([])
-  const [grammarMastery, setGrammarMastery] = useState<GrammarMastery[]>([])
+  const [grammarMastery] = useState<GrammarMastery[]>([])
   const [chapterProgress, setChapterProgress] = useState<ChapterProgress[]>([])
   const [dailyReading, setDailyReading] = useState<DailyReading[]>([])
-  const [grammarRules, setGrammarRules] = useState<GrammarRuleSummary[]>([])
+  const [grammarRules] = useState<GrammarRuleSummary[]>([])
   const [localCompleted, setLocalCompleted] = useState(0)
   const [localReviewed, setLocalReviewed] = useState(0)
   const [booting, setBooting] = useState(true)
@@ -43,48 +42,27 @@ export default function CenterClient() {
   }, [])
 
   useEffect(() => {
-    let cancelled = false
-    ;(async () => {
-      try {
-        const supabase = createClient()
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user || cancelled) {
-          if (!cancelled) setBooting(false)
-          return
-        }
-
-        const since = new Date()
-        since.setUTCDate(since.getUTCDate() - 30)
-        const sinceStr = since.toISOString().split('T')[0]
-
-        const [vocabRes, grammarRes, chapterRes, rulesRes, readingRes] = await Promise.all([
-          supabase.from('user_vocab_progress').select('vocab_id, created_at, last_reviewed_at').eq('user_id', user.id).order('created_at', { ascending: true }),
-          supabase.from('user_grammar_mastery').select('grammar_category, total_attempts, correct_attempts, updated_at').eq('user_id', user.id),
-          supabase.from('user_chapter_progress').select('chapter_id, status, completed_at').eq('user_id', user.id),
-          supabase.from('grammar_rules').select('slug, title, category'),
-          supabase
-            .from('user_daily_reading_stats')
-            .select('date, words_read')
-            .eq('user_id', user.id)
-            .gte('date', sinceStr),
-        ])
-        if (cancelled) return
-        setVocabProgress(vocabRes.data ?? [])
-        setGrammarMastery(grammarRes.data ?? [])
-        setChapterProgress(chapterRes.data ?? [])
-        setGrammarRules(rulesRes.data ?? [])
-        setDailyReading(readingRes.data ?? [])
-        setLocalCompleted(
-          mergeCompletedChapterIds((chapterRes.data ?? []).map((row) => row.chapter_id).filter((id): id is string => Boolean(id))).size,
-        )
-        setLocalReviewed(getAllLocalVocabulary().filter((item) => item.last_reviewed_at).length)
-      } finally {
-        if (!cancelled) setBooting(false)
-      }
-    })()
-    return () => {
-      cancelled = true
-    }
+    void Promise.resolve().then(() => {
+      const vault = getAllLocalVocabulary()
+      setVocabProgress(
+        vault.map((item) => ({
+          vocab_id: item.vocab_id,
+          created_at: item.last_reviewed_at ?? item.next_review_at,
+          last_reviewed_at: item.last_reviewed_at,
+        })),
+      )
+      setChapterProgress(
+        readLocalCompletedChapters().map((id) => ({
+          chapter_id: id,
+          status: 'completed',
+          completed_at: null,
+        })),
+      )
+      setDailyReading(readLocalDailyReadingHistory())
+      setLocalCompleted(mergeCompletedChapterIds([]).size)
+      setLocalReviewed(vault.filter((item) => item.last_reviewed_at).length)
+      setBooting(false)
+    })
   }, [])
 
   const vocabChartData = useMemo(() => {

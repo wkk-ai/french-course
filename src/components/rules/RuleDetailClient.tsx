@@ -14,43 +14,14 @@ import {
   type RuleMasteryStage,
 } from '@/lib/rules/unlock'
 import { mergeCompletedChapterIds } from '@/lib/local-progress'
-import { createClient } from '@/utils/supabase/client'
 
 type TabId = 'quick' | 'deep' | 'examples' | 'try'
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
 
 async function recordRuleMistake(category: string, context: string) {
-  try {
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-    const { data: existing } = await supabase
-      .from('user_mistakes')
-      .select('id, error_count')
-      .eq('user_id', user.id)
-      .eq('grammar_category', category)
-      .eq('is_resolved', false)
-      .is('vocab_id', null)
-      .maybeSingle()
-    if (existing) {
-      await supabase
-        .from('user_mistakes')
-        .update({ error_count: existing.error_count + 1, last_error_at: new Date().toISOString(), error_context: context })
-        .eq('id', existing.id)
-      return
-    }
-    await supabase.from('user_mistakes').insert({
-      user_id: user.id,
-      grammar_category: category,
-      error_context: context,
-      error_count: 1,
-      is_resolved: false,
-      last_error_at: new Date().toISOString(),
-    })
-  } catch {
-    // Best-effort mistake logging.
-  }
+  void category
+  void context
 }
 
 function RuleTableView({ table }: { table: RuleTable }) {
@@ -92,38 +63,13 @@ export function RuleDetailClient({ teaser }: { teaser: PublicGrammarRule }) {
     let cancelled = false
     ;(async () => {
       try {
-        const supabase = createClient()
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) {
-          if (!cancelled) {
-            setUnlocked(false)
-            setStage('locked')
-            setBooting(false)
-          }
-          return
-        }
-        const [{ data: progress }, { data: masteryRows }] = await Promise.all([
-          supabase.from('user_chapter_progress').select('chapter_id').eq('user_id', user.id).eq('status', 'completed'),
-          supabase
-            .from('user_grammar_mastery')
-            .select('grammar_category, total_attempts, correct_attempts')
-            .eq('user_id', user.id)
-            .in('grammar_category', teaser.masteryCategories),
-        ])
-        if (cancelled) return
-        const completed = mergeCompletedChapterIds((progress ?? []).map((row) => row.chapter_id))
+        const completed = mergeCompletedChapterIds([])
         const isOpen = isRuleUnlocked(
           { slug: teaser.slug, unlockChapterIds: teaser.unlockChapterIds },
           completed,
         )
-        let totalAttempts = 0
-        let correctAttempts = 0
-        for (const row of masteryRows ?? []) {
-          totalAttempts += row.total_attempts ?? 0
-          correctAttempts += row.correct_attempts ?? 0
-        }
         setUnlocked(isOpen)
-        setStage(masteryStage(isOpen, correctAttempts, totalAttempts))
+        setStage(masteryStage(isOpen, 0, 0))
         if (isOpen) {
           const res = await fetch(`${basePath}/rules-data/${teaser.slug}.json`)
           if (!res.ok) throw new Error('missing rule payload')

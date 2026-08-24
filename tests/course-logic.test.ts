@@ -700,4 +700,39 @@ test('HomeClient uses lightweight bundled-chapter-ids only', async () => {
   assert.equal(source.includes('BUNDLED_LESSONS'), false)
   assert.equal(source.includes('resolveLessonContent'), false)
   assert.ok(source.includes('bundled-chapter-ids'))
+  const lesson = fs.readFileSync(path.join(process.cwd(), 'src/app/(lesson)/lesson/[id]/LessonClient.tsx'), 'utf8')
+  const shell = fs.readFileSync(path.join(process.cwd(), 'src/app/(lesson)/lesson/[id]/LessonShell.tsx'), 'utf8')
+  assert.equal(lesson.includes('BUNDLED_LESSONS'), false)
+  assert.equal(shell.includes('BUNDLED_LESSONS'), false)
+  assert.equal(shell.includes('bundled-lessons'), false)
+})
+
+test('guest unlock uses local completed chapters only', async () => {
+  const { isLessonUnlocked } = await import('../src/lib/lesson-unlock')
+  const ids = ['a', 'b', 'c']
+  assert.equal(isLessonUnlocked('a', [], ids), true)
+  assert.equal(isLessonUnlocked('b', [], ids), false)
+  assert.equal(isLessonUnlocked('b', ['a'], ids), true)
+  assert.equal(isLessonUnlocked('a', ['a'], ids), true)
+})
+
+test('home catalog is pathway-only (no login, no supabase)', async () => {
+  const { homeCatalogFromPathway } = await import('../src/lib/home-catalog')
+  const { BUNDLED_CHAPTER_IDS } = await import('../src/lib/bundled-chapter-ids')
+  const catalog = homeCatalogFromPathway()
+  assert.equal(catalog.modules.length, 36)
+  assert.equal(catalog.chapters.length, 720)
+  assert.equal(catalog.chapters.filter((chapter) => chapter.lesson_content).length, BUNDLED_CHAPTER_IDS.length)
+})
+
+test('lesson page and Home do not import AuthGate or getUser', async () => {
+  const fs = await import('node:fs')
+  const path = await import('node:path')
+  const lesson = fs.readFileSync(path.join(process.cwd(), 'src/app/(lesson)/lesson/[id]/LessonClient.tsx'), 'utf8')
+  const home = fs.readFileSync(path.join(process.cwd(), 'src/app/(main)/HomeClient.tsx'), 'utf8')
+  const mainLayout = fs.readFileSync(path.join(process.cwd(), 'src/app/(main)/layout.tsx'), 'utf8')
+  assert.equal(lesson.includes('getUser'), false)
+  assert.equal(home.includes('getUser'), false)
+  assert.equal(mainLayout.includes('AuthGate'), false)
+  assert.equal(lesson.includes('complete_chapter'), false)
 })

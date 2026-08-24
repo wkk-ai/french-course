@@ -29,8 +29,8 @@
 7. **[2026-07-27] RPC `chapter_vocabulary` re-seeds Marc/Paris into Review**
    Do instead: remote `complete_chapter` migration applied; keep client `filterReviewPool` as belt-and-suspenders.
 
-8. **[2026-07-27] Lesson page freezes (“Checking session…” / Page Unresponsive)**
-   Do instead: never import `BUNDLED_LESSONS` / factory themes from client components; use `bundled-vocabulary`, `remediation.ts`, packed lemma index; lazy-build factory lessons server-side only; cache `buildLemmaLookup`.
+8. **[2026-08-24] No login on phone; never ship factory in client**
+   Do instead: guest unlock via `isLessonUnlocked` + local completed ids. Finish = `markLocalChapterCompleted` + vault. Compact JSON from `emit-course-data` (never import `BUNDLED_LESSONS` in client — freeze). Save-course caches JSON + slim pages. iPhone: Safari Add to Home Screen, Save course once on wifi.
 
 9. **[2026-07-25] Prove D must gate at 70%, no hints**
    Do instead: `didPassProve`; `allowHints={!isProve}`; exclude rem from Prove score; fail → remediate B/C.

@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { ChevronRight, Search } from 'lucide-react'
-import { createClient } from '@/utils/supabase/client'
 import type { PublicGrammarRule } from '@/lib/rules/public'
 import { isRuleUnlocked, masteryLabel, masteryStage } from '@/lib/rules/unlock'
 import { mergeCompletedChapterIds } from '@/lib/local-progress'
@@ -24,33 +23,15 @@ type Mastery = {
 export default function RulesClient({ rules }: { rules: PublicGrammarRule[] }) {
   const [activeCategory, setActiveCategory] = useState('All')
   const [searchQuery, setSearchQuery] = useState('')
-  const [mastery, setMastery] = useState<Mastery[]>([])
+  const [mastery] = useState<Mastery[]>([])
   const [completed, setCompleted] = useState<Set<string>>(new Set())
   const [booting, setBooting] = useState(true)
 
   useEffect(() => {
-    let cancelled = false
-    ;(async () => {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user || cancelled) {
-        if (!cancelled) setBooting(false)
-        return
-      }
-      const [{ data: masteryData }, { data: progress }] = await Promise.all([
-        supabase.from('user_grammar_mastery').select('grammar_category, total_attempts, correct_attempts').eq('user_id', user.id),
-        supabase.from('user_chapter_progress').select('chapter_id').eq('user_id', user.id).eq('status', 'completed'),
-      ])
-      if (cancelled) return
-      setMastery(masteryData ?? [])
-      setCompleted(mergeCompletedChapterIds((progress ?? []).map((row) => row.chapter_id)))
+    void Promise.resolve().then(() => {
+      setCompleted(mergeCompletedChapterIds([]))
       setBooting(false)
-    })().catch(() => {
-      if (!cancelled) setBooting(false)
     })
-    return () => {
-      cancelled = true
-    }
   }, [])
 
   const unlockedRules = useMemo(

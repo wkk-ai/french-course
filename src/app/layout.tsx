@@ -17,8 +17,13 @@ const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
 export const metadata: Metadata = {
   title: "L'Art du Français",
-  description: "Learn French through structured reading and linguistics.",
+  description: "Learn French through structured reading. No login. Save the course on your phone.",
   applicationName: "L'Art du Français",
+  appleWebApp: {
+    capable: true,
+    title: "Art du Français",
+    statusBarStyle: "default",
+  },
   icons: {
     icon: [
       { url: `${basePath}/favicon.ico`, sizes: "32x32" },

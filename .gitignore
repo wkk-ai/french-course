@@ -17,6 +17,9 @@
 /.next/
 /out/
 
+# generated compact lessons (emit-course-data)
+/public/course-data/
+
 # production
 /build
 

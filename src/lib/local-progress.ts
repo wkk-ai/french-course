@@ -2,6 +2,7 @@
 
 const KEY = 'french-course:completed-chapters'
 const STREAK_KEY = 'french-course:local-streak'
+const DAILY_WORDS_KEY = 'french-course:daily-words'
 const DAILY_ARTICLES_KEY = (date: string) => `french-course:daily-articles:${date}`
 
 export function readLocalCompletedChapters(): string[] {
@@ -100,11 +101,45 @@ export function shouldCountDailyArticle(chapterId: string): boolean {
   }
 }
 
+type DailyWords = Record<string, number>
+
+function readDailyWordsMap(): DailyWords {
+  if (typeof window === 'undefined') return {}
+  try {
+    const parsed = JSON.parse(localStorage.getItem(DAILY_WORDS_KEY) ?? '{}') as unknown
+    if (!parsed || typeof parsed !== 'object') return {}
+    const out: DailyWords = {}
+    for (const [date, value] of Object.entries(parsed as DailyWords)) {
+      if (typeof value === 'number' && Number.isFinite(value)) out[date] = value
+    }
+    return out
+  } catch {
+    return {}
+  }
+}
+
+export function addLocalDailyWords(words: number, date = localDateString()) {
+  if (typeof window === 'undefined' || words <= 0) return
+  const map = readDailyWordsMap()
+  map[date] = (map[date] ?? 0) + words
+  localStorage.setItem(DAILY_WORDS_KEY, JSON.stringify(map))
+}
+
+export function readLocalDailyWords(date = localDateString()): number {
+  return readDailyWordsMap()[date] ?? 0
+}
+
+export function readLocalDailyReadingHistory(): Array<{ date: string; words_read: number }> {
+  return Object.entries(readDailyWordsMap()).map(([date, words_read]) => ({ date, words_read }))
+}
+
 export function clearLocalLearnerData() {
   if (typeof window === 'undefined') return
   localStorage.removeItem(KEY)
   localStorage.removeItem(STREAK_KEY)
+  localStorage.removeItem(DAILY_WORDS_KEY)
   localStorage.removeItem('ladf-vocab-vault-v1')
+  localStorage.removeItem('french-course:offline-version')
   for (const key of Object.keys(localStorage)) {
     if (key.startsWith('french-course:lesson-draft:')) localStorage.removeItem(key)
     if (key.startsWith('french-course:daily-articles:')) localStorage.removeItem(key)

@@ -3,9 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "build:pages": "NEXT_PUBLIC_BASE_PATH=/french-course next build",
+    "dev": "tsx scripts/ensure-course-data.ts && next dev",
+    "emit-course": "tsx scripts/emit-course-data.ts",
+    "build": "npm run emit-course && next build",
+    "build:pages": "npm run emit-course && NEXT_PUBLIC_BASE_PATH=/french-course next build",
     "start": "next start",
     "lint": "eslint",
     "test": "tsx --test tests/**/*.test.ts",

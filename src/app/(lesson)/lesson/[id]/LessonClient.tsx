@@ -13,13 +13,13 @@ import { enrichTokens, isPunctuationToken, tokenizeFrench } from '@/lib/clickabl
 import { CONJUGATION_TENSES, conjugationsForWord, isConjugableVerb } from '@/lib/french-conjugations'
 import { isCanonicalChapterId } from '@/lib/course-catalog'
 import { calculateLessonScore, didPassProve, PROVE_PASS_SCORE } from '@/lib/lesson-score'
-import { createClient } from '@/utils/supabase/client'
 import { BUNDLED_CHAPTER_IDS } from '@/lib/bundled-chapter-ids'
 import { bumpLocalMistakeCount, enqueueLocalVocabulary } from '@/lib/local-vocab-vault'
-import { markLocalChapterCompleted, mergeCompletedChapterIds, shouldCountDailyArticle } from '@/lib/local-progress'
+import { addLocalDailyWords, markLocalChapterCompleted, mergeCompletedChapterIds, shouldCountDailyArticle } from '@/lib/local-progress'
+import { isLessonUnlocked } from '@/lib/lesson-unlock'
 import { BUNDLED_VOCABULARY } from '@/lib/bundled-vocabulary'
 import { PATHWAY_BY_CHAPTER_ID } from '@/lib/pathway/catalog'
-import { lemmaIdsFromLesson, vocabularyRowsForLemmas } from '@/lib/review/lemmas-from-lesson'
+import { lemmaIdsFromLesson } from '@/lib/review/lemmas-from-lesson'
 import { isReviewablePartOfSpeech } from '@/lib/exercises/validate'
 import type { LessonExercise } from '@/lib/exercises/types'
 
@@ -75,7 +75,6 @@ export default function LessonClient({
   content,
   vocabulary,
   conjugations,
-  rules,
 }: {
   chapterId: string
   title: string
@@ -95,7 +94,7 @@ export default function LessonClient({
   const [answers, setAnswers] = useState<Record<string, ExerciseAnswer>>({})
   const [exerciseIndex, setExerciseIndex] = useState(0)
   const exerciseSectionRef = useRef<HTMLElement>(null)
-  const [remediationCategories, setRemediationCategories] = useState<string[]>([])
+  const [remediationCategories] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [gate, setGate] = useState<'loading' | 'ready' | 'login' | 'locked'>('loading')
@@ -222,47 +221,17 @@ export default function LessonClient({
   }, [answers, stage])
 
   useEffect(() => {
-    let cancelled = false
-    ;(async () => {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        if (!cancelled) setGate('login')
-        router.replace('/login/')
-        return
-      }
-
-      const [{ data: progress }, { data: mistakes }] = await Promise.all([
-        supabase.from('user_chapter_progress').select('chapter_id, status').eq('user_id', user.id),
-        supabase.from('user_mistakes').select('grammar_category').eq('user_id', user.id).eq('is_resolved', false),
-      ])
-
-      if (!cancelled) {
-        setRemediationCategories([
-          ...new Set((mistakes ?? []).map((item) => item.grammar_category).filter((category): category is string => Boolean(category))),
-        ])
-      }
-
-      const completed = mergeCompletedChapterIds(
-        (progress ?? []).filter((item) => item.status === 'completed').map((item) => item.chapter_id),
-      )
+    void Promise.resolve().then(() => {
+      const completed = mergeCompletedChapterIds([])
       const orderedAuthored = BUNDLED_CHAPTER_IDS.filter((id) => isCanonicalChapterId(id))
-      const firstIncomplete = orderedAuthored.find((id) => !completed.has(id))
-      const allowed = completed.has(chapterId) || firstIncomplete === chapterId || orderedAuthored.length === 0
-
+      const allowed = isLessonUnlocked(chapterId, completed, orderedAuthored)
       if (!allowed) {
-        if (!cancelled) setGate('locked')
+        setGate('locked')
         router.replace('/')
         return
       }
-      if (!cancelled) setGate('ready')
-    })().catch(() => {
-      if (!cancelled) setGate('login')
-      router.replace('/login/')
+      setGate('ready')
     })
-    return () => {
-      cancelled = true
-    }
   }, [chapterId, router])
 
   const dictVocabulary = useMemo(() => {
@@ -340,61 +309,8 @@ export default function LessonClient({
     return ''
   }
 
-  const recordMistake = async (category: string, context: string, vocabId?: string | null) => {
-    // Always bump local/remote vocab miss counts when we can resolve a lemma.
-    if (vocabId) {
-      bumpLocalMistakeCount(vocabId)
-      try {
-        const supabase = createClient()
-        const { data: { user } } = await supabase.auth.getUser()
-        if (user) {
-          const { data: progress } = await supabase
-            .from('user_vocab_progress')
-            .select('mistake_count')
-            .eq('user_id', user.id)
-            .eq('vocab_id', vocabId)
-            .maybeSingle()
-          if (progress) {
-            await supabase
-              .from('user_vocab_progress')
-              .update({ mistake_count: (progress.mistake_count ?? 0) + 1 })
-              .eq('user_id', user.id)
-              .eq('vocab_id', vocabId)
-          }
-        }
-      } catch {
-        // Local vault already bumped.
-      }
-    }
-
-    try {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-      const { data: existing } = await supabase
-        .from('user_mistakes')
-        .select('id, error_count')
-        .eq('user_id', user.id)
-        .eq('grammar_category', category)
-        .eq('is_resolved', false)
-        .is('vocab_id', null)
-        .maybeSingle()
-      if (existing) {
-        await supabase
-          .from('user_mistakes')
-          .update({ error_count: existing.error_count + 1, last_error_at: new Date().toISOString(), error_context: context })
-          .eq('id', existing.id)
-        return
-      }
-      await supabase.from('user_mistakes').insert({
-        user_id: user.id,
-        grammar_category: category,
-        error_context: context,
-        vocab_id: vocabId ?? null,
-      })
-    } catch {
-      // Review logging is best-effort; do not block answering.
-    }
+  const recordMistake = async (_category: string, _context: string, vocabId?: string | null) => {
+    if (vocabId) bumpLocalMistakeCount(vocabId)
   }
 
   const needsSpaceBefore = (tokens: WordToken[], index: number) => {
@@ -538,50 +454,10 @@ export default function LessonClient({
     </p>
   )
 
-  const enqueueLessonVocabulary = async (_userId: string) => {
-    // Reviewable lemmas only — never enqueue proper nouns / plot names.
+  const enqueueLessonVocabulary = () => {
     const lemmaIds = lemmaIdsFromLesson(content)
     if (!lemmaIds.length) return
-
-    // Always seed the local infinite loop first — remote FK/RLS must not leave Review empty.
     enqueueLocalVocabulary(lemmaIds)
-
-    try {
-      const supabase = createClient()
-      const rows = vocabularyRowsForLemmas(lemmaIds).map((word) => ({
-        id: word.id,
-        word: word.word,
-        base_translation: word.base_translation,
-        part_of_speech: word.part_of_speech,
-        gender: word.gender,
-        register: word.register,
-        ipa_pronunciation: word.ipa_pronunciation,
-        is_idiom: word.is_idiom,
-        is_slang: word.is_slang,
-        idiom_explanation: word.idiom_explanation,
-      }))
-
-      const { error: rpcError } = await supabase.rpc('enqueue_lesson_vocabulary', {
-        p_vocab_rows: rows,
-        p_lemma_ids: lemmaIds,
-      })
-
-      if (rpcError) {
-        // Fallback when RPC is not applied yet: best-effort direct writes.
-        if (rows.length) await supabase.from('vocabulary').upsert(rows, { onConflict: 'id' })
-        await supabase.from('user_vocab_progress').upsert(
-          lemmaIds.map((vocab_id) => ({
-            user_id: _userId,
-            vocab_id,
-            next_review_at: new Date().toISOString(),
-            last_reviewed_at: null,
-          })),
-          { onConflict: 'user_id,vocab_id', ignoreDuplicates: true },
-        )
-      }
-    } catch {
-      // Local vault already seeded above.
-    }
   }
 
   const wordsReadInLesson = useMemo(() => {
@@ -597,46 +473,10 @@ export default function LessonClient({
     return readingWords + dialogueWords
   }, [content.wordCount, readingParagraphs, conversationLines])
 
-  const localDateString = () => {
-    const now = new Date()
-    const year = now.getFullYear()
-    const month = String(now.getMonth() + 1).padStart(2, '0')
-    const day = String(now.getDate()).padStart(2, '0')
-    return `${year}-${month}-${day}`
-  }
-
-  const recordDailyReading = async (userId: string, words: number) => {
+  const recordDailyReading = (words: number) => {
     if (words <= 0) return
-    const countArticle = shouldCountDailyArticle(chapterId)
-    try {
-      const supabase = createClient()
-      const today = localDateString()
-      const { data: existing } = await supabase
-        .from('user_daily_reading_stats')
-        .select('words_read, articles_completed')
-        .eq('user_id', userId)
-        .eq('date', today)
-        .maybeSingle()
-      if (existing) {
-        await supabase
-          .from('user_daily_reading_stats')
-          .update({
-            words_read: (existing.words_read ?? 0) + words,
-            articles_completed: (existing.articles_completed ?? 0) + (countArticle ? 1 : 0),
-          })
-          .eq('user_id', userId)
-          .eq('date', today)
-        return
-      }
-      await supabase.from('user_daily_reading_stats').insert({
-        user_id: userId,
-        date: today,
-        words_read: words,
-        articles_completed: countArticle ? 1 : 0,
-      })
-    } catch {
-      // Daily reading stats are best-effort.
-    }
+    shouldCountDailyArticle(chapterId)
+    addLocalDailyWords(words)
   }
 
   const completeLesson = async () => {
@@ -650,93 +490,23 @@ export default function LessonClient({
     }
     setLoading(true)
     setError(null)
-    const grammarResults = scoringExercises.map((exercise) => ({
-      category: exercise.category,
-      correct: isExerciseCorrect(exercise, answers[exercise.id]),
-      context: `Lesson exercise: ${exercise.prompt}`,
-    }))
     try {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Your session expired. Please sign in again.')
-
-      const score = calculateLessonScore(answers, scoringExercises)
       const wordsRead = wordsReadInLesson
-      const pathway = PATHWAY_BY_CHAPTER_ID.get(chapterId)
-      if (pathway) {
-        await supabase.rpc('ensure_chapter_row', {
-          p_chapter_id: chapterId,
-          p_module_id: pathway.module.id,
-          p_title: pathway.sub.title,
-          p_description: pathway.sub.description,
-          p_order_index: pathway.sub.orderIndex,
-          p_module_title: pathway.module.title,
-          p_module_description: pathway.module.description,
-          p_cefr: pathway.module.cefr,
-          p_module_order: pathway.module.orderIndex,
-        })
-      }
-
-      const { error: rpcError } = await supabase.rpc('complete_chapter', {
-        p_chapter_id: chapterId,
-        p_score: score,
-        p_words_read: 0,
-        p_grammar_results: grammarResults,
-      })
-
-      if (rpcError) {
-        const { error: progressError } = await supabase.from('user_chapter_progress').upsert({
-          user_id: user.id,
-          chapter_id: chapterId,
-          status: 'completed',
-          score,
-          completed_at: new Date().toISOString(),
-        }, { onConflict: 'user_id,chapter_id' })
-        if (progressError) {
-          throw new Error('We could not save this lesson. Check your connection and try again.')
+      for (const exercise of scoringExercises) {
+        if (!isExerciseCorrect(exercise, answers[exercise.id])) {
+          void recordMistake(exercise.category, `Lesson exercise: ${exercise.prompt}`, lemmaIdFromExercise(exercise))
         }
-
-        await Promise.all(
-          scoringExercises
-            .filter((exercise) => !isExerciseCorrect(exercise, answers[exercise.id]))
-            .map((exercise) =>
-              recordMistake(exercise.category, `Lesson exercise: ${exercise.prompt}`, lemmaIdFromExercise(exercise)),
-            ),
-        )
       }
-
-      await enqueueLessonVocabulary(user.id)
-      await recordDailyReading(user.id, wordsRead)
-
-      // Resolve open mistake categories that were answered correctly this lesson.
-      const correctCats = [
-        ...new Set(
-          scoringExercises
-            .filter((exercise) => isExerciseCorrect(exercise, answers[exercise.id]))
-            .map((exercise) => exercise.category),
-        ),
-      ]
-      if (correctCats.length) {
-        await supabase
-          .from('user_mistakes')
-          .update({ is_resolved: true })
-          .eq('user_id', user.id)
-          .eq('is_resolved', false)
-          .in('grammar_category', correctCats)
-      }
-
-      // Only unlock locally after remote (or fallback) progress actually saved.
+      enqueueLessonVocabulary()
+      recordDailyReading(wordsRead)
       markLocalChapterCompleted(chapterId)
       try {
         sessionStorage.removeItem(DRAFT_KEY(chapterId))
       } catch {
         // ignore
       }
-
       router.push('/')
-      router.refresh()
     } catch (caughtError) {
-      // Do NOT mark local complete on auth/pre-save failure.
       setError(caughtError instanceof Error ? caughtError.message : 'We could not save this lesson. Please try again.')
     } finally {
       setLoading(false)
@@ -784,13 +554,13 @@ export default function LessonClient({
               <h2 className="mt-3 text-headline-md">{content.brief.title}</h2>
               <RichText text={content.brief.body} className="mt-4 text-body-reading text-on-surface-variant" />
             </div>
-            {rules.length > 0 && (
+            {Boolean(content.brief.ruleSlugs?.length) && (
               <div>
                 <p className="text-label-caps text-on-surface-variant">RELATED RULES</p>
                 <div className="mt-2 flex flex-wrap gap-2">
-                  {rules.map((rule) => (
-                    <Link key={rule.id} href={`/rules/${rule.slug}/`} className="rounded-full border-2 border-primary-fixed-dim bg-primary-fixed/30 px-3 py-2 text-sm font-bold text-primary">
-                      {rule.title}
+                  {content.brief.ruleSlugs.map((slug) => (
+                    <Link key={slug} href={`/rules/${slug}/`} className="rounded-full border-2 border-primary-fixed-dim bg-primary-fixed/30 px-3 py-2 text-sm font-bold text-primary">
+                      {slug}
                     </Link>
                   ))}
                 </div>

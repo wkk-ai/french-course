@@ -898,7 +898,8 @@ function dedupe(items: LessonExercise[]): LessonExercise[] {
   const seen = new Set<string>()
   const out: LessonExercise[] = []
   for (const item of items) {
-    const key = `${item.prompt}|${(item.options ?? []).join('~')}|${item.type ?? ''}|${'statement' in item ? (item as { statement?: string }).statement : ''}`
+    const optionKey = 'options' in item && Array.isArray(item.options) ? item.options.join('~') : ''
+    const key = `${item.prompt}|${optionKey}|${item.type ?? ''}|${'statement' in item ? (item as { statement?: string }).statement : ''}`
     if (seen.has(key)) continue
     seen.add(key)
     out.push(item)

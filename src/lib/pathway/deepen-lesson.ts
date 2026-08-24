@@ -4,7 +4,7 @@ import { BUNDLED_VOCABULARY } from '@/lib/bundled-vocabulary'
 import { sanitizeLessonContent } from '@/lib/pathway/sanitize-lesson'
 import { MODULE1_CHAPTER_IDS } from '@/lib/module1-content'
 
-const HAND_IDS = new Set(MODULE1_CHAPTER_IDS)
+const HAND_IDS = new Set<string>(MODULE1_CHAPTER_IDS)
 
 function briefMin(role: 'A' | 'B' | 'C' | 'D'): number {
   if (role === 'A') return 2500
@@ -182,7 +182,7 @@ export function deepenLessonToModule1Bar(
     brief = { ...brief, body: ensureBriefMin(brief.body, briefMin(role), role) }
   }
   const withBrief = { ...base, brief }
-  let reading = ensureReadingMin(withBrief, chapterId ?? 'x', isHand)
+  let reading = [...(ensureReadingMin(withBrief, chapterId ?? 'x', isHand) ?? [])]
   // Always scrub leftover English tokens from hand readings (even thin ones).
   if (isHand) {
     reading = reading.map((paragraph, index) => {

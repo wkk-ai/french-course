@@ -14,7 +14,7 @@ import { mergeCompletedChapterIds } from '@/lib/local-progress'
 import { buildFlashcardDeck, countPoolByFilter, FLASHCARD_FILTERS, flashcardQuality } from '@/lib/review/flashcards'
 import { filterReviewPool } from '@/lib/review/pool-filter'
 import { buildReviewSession, emptySessionMessage } from '@/lib/review/session'
-import { lemmaIdsForChapter, vocabularyRowsForLemmas } from '@/lib/review/lemmas'
+import { lemmaIdsForChapter } from '@/lib/review/lemmas'
 import type {
   FlashcardDeck,
   FlashcardPosFilter,
@@ -24,7 +24,6 @@ import type {
   SessionMode,
 } from '@/lib/review/types'
 import { calculateSrsSchedule } from '@/lib/srs'
-import { createClient } from '@/utils/supabase/client'
 
 function resolveBundled(vocabId: string) {
   return BUNDLED_VOCABULARY.find((item) => item.id === vocabId) ?? null
@@ -89,115 +88,17 @@ export default function ReviewClient() {
   }, [pool])
 
   const loadPool = useCallback(async () => {
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      setPool(enrichPoolItems(getAllLocalVocabulary(), 'local'))
-      return
-    }
-
-    const [progressResult, completedResult] = await Promise.all([
-      supabase
-        .from('user_vocab_progress')
-        .select('vocab_id, repetition_count, ease_factor, interval_days, total_encounters, mistake_count, next_review_at, last_reviewed_at, vocabulary(word, base_translation, part_of_speech, register)')
-        .eq('user_id', user.id)
-        .order('next_review_at')
-        .limit(2500),
-      supabase
-        .from('user_chapter_progress')
-        .select('chapter_id')
-        .eq('user_id', user.id)
-        .eq('status', 'completed'),
-    ])
-
-    let remote: ReviewPoolItem[] = (progressResult.data ?? []).map((row) => {
-      const vocabulary = Array.isArray(row.vocabulary) ? row.vocabulary[0] : row.vocabulary
-      return enrichPoolItem(
-        {
-          vocab_id: row.vocab_id,
-          repetition_count: row.repetition_count ?? 0,
-          ease_factor: row.ease_factor ?? 2.5,
-          interval_days: row.interval_days ?? 0,
-          total_encounters: row.total_encounters ?? 1,
-          mistake_count: row.mistake_count ?? 0,
-          next_review_at: row.next_review_at ?? new Date().toISOString(),
-          last_reviewed_at: row.last_reviewed_at ?? null,
-          word: vocabulary?.word,
-          base_translation: vocabulary?.base_translation,
-          part_of_speech: vocabulary?.part_of_speech,
-          register: vocabulary?.register,
-        },
-        'remote',
-      )
-    })
-
-    const completedIds = [...mergeCompletedChapterIds((completedResult.data ?? []).map((row) => row.chapter_id))]
+    const completedIds = [...mergeCompletedChapterIds([])]
     const authoredCompleted = completedIds.filter((id) => BUNDLED_CHAPTER_IDS.includes(id))
-    const remoteIds = new Set(remote.map((item) => item.vocab_id))
     let localItems = getAllLocalVocabulary()
-    const localIds = new Set(localItems.map((item) => item.vocab_id))
-    const knownIds = new Set([...remoteIds, ...localIds])
-
-    // Backfill any missing reviewable lemmas from completed authored chapters (not only empty pools).
+    const knownIds = new Set(localItems.map((item) => item.vocab_id))
     if (authoredCompleted.length > 0) {
       const needed = [...new Set(authoredCompleted.flatMap((id) => lemmaIdsForChapter(id)))]
       const missing = needed.filter((id) => !knownIds.has(id))
-      if (missing.length) {
-        enqueueLocalVocabulary(missing)
-        const rows = vocabularyRowsForLemmas(missing).map((word) => ({
-          id: word.id,
-          word: word.word,
-          base_translation: word.base_translation,
-          part_of_speech: word.part_of_speech,
-          gender: word.gender,
-          register: word.register,
-          ipa_pronunciation: word.ipa_pronunciation,
-          is_idiom: word.is_idiom,
-          is_slang: word.is_slang,
-          idiom_explanation: word.idiom_explanation,
-        }))
-        const { error: rpcError } = await supabase.rpc('enqueue_lesson_vocabulary', {
-          p_vocab_rows: rows,
-          p_lemma_ids: missing,
-        })
-        if (!rpcError) {
-          const refreshed = await supabase
-            .from('user_vocab_progress')
-            .select('vocab_id, repetition_count, ease_factor, interval_days, total_encounters, mistake_count, next_review_at, last_reviewed_at, vocabulary(word, base_translation, part_of_speech, register)')
-            .eq('user_id', user.id)
-            .order('next_review_at')
-            .limit(2500)
-          remote = (refreshed.data ?? []).map((row) => {
-            const vocabulary = Array.isArray(row.vocabulary) ? row.vocabulary[0] : row.vocabulary
-            return enrichPoolItem(
-              {
-                vocab_id: row.vocab_id,
-                repetition_count: row.repetition_count ?? 0,
-                ease_factor: row.ease_factor ?? 2.5,
-                interval_days: row.interval_days ?? 0,
-                total_encounters: row.total_encounters ?? 1,
-                mistake_count: row.mistake_count ?? 0,
-                next_review_at: row.next_review_at ?? new Date().toISOString(),
-                last_reviewed_at: row.last_reviewed_at ?? null,
-                word: vocabulary?.word,
-                base_translation: vocabulary?.base_translation,
-                part_of_speech: vocabulary?.part_of_speech,
-                register: vocabulary?.register,
-              },
-              'remote',
-            )
-          })
-        }
-        localItems = getAllLocalVocabulary()
-      }
+      if (missing.length) enqueueLocalVocabulary(missing)
+      localItems = getAllLocalVocabulary()
     }
-
-    const local = enrichPoolItems(
-      localItems.filter((item) => !remoteIds.has(item.vocab_id) && !remote.some((entry) => entry.vocab_id === item.vocab_id)),
-      'local',
-    )
-
-    setPool(filterReviewPool([...remote, ...local]))
+    setPool(enrichPoolItems(localItems, 'local'))
   }, [])
 
   useEffect(() => {
@@ -263,36 +164,7 @@ export default function ReviewClient() {
   }
 
   const persistVocabScore = async (item: ReviewPoolItem, quality: number) => {
-    // Always mirror locally so a later remote refresh cannot erase an unsaved rating.
     scoreLocalVocabulary(item.vocab_id, quality)
-    if (item.source === 'local') return
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-    const schedule = calculateSrsSchedule(
-      {
-        repetitionCount: item.repetition_count,
-        easeFactor: item.ease_factor,
-        intervalDays: item.interval_days,
-      },
-      quality,
-    )
-    const { error: updateError } = await supabase
-      .from('user_vocab_progress')
-      .update({
-        repetition_count: schedule.repetitionCount,
-        ease_factor: schedule.easeFactor,
-        interval_days: schedule.intervalDays,
-        next_review_at: schedule.nextReview.toISOString(),
-        last_reviewed_at: new Date().toISOString(),
-        total_encounters: item.total_encounters + 1,
-        mistake_count: item.mistake_count + (quality < 3 ? 1 : 0),
-      })
-      .eq('user_id', user.id)
-      .eq('vocab_id', item.vocab_id)
-    if (updateError) {
-      throw new Error('Could not save this review online. It is kept on this device — try again.')
-    }
   }
 
   const startSession = (mode: SessionMode) => {

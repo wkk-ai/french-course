@@ -13,8 +13,8 @@ import {
 } from '@/lib/pathway/catalog'
 import { deriveChapterStatus } from '@/lib/progression'
 import { BUNDLED_CHAPTER_IDS } from '@/lib/bundled-chapter-ids'
-import { mergeCompletedChapterIds, readLocalCompletedChapters, subscribeCompletedChapters } from '@/lib/local-progress'
-import { createClient } from '@/utils/supabase/client'
+import { mergeCompletedChapterIds, readLocalCompletedChapters, readLocalDailyWords, subscribeCompletedChapters } from '@/lib/local-progress'
+import { SaveCourseCard } from '@/components/SaveCourseCard'
 
 type Module = {
   id: string
@@ -101,42 +101,13 @@ export default function HomeClient({
   const [progressReady, setProgressReady] = useState(false)
 
   useEffect(() => {
-    let cancelled = false
-    ;(async () => {
-      try {
-        const supabase = createClient()
-        const {
-          data: { user },
-        } = await supabase.auth.getUser()
-
-        if (!user) {
-          if (!cancelled) setProgressReady(true)
-          return
-        }
-
-        const now = new Date()
-        const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
-        const [{ data: progress }, { data: todayStats }] = await Promise.all([
-          supabase.from('user_chapter_progress').select('chapter_id, status').eq('user_id', user.id),
-          supabase.from('user_daily_reading_stats').select('words_read').eq('user_id', user.id).eq('date', today).maybeSingle(),
-        ])
-        if (cancelled) return
-        const remoteCompleted = (progress as Progress[] | null)?.filter((item) => item.status === 'completed').map((item) => item.chapter_id) ?? []
-        const merged = mergeCompletedChapterIds(remoteCompleted)
-        const map = new Map<string, Progress['status']>()
-        for (const [id, status] of (progress as Progress[] | null)?.map((item) => [item.chapter_id, item.status] as const) ?? []) {
-          map.set(id, status)
-        }
-        for (const id of merged) map.set(id, 'completed')
-        setProgressByChapter(map)
-        setWordsRead(todayStats?.words_read ?? 0)
-      } finally {
-        if (!cancelled) setProgressReady(true)
-      }
-    })()
-    return () => {
-      cancelled = true
-    }
+    void Promise.resolve().then(() => {
+      const map = new Map<string, Progress['status']>()
+      for (const id of mergeCompletedChapterIds([])) map.set(id, 'completed')
+      setProgressByChapter(map)
+      setWordsRead(readLocalDailyWords())
+      setProgressReady(true)
+    })
   }, [])
 
   useEffect(() => {
@@ -183,6 +154,8 @@ export default function HomeClient({
 
   return (
     <div className="flex flex-col gap-8 pb-8">
+      <SaveCourseCard />
+
       <section className="tactile-card p-5">
         <p className="text-label-caps text-on-surface-variant">TODAY&apos;S READING</p>
         <div className="mt-2">

@@ -1,60 +1,34 @@
 'use client'
 
-import { Flame, LogOut, Trophy } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { Flame, RotateCcw, Trophy } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { clearLocalLearnerData, mergeCompletedChapterIds, readLocalStreak, subscribeCompletedChapters } from '@/lib/local-progress'
 import { getAllLocalVocabulary } from '@/lib/local-vocab-vault'
-import { createClient } from '@/utils/supabase/client'
 
 export default function TopBar() {
-  const router = useRouter()
   const [streak, setStreak] = useState(0)
   const [xp, setXp] = useState(0)
-  const [email, setEmail] = useState<string | null>(null)
   const [booting, setBooting] = useState(true)
 
-  const refreshStats = async () => {
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-
-    setEmail(user.email ?? null)
-    const [{ data: streakData }, { data: progressRows }, { count: vocabCount }] = await Promise.all([
-      supabase.from('user_streaks').select('current_streak').eq('user_id', user.id).single(),
-      supabase.from('user_chapter_progress').select('chapter_id, status').eq('user_id', user.id).eq('status', 'completed'),
-      supabase.from('user_vocab_progress').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
-    ])
-    const completedCount = mergeCompletedChapterIds((progressRows ?? []).map((row) => row.chapter_id)).size
+  const refreshStats = () => {
+    const completedCount = mergeCompletedChapterIds([]).size
     const localVocab = getAllLocalVocabulary().length
-    setStreak(Math.max(streakData?.current_streak ?? 0, readLocalStreak()))
-    setXp(completedCount * 100 + Math.max(vocabCount ?? 0, localVocab) * 5)
+    setStreak(readLocalStreak())
+    setXp(completedCount * 100 + localVocab * 5)
   }
 
   useEffect(() => {
-    let cancelled = false
-    ;(async () => {
-      try {
-        await refreshStats()
-      } finally {
-        if (!cancelled) setBooting(false)
-      }
-    })()
-    const unsub = subscribeCompletedChapters(() => {
-      void refreshStats()
+    void Promise.resolve().then(() => {
+      refreshStats()
+      setBooting(false)
     })
-    return () => {
-      cancelled = true
-      unsub()
-    }
+    return subscribeCompletedChapters(refreshStats)
   }, [])
 
-  const signOut = async () => {
+  const resetPhone = () => {
+    if (!window.confirm('Erase progress on this phone? Lessons stay saved. You start the pathway again.')) return
     clearLocalLearnerData()
-    const supabase = createClient()
-    await supabase.auth.signOut()
-    router.push('/login')
-    router.refresh()
+    refreshStats()
   }
 
   return (
@@ -72,11 +46,9 @@ export default function TopBar() {
           <span className="text-label-caps text-primary">XP</span>
           <span className="font-bold text-primary">{xp}</span>
         </div>
-        {email && (
-          <button onClick={signOut} title="Sign out" aria-label="Sign out" className="rounded-lg p-3 text-on-surface-variant hover:bg-surface-container-low min-h-[44px] min-w-[44px] flex items-center justify-center">
-            <LogOut className="size-4" />
-          </button>
-        )}
+        <button onClick={resetPhone} title="Reset this phone" aria-label="Reset this phone" className="rounded-lg p-3 text-on-surface-variant hover:bg-surface-container-low min-h-[44px] min-w-[44px] flex items-center justify-center">
+          <RotateCcw className="size-4" />
+        </button>
       </div>
     </header>
   )
