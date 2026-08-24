@@ -9,7 +9,7 @@
     "build:pages": "npm run emit-course && NEXT_PUBLIC_BASE_PATH=/french-course next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "tsx --test tests/**/*.test.ts",
+    "test": "tsx --test tests/*.test.ts",
     "test:content": "tsx scripts/measure-content-pads.ts",
     "configure:github": "python3 scripts/configure-github-pages.py"
   },
