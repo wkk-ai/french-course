@@ -98,3 +98,9 @@
 
 1. **[2026-07-24] Assumed `gh` on PATH**
    Do instead: use `/tmp/ghcli/*/bin/gh` (or locate) for Pages deploy watches when `gh` is missing.
+
+2. **[2026-08-26] `tests/**/*.test.ts` fails on GitHub Actions**
+   Do instead: `tsx --test tests/*.test.ts` — Linux npm does not expand `**`.
+
+3. **[2026-08-26] Private course lives on Hostinger, not Pages**
+   Do instead: deploy `out/` (no `NEXT_PUBLIC_BASE_PATH`) to `french.worldhealthshop.com` (`public_html/french`). Folder password via `.htaccess` + `.htpasswd` (user `french`). Do not deploy to `worldhealthshop.com` itself. GitHub Pages stays off.
