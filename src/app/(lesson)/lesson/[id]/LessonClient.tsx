@@ -9,7 +9,7 @@ import { ExerciseCard } from '@/components/lesson/ExerciseCard'
 import { buildRemediationExercises } from '@/lib/exercises/remediation'
 import { isExerciseAnswered, isExerciseCorrect } from '@/lib/exercises/grading'
 import { RichText } from '@/components/RichText'
-import { enrichTokens, isPunctuationToken, tokenizeFrench } from '@/lib/clickable-text'
+import { joinFrenchTokens, isPunctuationToken, tokenizeFrench } from '@/lib/clickable-text'
 import { CONJUGATION_TENSES, conjugationsForWord, isConjugableVerb } from '@/lib/french-conjugations'
 import { isCanonicalChapterId } from '@/lib/course-catalog'
 import { calculateLessonScore, didPassProve, PROVE_PASS_SCORE } from '@/lib/lesson-score'
@@ -243,9 +243,9 @@ export default function LessonClient({
   // Always enrich against the full client bank so id-collisions / thin props cannot drop surfaces.
   const readingParagraphs = useMemo(
     () =>
-      content.reading?.map((paragraph) => ({
+      content.reading?.map((paragraph, index) => ({
         ...paragraph,
-        tokens: enrichTokens(paragraph.tokens, dictVocabulary),
+        tokens: tokenizeFrench(joinFrenchTokens(paragraph.tokens), `read-${index}`, dictVocabulary),
       })) ?? [],
     [content.reading, dictVocabulary],
   )
@@ -253,9 +253,11 @@ export default function LessonClient({
     () =>
       content.conversation?.lines.map((line, index) => ({
         ...line,
-        tokens: line.tokens?.length
-          ? enrichTokens(line.tokens, dictVocabulary)
-          : tokenizeFrench(line.text, `conv-${index}`, dictVocabulary),
+        tokens: tokenizeFrench(
+          line.text?.trim() ? line.text : joinFrenchTokens(line.tokens ?? []),
+          `conv-${index}`,
+          dictVocabulary,
+        ),
       })) ?? [],
     [content.conversation, dictVocabulary],
   )

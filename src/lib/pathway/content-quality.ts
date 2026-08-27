@@ -49,6 +49,9 @@ export const AUTHOR_PAD_DENYLIST: string[] = [
   'Je comprends la règle',
   'Aujourd\'hui, nous travaillons le français de la leçon',
   'Familier (read-only if early)',
+  'atteindre la lecture complète',
+  'Marc et Marie parlent encore',
+  'Ils ajoutent encore des mots clairs pour',
 ]
 
 const PROPER_NOUN_ALLOWLIST = new Set([
@@ -151,11 +154,8 @@ export function englishLeakInFrench(text: string): boolean {
   if (EN_GLOSS_LEAK.test(text)) return true
   if (EN_TITLE_IN_FR.test(text)) return true
   if (/\bStructure du jour\s*:[^·\n]*\b(with|regular|irregular|tense|apply)\b/i.test(text)) return true
+  if (/\b(Find the wrong|Fill many gaps|wrong form)\b/i.test(text)) return true
   return false
-}
-
-function isProperNounAllowlisted(surface: string): boolean {
-  return isPathwayProperNoun(surface)
 }
 
 function collectUntappable(text: string, prefix: string, vocabulary: VocabularyWord[], out: Set<string>) {
@@ -164,7 +164,6 @@ function collectUntappable(text: string, prefix: string, vocabulary: VocabularyW
     if (token.lemmaId) continue
     if (isPunctuationToken(token.text)) continue
     if (!/[A-Za-zÀ-ÿŒœÆæ]/.test(token.text)) continue
-    if (isProperNounAllowlisted(token.text)) continue
     out.add(token.text)
   }
 }

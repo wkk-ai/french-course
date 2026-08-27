@@ -27,7 +27,7 @@ Last updated: **2026-07-27** (dictionary tap miss driven to 0% across 720 lesson
 |----|--------|-----|------------------|
 | R1-01 | fixed | Author/AI notes in Theory First — craft factory + live denylist (2026-08-01) |
 | R1-02 | fixed | Meta French pads in Reading — craft scenes replace lemma loops (2026-08-01) |
-| R1-03 | fixed | Reading/dialogue words missing from dictionary (no lemma) | Was ~45%; now **0 / ~203 549** tokens (`measure-tap-coverage`) |
+| R1-03 | fixed | Reading/dialogue words missing from dictionary (no lemma) | 2026-08-27: names/cities are real lemmas; tap miss **0 / 720**; no allowlist pass |
 | R1-04 | fixed | English leaking into “French” reading (gloss dumps, EN titles, Prove labels) | 256+ lessons / 511 themes |
 | R1-05 | fixed | Identical pad paragraphs cloned (“Lecture de consolidation…”) | ×525 |
 | R1-06 | fixed | CI length-only theater — structural craft validate + measure + Pages test gate (2026-08-01) |

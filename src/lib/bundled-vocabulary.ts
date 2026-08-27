@@ -4,6 +4,7 @@ import { PHASE1_VOCABULARY } from '@/lib/phase1/vocabulary'
 import { LATER_VOCABULARY } from '@/lib/pathway/vocabulary-later'
 import { CORE_EXTRA_VOCABULARY } from '@/lib/pathway/vocabulary-core-extra'
 import { TAP_FILL_VOCABULARY } from '@/lib/pathway/vocabulary-tap-fill'
+import { PROPER_NAME_VOCABULARY } from '@/lib/pathway/vocabulary-proper-names'
 
 /** Collapse duplicate lemma surfaces; keep first (earlier bank wins). Letters keep case. */
 export function dedupeVocabularySurfaces(words: VocabularyWord[]): VocabularyWord[] {
@@ -28,4 +29,5 @@ export const BUNDLED_VOCABULARY: VocabularyWord[] = dedupeVocabularySurfaces([
   ...LATER_VOCABULARY,
   ...CORE_EXTRA_VOCABULARY,
   ...TAP_FILL_VOCABULARY,
+  ...PROPER_NAME_VOCABULARY,
 ])

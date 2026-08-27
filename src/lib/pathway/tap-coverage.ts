@@ -1,6 +1,6 @@
 import type { LessonContent, VocabularyWord } from '@/lib/course'
 import { isPunctuationToken, tokenizeFrench } from '@/lib/clickable-text'
-import { isPathwayProperNoun, untappableSurfaces } from '@/lib/pathway/content-quality'
+import { untappableSurfaces } from '@/lib/pathway/content-quality'
 
 export type TapCoverageStats = {
   totalWordTokens: number
@@ -28,7 +28,7 @@ export function measureLessonTapCoverage(lesson: LessonContent, vocabulary: Voca
       if (isPunctuationToken(token.text)) continue
       if (!/[A-Za-zÀ-ÿŒœÆæ]/.test(token.text)) continue
       totalWordTokens += 1
-      if (!token.lemmaId && !isPathwayProperNoun(token.text)) missTokens += 1
+      if (!token.lemmaId) missTokens += 1
     }
   }
 

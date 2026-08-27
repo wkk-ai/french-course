@@ -8,6 +8,7 @@ import { PHASE1_VOCABULARY } from '../src/lib/phase1/vocabulary'
 import { LATER_VOCABULARY } from '../src/lib/pathway/vocabulary-later'
 import { CORE_EXTRA_VOCABULARY } from '../src/lib/pathway/vocabulary-core-extra'
 import { TAP_FILL_VOCABULARY } from '../src/lib/pathway/vocabulary-tap-fill'
+import { PROPER_NAME_VOCABULARY } from '../src/lib/pathway/vocabulary-proper-names'
 import { resolveVocabularyForLesson } from '../src/lib/lesson-content'
 import { buildLemmaLookup, tokenizeFrench } from '../src/lib/clickable-text'
 import { readFileSync } from 'fs'
@@ -21,6 +22,7 @@ const banks: Bank[] = [
   { name: 'LATER', words: LATER_VOCABULARY },
   { name: 'CORE_EXTRA', words: CORE_EXTRA_VOCABULARY },
   { name: 'TAP_FILL', words: TAP_FILL_VOCABULARY },
+  { name: 'PROPER_NAME', words: PROPER_NAME_VOCABULARY },
 ]
 
 function idNum(id: string): number | null {

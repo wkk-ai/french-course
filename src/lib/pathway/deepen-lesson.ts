@@ -2,6 +2,7 @@ import type { LessonContent } from '@/lib/course'
 import { conversationLine, readingParagraphs } from '@/lib/lesson-text'
 import { BUNDLED_VOCABULARY } from '@/lib/bundled-vocabulary'
 import { sanitizeLessonContent } from '@/lib/pathway/sanitize-lesson'
+import { looksFrenchLemma, worldForTheme } from '@/lib/pathway/craft-from-theme'
 import { MODULE1_CHAPTER_IDS } from '@/lib/module1-content'
 
 const HAND_IDS = new Set<string>(MODULE1_CHAPTER_IDS)
@@ -43,6 +44,7 @@ function frenchSceneLabel(raw: string | undefined): string {
 }
 
 function scrubEnglishFromReadingText(text: string): string {
+  const english = 'the|with|in|not|often|still|some|final|letters|sound|water|tea|cup|drops|keeps|staff|means|mean|form|has|verb|where|without|at|to|can|ends|silent|spelling|brother|father|mother|sister|home|my|one'
   return text
     .replace(/\bÀ\s*\(\s*with grave\s*\)[^.]*\./gi, 'À avec accent grave marque le lieu.')
     .replace(/\bcan mean\b[^.]*\./gi, '')
@@ -50,7 +52,7 @@ function scrubEnglishFromReadingText(text: string): string {
     .replace(/\bSilent [^.]*\./gi, 'Certaines lettres finales sont muettes.')
     .replace(/\bSpelling [^.]*\./gi, 'L\'orthographe et le son ne sont pas toujours les mêmes.')
     .replace(/\bUse [^.]*\./gi, 'On utilise ces formes avec soin.')
-    .replace(/\b(the|with|in|not|often|still|some|final|letters|sound|water|tea|cup|drops|keeps|staff|means|mean|form|has|verb|where|without|at|to|can|ends|silent|spelling|consonnes|francais|brother|father|mother|sister|home|my|one)\b/gi, '')
+    .replace(new RegExp(`(^|[^A-Za-zÀ-ÿŒœÆæ])(${english})(?=[^A-Za-zÀ-ÿŒœÆæ]|$)`, 'gi'), '$1')
     .replace(/\s{2,}/g, ' ')
     .replace(/\s+([.,!?])/g, '$1')
     .trim()
@@ -113,25 +115,52 @@ function ensureReadingMin(lesson: LessonContent, chapterId: string, isHand: bool
     })
   }
 
-  const meanings = parseMeanings(lesson.brief?.body ?? '').filter(
-    ([fr]) =>
-      fr &&
-      !/\b(Drills|Phase|grammar|Final|Checkpoint|Prove|Global|diploma|texts|Comprehension|mixte Phase)\b/i.test(fr) &&
-      (/[àâäéèêëîïôöùûüçœæ]/i.test(fr) ||
-        /\b(je|tu|bonjour|merci|oui|non|le|la|être|avoir|habiter|père|mère|frère|sœur)\b/i.test(fr) ||
-        /^[a-zàâäéèêëîïôöùûüçœæ' -]{2,}$/i.test(fr)),
+  const meanings = parseMeanings(lesson.brief?.body ?? '')
+    .map(([fr]) => fr.replace(/[()]/g, '').split('/')[0]?.trim() ?? '')
+    .filter((fr) => looksFrenchLemma(fr))
+  const extra = meanings.slice(0, 8).join(', ') || 'bonjour, merci, oui, non'
+  const world = worldForTheme({ id: chapterId })
+  const details = [
+    'près de la gare',
+    'devant le café',
+    'après le cours',
+    'sur la grande place',
+    'près du marché',
+    'devant la mairie',
+  ]
+  const templates = [
+    `${world.a} arrive ${details[0]} à ${world.place}. ${world.b} est déjà là. Ils parlent de ${extra}. ${world.a} dit bonjour. ${world.b} répond merci.`,
+    `À ${world.place}, ${world.b} pose une vraie question. ${world.a} répond avec ${extra}. Ils restent calmes. Puis ils disent au revoir.`,
+    `${world.a} écrit trois phrases. ${world.b} lit à voix haute ${details[1]} à ${world.place}. Les mots restent : ${extra}.`,
+    `${world.b} répète une phrase complète. ${world.a} écoute, puis ajoute encore « ${meanings[0] ?? 'bonjour'} ». Ils quittent ${world.place}.`,
+    `Plus tard à ${world.place}, ${world.a} et ${world.b} utilisent encore ${extra}. La conversation reste simple et polie. Merci. À bientôt.`,
+    `${world.a} dit s'il vous plaît ${details[2]}. ${world.b} dit à bientôt. À ${world.place}, ces mots suffisent : ${extra}.`,
+  ]
+  const seen = new Set(
+    reading.map((paragraph) =>
+      paragraph.tokens
+        .map((token) => token.text)
+        .join(' ')
+        .toLowerCase()
+        .replace(/\s+/g, ' ')
+        .replace(/\s+([.,!?;:])/g, '$1')
+        .trim(),
+    ),
   )
-  const words = meanings.slice(0, 10).map(([fr]) => fr).join(', ') || 'bonjour, merci, oui, non'
   let pass = 0
-  while (readingWords({ ...lesson, reading }) < 220 && pass < 6) {
-    const a = ['Marc', 'Paul', 'Luc', 'Hugo', 'Louis', 'Adam'][pass % 6]
-    const b = ['Marie', 'Sophie', 'Claire', 'Léa', 'Nina', 'Jade'][pass % 6]
-    const place = ['Paris', 'Lyon', 'Lille', 'Nantes', 'Nice', 'Rennes'][pass % 6]
-    const para =
-      `${a} et ${b} sont à ${place}. Ils parlent de ${words}. ${a} dit bonjour clairement. ${b} répond merci. ` +
-      `${a} ajoute encore une phrase simple. ${b} dit oui, puis à bientôt. Ils disent aussi au revoir. ` +
-      `Cette scène ${chapterId.slice(-4)}-${pass} reste utile pour retenir le sens.`
-    reading = [...reading, ...readingParagraphs(`ensure-${chapterId.slice(-4)}-${pass}`, [para], BUNDLED_VOCABULARY)]
+  while (readingWords({ ...lesson, reading }) < 220 && pass < templates.length) {
+    const key = templates[pass]
+      .toLowerCase()
+      .replace(/\s+/g, ' ')
+      .replace(/\s+([.,!?;:])/g, '$1')
+      .trim()
+    if (!seen.has(key)) {
+      seen.add(key)
+      reading = [
+        ...reading,
+        ...readingParagraphs(`ensure-${chapterId.slice(-4)}-${pass}`, [templates[pass]], BUNDLED_VOCABULARY),
+      ]
+    }
     pass += 1
   }
   return reading
@@ -183,7 +212,6 @@ export function deepenLessonToModule1Bar(
   }
   const withBrief = { ...base, brief }
   let reading = [...(ensureReadingMin(withBrief, chapterId ?? 'x', isHand) ?? [])]
-  // Always scrub leftover English tokens from hand readings (even thin ones).
   if (isHand) {
     reading = reading.map((paragraph, index) => {
       const raw = paragraph.tokens.map((token) => token.text).join(' ')
@@ -192,18 +220,8 @@ export function deepenLessonToModule1Bar(
       return readingParagraphs(`hand-en-${(chapterId ?? 'x').slice(-4)}-${index}`, [scrubbed], BUNDLED_VOCABULARY)[0] ?? paragraph
     })
   }
-  // After scrub, top up if scrubbing shortened under the bar.
   if (readingWords({ ...withBrief, reading }) < 220) {
-    const gap = 220 - readingWords({ ...withBrief, reading })
-    const meanings = parseMeanings(withBrief.brief?.body ?? '').slice(0, 8).map(([fr]) => fr).join(', ') || 'bonjour, merci'
-    const filler =
-      `Marc et Marie parlent encore à Paris. Ils disent ${meanings}. ` +
-      `Marc dit une phrase nouvelle pour la leçon ${(chapterId ?? 'x').slice(-4)}. Marie répond avec soin. ` +
-      `Ils ajoutent encore des mots clairs pour atteindre la lecture complète (${gap} mots). Merci. À bientôt. Au revoir.`
-    reading = [
-      ...reading,
-      ...readingParagraphs(`topup-${(chapterId ?? 'x').slice(-4)}`, [filler], BUNDLED_VOCABULARY),
-    ]
+    reading = ensureReadingMin({ ...withBrief, reading }, chapterId ?? 'x', false) ?? reading
   }
   reading = reading.map((paragraph, index) => {
     const raw = paragraph.tokens.map((token) => token.text).join(' ')

@@ -19,7 +19,7 @@ export type DeepTheme = Phase1Theme & {
 
 type World = { seed: number; a: string; b: string; place: string }
 
-const NAME_PAIRS: Array<[string, string]> = [
+export const NAME_PAIRS: Array<[string, string]> = [
   ['Marc', 'Marie'],
   ['Paul', 'Sophie'],
   ['Luc', 'Claire'],
@@ -42,7 +42,7 @@ const NAME_PAIRS: Array<[string, string]> = [
   ['Nathan', 'Lina'],
 ]
 
-const PLACES = [
+export const PLACES = [
   'Paris',
   'Lyon',
   'Marseille',
@@ -137,10 +137,21 @@ function looksFrenchLemma(fr: string): boolean {
     return false
   }
   if (/say as one chunk/i.test(raw)) return false
+  // English quiz labels accidentally formatted as *lemma* = …
+  if (
+    !/[àâäéèêëîïôöùûüçœæ]/i.test(raw) &&
+    /\b(find|fill|the|wrong|form|many|gaps|reading|please|with|from|this|that|which|what|words?|theme|vocabulary|vocab|drill|prompt|option|error)\b/i.test(
+      raw,
+    )
+  ) {
+    return false
+  }
   if (/[àâäéèêëîïôöùûüçœæ]/i.test(raw)) return true
   return /\b(je|tu|il|bonjour|merci|le|la|les|un|une|des|de|à|être|avoir|maison|père|mère|café|oui|non)\b/i.test(raw)
     || /^[a-zàâäéèêëîïôöùûüçœæ'’\s-]{2,40}$/i.test(raw)
 }
+
+export { looksFrenchLemma }
 
 function cleanMeanings(theme: DeepTheme): Array<[string, string]> {
   return theme.meanings.filter(([fr, en]) => looksFrenchLemma(fr) && en && !/prove chunk|useful phrase/i.test(en))
@@ -576,7 +587,63 @@ function buildReading(theme: DeepTheme, world: World): string[] {
   }
 
   const variants = banks[domain]
-  return variants[seed % variants.length]
+  return uniquifyReading(variants[seed % variants.length], theme, world)
+}
+
+function uniquifyReading(paras: string[], theme: DeepTheme, world: World): string[] {
+  const { a, b, place, seed } = world
+  const w = lemmas(theme)
+  const extra = w.slice(0, 8).join(', ') || 'bonjour, merci'
+  const details = ['dans la rue', 'devant le café', 'près de la gare', 'à la maison', 'à l\'école', 'sur la place']
+  const detail = pick(details, seed, 19)
+  const when = whenCap(seed)
+  const beats = [
+    `${a} dit bonjour.`,
+    `${b} dit merci.`,
+    `${a} écoute.`,
+    `${b} sourit.`,
+    `${a} parle clairement.`,
+    `${b} répond.`,
+    `${a} dit oui.`,
+    `${b} dit non.`,
+    `${a} habite ici.`,
+    `${b} est là.`,
+    `${a} dit au revoir.`,
+    `${b} dit à bientôt.`,
+    `${a} prend un café.`,
+    `${b} prend de l'eau.`,
+    `${a} marche un peu.`,
+    `${b} reste ici.`,
+    `${a} pose une question.`,
+    `${b} donne un exemple.`,
+    `${a} dit s'il vous plaît.`,
+    `${b} dit enchantée.`,
+  ]
+  const beat = pick(beats, seed, 23)
+  const focus = frenchFocusLines(theme)
+  const stamp = `« ${L(w, 0, 'bonjour')} », « ${L(w, 1, 'merci')} », « ${L(w, 2, 'oui')} »`
+  const out = paras.map((paragraph, index) => {
+    if (index === 0) {
+      const lead = /^(Ce matin|Cet après-midi|Ce soir|Aujourd'hui|Vers midi|En fin de journée),/.test(paragraph)
+        ? paragraph
+        : `${when}, ${paragraph}`
+      return `${lead} Ils sont ${detail}. ${beat} Ils disent aussi ${stamp}. ${focus[0] ?? `${a} utilise ${L(w, 0, 'bonjour')}.`}`
+    }
+    if (index === 2) {
+      return `${paragraph} ${focus[1] ?? `${b} comprend « ${L(w, 1, 'merci')} ».`}`
+    }
+    if (index === paras.length - 1) {
+      return `${paragraph} ${a} et ${b} quittent ${place} avec « ${L(w, 3, 'non')} » encore clair.`
+    }
+    return paragraph
+  })
+  const wordCount = out.join(' ').split(/\s+/).filter(Boolean).length
+  if (wordCount < 230) {
+    out.push(
+      `${a} et ${b} restent ${detail} à ${place}. Ils disent ${extra}. ${beat} Merci. À bientôt. Au revoir.`,
+    )
+  }
+  return out
 }
 
 function whenCap(seed: number): string {

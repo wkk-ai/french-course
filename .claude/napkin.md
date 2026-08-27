@@ -8,11 +8,11 @@
 
 ## Execution & Validation (Highest Priority)
 
-1. **[2026-08-01] Factory = domain hand-feel craft (no pads / no quiz-chat)**
-   Do instead: `craft-from-theme` picks domain from title/grammar first (never lemma-`bonjour` false greeting). Real apartment/café/city/family… scripts + focus uniquify (dialogue clones = 0). Shared name/place world; no pad emitters. Tap-fill + proper-noun allowlist for new names/places. Pages: `npm test` + `measure-content-pads` → `failing: 0 / 720`. Still generator — not 705 human rewrites. Schema: `theme-craft-schema.ts`. Rules body: `/rules-data/*.json` after unlock.
+1. **[2026-08-27] Factory = domain hand-feel craft (no pads / no quiz-chat)**
+   Do instead: `craft-from-theme` picks domain from title/grammar first (never lemma-`bonjour` false greeting). Real apartment/café/city/family… scripts + focus uniquify on dialogue AND reading. Shared name/place world with real dictionary lemmas. No pad emitters. CI: `npm test` + `measure-content-pads` → `failing: 0 / 720`. Still generator — not 705 human rewrites. Schema: `theme-craft-schema.ts`. Live host: Hostinger, not Pages.
 
-2. **[2026-07-27] Reading tap “Not in the dictionary” / vocab id hygiene**
-   Do instead: (1) namespaces M1 `1–295`, P1 `400–499`, LATER `600–841`, CORE `4000+`, TAP `5000+`; (2) one surface → one id (`dedupeVocabularySurfaces` + `scripts/dedupe-vocab-banks.ts`); (3) CI unique ids + unique surfaces; (4) `npx tsx scripts/audit-vocab-ids.ts` after vocab edits.
+2. **[2026-08-27] Reading tap “Not in the dictionary” / names as real lemmas**
+   Do instead: every tappable surface needs a bank lemma — people and cities too (`vocabulary-proper-names.ts`, ids 7000+). Do not treat allowlist as a pass. CI: `measureBundledTapCoverage` missTokens = 0. Re-tokenize reading/dialogue in `LessonClient` via `joinFrenchTokens` + `tokenizeFrench`. Capitalized Tours/Nice prefer the proper-noun lemma.
 
 3. **[2026-07-27] Factory readingFr dumps English glosses + EN grammar labels**
    Do instead: French-only reading; teach EN in Theory meanings list, not `signifie « past tense… »` / `with avoir` / `PC regular` inside `readingFr`. CI fail on ASCII EN content-words in reading/dialogue (allowlist cognates). Measured: 511/705 themes EN-in-readingFr; 305 dialogues with EN labels.
@@ -20,8 +20,8 @@
 4. **[2026-07-27] Meta “how to study” quizzes + weak plot/name distractors**
    Do instead: quiz FR forms/meanings only; ban prompts like “Before grammar drills…” / distractors `plot`/`name`/`story`. `validateLessonExercise` must reject authoring-meta + junk distractors. Measured: ~3 301 meta items / 705 lessons; ~2 513 weak-distractor items. Classic story-memory prompts = 0.
 
-5. **[2026-07-27] `validateChapterContent` only checks length/presence — not quality**
-   Do instead: extend CI: pad denylist, EN-in-readingFr, lemma coverage, near-dup paragraphs, focus originality, Prove dialogue originality, meta-exercise ban. Char minima currently reward `deepen-lesson` pad loops.
+5. **[2026-08-27] `validateChapterContent` must catch clones / pads / English, not length**
+   Do instead: fail on skeleton-near-dup paragraphs, glued tokens (`BonjourLuc`), EN quiz labels in reading, `atteindre la lecture complète` pads. `measure-content-pads` fails on reading clones + tap misses. Never mark fixed from char count. `deepen-lesson` must not inject Marc/Marie filler.
 
 6. **[2026-07-27] `user_mistakes.is_resolved` never written true**
    Do instead: resolve mistakes after correct rem/practice; else rem forever + Prove score pollution.
@@ -103,4 +103,4 @@
    Do instead: `tsx --test tests/*.test.ts` — Linux npm does not expand `**`.
 
 3. **[2026-08-26] Private course lives on Hostinger, not Pages**
-   Do instead: deploy `out/` (no `NEXT_PUBLIC_BASE_PATH`) to `french.worldhealthshop.com` (`public_html/french`). Folder password via `.htaccess` + `.htpasswd` (user `french`). Do not deploy to `worldhealthshop.com` itself. GitHub Pages stays off.
+   Do instead: deploy `out/` (no `NEXT_PUBLIC_BASE_PATH`) to `french.worldhealthshop.com` (`public_html/french`). Folder password via `.htaccess` + `.htpasswd` (user `french`). Do not deploy to `worldhealthshop.com` itself. Keep GitHub **private**. CI workflow tests only — never `deploy-pages` (that would republish the course).

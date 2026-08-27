@@ -139,6 +139,12 @@ function registerFrenchInflections(map: Map<string, string>, word: VocabularyWor
 /** Resolve lemma id: full surface, then elision-stripped base, then hyphen clitic. */
 export function lookupLemma(lookup: Map<string, string>, text: string): string | undefined {
   const key = normalizeLookup(text)
+  const trimmed = text.trim().replace(/^[«»"'(\[]+/, '')
+  // Capitalized city/name wins over a common-noun plural (Tours vs tour+s).
+  if (/^[A-ZÀ-Ÿ]/.test(trimmed)) {
+    const proper = properLemmaMaps.get(lookup)?.get(key)
+    if (proper) return proper
+  }
   const direct = lookup.get(key)
   if (direct) return direct
   const stripped = stripElisionBase(text)
@@ -196,6 +202,7 @@ function splitGluedPunctuation(token: WordToken): WordToken[] {
 /** Build lookup keys for surface forms → lemma id. */
 let cachedLookupVocab: VocabularyWord[] | null = null
 let cachedLookupMap: Map<string, string> | null = null
+const properLemmaMaps = new WeakMap<Map<string, string>, Map<string, string>>()
 
 export function buildLemmaLookup(vocabulary: VocabularyWord[]) {
   if (cachedLookupVocab === vocabulary && cachedLookupMap) return cachedLookupMap
@@ -301,7 +308,7 @@ export function buildLemmaLookup(vocabulary: VocabularyWord[]) {
       for (const form of ['anglaise', 'anglais', 'anglaises']) map.set(normalizeLookup(form), word.id)
     }
     if (word.word === 'français') {
-      for (const form of ['française', 'françaises', 'français']) map.set(normalizeLookup(form), word.id)
+      for (const form of ['française', 'françaises', 'français', 'francais', 'francaise', 'francaises']) map.set(normalizeLookup(form), word.id)
     }
     if (word.word === 'étudiant') {
       for (const form of ['étudiante', 'étudiantes', 'étudiants']) map.set(normalizeLookup(form), word.id)
@@ -639,6 +646,13 @@ export function buildLemmaLookup(vocabulary: VocabularyWord[]) {
     map.set(normalizeLookup(phrase), id)
   }
 
+  const proper = new Map<string, string>()
+  for (const word of vocabulary) {
+    if (!/proper/i.test(word.part_of_speech ?? '')) continue
+    proper.set(normalizeLookup(word.word), word.id)
+  }
+  properLemmaMaps.set(map, proper)
+
   cachedLookupVocab = vocabulary
   cachedLookupMap = map
   return map
@@ -785,10 +799,39 @@ export function enrichTokens(tokens: WordToken[], vocabulary: VocabularyWord[]):
   return merged
 }
 
+/** Rebuild French text from stored tokens using the same spacing as the lesson screen. */
+export function joinFrenchTokens(tokens: Array<{ text: string }>): string {
+  let out = ''
+  for (let index = 0; index < tokens.length; index += 1) {
+    const current = tokens[index].text
+    if (index === 0) {
+      out = current
+      continue
+    }
+    const previous = tokens[index - 1].text
+    if (current === '«' || current === '»') {
+      out += ` ${current}`
+      continue
+    }
+    if (isPunctuationToken(current)) {
+      out += current
+      continue
+    }
+    if (previous === '«' || isPunctuationToken(previous)) {
+      out += ` ${current}`
+      continue
+    }
+    out += ` ${current}`
+  }
+  return out
+}
+
 /** Tokenize plain conversation text into clickable tokens. */
 export function tokenizeFrench(text: string, prefix: string, vocabulary: VocabularyWord[]): WordToken[] {
+  // Split glued camelCase (BonjourLuc). ASCII A-Z only — À-Ÿ includes lowercase é/ç/ô.
+  const unglued = text.replace(/([a-zà-ÿœæ])([A-Z])/g, '$1 $2')
   // Include œ/æ — they sit outside À-ÿ and otherwise split words like sœur.
-  const parts = text.match(/[A-Za-zÀ-ÿŒœÆæ’']+|[^A-Za-zÀ-ÿŒœÆæ’'\s]+|\s+/g) ?? [text]
+  const parts = unglued.match(/[A-Za-zÀ-ÿŒœÆæ’']+|[^A-Za-zÀ-ÿŒœÆæ’'\s]+|\s+/g) ?? [unglued]
   const rough: WordToken[] = []
   let index = 0
   for (const part of parts) {

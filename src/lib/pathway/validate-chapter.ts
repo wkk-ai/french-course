@@ -1,5 +1,6 @@
 import type { LessonContent } from '@/lib/course'
 import { AUTHOR_PAD_DENYLIST, englishLeakInFrench, hasAuthorPad } from '@/lib/pathway/content-quality'
+import { NAME_PAIRS, PLACES } from '@/lib/pathway/craft-from-theme'
 
 function readingWordCount(lesson: LessonContent): number {
   let count = 0
@@ -32,15 +33,69 @@ function countTeachingSections(brief: string): number {
   return hashes.length
 }
 
+function paragraphSkeleton(text: string): string {
+  const names = [...NAME_PAIRS.flat(), ...PLACES]
+    .map((name) => name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+    .join('|')
+  return normalizePara(text)
+    .replace(new RegExp(`\\b(${names})\\b`, 'gi'), '#')
+    .replace(/\b[a-f0-9]{4}-\d+\b/gi, '#')
+    .replace(/\d+/g, '#')
+}
+
+function tokenSet(text: string): Set<string> {
+  return new Set(
+    paragraphSkeleton(text)
+      .split(/\s+/)
+      .filter((word) => word.length > 2 && word !== '#'),
+  )
+}
+
+function jaccard(left: Set<string>, right: Set<string>): number {
+  let inter = 0
+  for (const word of left) if (right.has(word)) inter += 1
+  const union = left.size + right.size - inter
+  return union ? inter / union : 0
+}
+
 function hasNearDupParagraphs(lesson: LessonContent): boolean {
   const paras = (lesson.reading ?? []).map((paragraph) =>
     normalizePara(paragraph.tokens.map((token) => token.text).join(' ')),
   )
   const seen = new Set<string>()
+  const skeletons = new Set<string>()
+  const sets: Array<{ text: string; tokens: Set<string> }> = []
   for (const para of paras) {
     if (para.length < 40) continue
     if (seen.has(para)) return true
     seen.add(para)
+    const skeleton = paragraphSkeleton(para)
+    if (skeleton.length >= 50) {
+      if (skeletons.has(skeleton)) return true
+      skeletons.add(skeleton)
+    }
+    if (para.length >= 80) {
+      const tokens = tokenSet(para)
+      for (const prior of sets) {
+        if (jaccard(tokens, prior.tokens) >= 0.88) return true
+      }
+      sets.push({ text: para, tokens })
+    }
+  }
+  return false
+}
+
+function hasGluedWordToken(lesson: LessonContent): boolean {
+  const glued = /[a-zà-ÿœæ][A-Z]/
+  for (const paragraph of lesson.reading ?? []) {
+    for (const token of paragraph.tokens) {
+      if (glued.test(token.text)) return true
+    }
+  }
+  for (const line of lesson.conversation?.lines ?? []) {
+    for (const token of line.tokens ?? []) {
+      if (glued.test(token.text)) return true
+    }
   }
   return false
 }
@@ -89,6 +144,9 @@ export function validateChapterContent(
   }
   if (hasNearDupParagraphs(lesson)) {
     return { ok: false, reason: 'Near-duplicate reading paragraphs' }
+  }
+  if (hasGluedWordToken(lesson)) {
+    return { ok: false, reason: 'Glued word token in reading or dialogue' }
   }
   const dialogue = lesson.conversation?.lines?.length ?? 0
   if (dialogue < 12) {
@@ -154,5 +212,9 @@ export function dialogueFingerprint(lesson: LessonContent): string {
 }
 
 export function readingFingerprint(lesson: LessonContent): string {
-  return normalizePara(readingPlainText(lesson).slice(0, 400))
+  const firstTwo = (lesson.reading ?? [])
+    .slice(0, 2)
+    .map((paragraph) => paragraph.tokens.map((token) => token.text).join(' '))
+    .join(' ')
+  return paragraphSkeleton(firstTwo)
 }

@@ -435,4 +435,8 @@ export const TAP_FILL_VOCABULARY: VocabularyWord[] = [
   v(964, 'devient', 'becomes', 'verb'),
   v(965, 'comparent', 'compare (they)', 'verb'),
   v(966, 'hasard', 'chance', 'noun', 'masculine'),
+  v(967, 'suffisent', 'are enough / suffice', 'verb'),
+  v(968, 'suffire', 'to be enough / to suffice', 'verb'),
+  v(969, 'consonnes', 'consonants', 'noun', 'feminine'),
+  v(970, 'consonne', 'consonant', 'noun', 'feminine'),
 ]

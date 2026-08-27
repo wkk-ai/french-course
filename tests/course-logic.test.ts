@@ -661,19 +661,20 @@ test('bundled vocabulary has one row per lemma surface', async () => {
   assert.equal(dups.length, 0, dups.slice(0, 10).join('; '))
 })
 
-test('bundled tap coverage stays near zero (proper nouns allowlisted)', async () => {
+test('bundled tap coverage is zero — every word has a dictionary entry', async () => {
   const { BUNDLED_CHAPTER_IDS, BUNDLED_LESSONS } = await import('../src/lib/bundled-lessons')
   const { BUNDLED_VOCABULARY } = await import('../src/lib/phase1/content')
   const { measureBundledTapCoverage } = await import('../src/lib/pathway/tap-coverage')
   const stats = measureBundledTapCoverage(BUNDLED_LESSONS, BUNDLED_CHAPTER_IDS, BUNDLED_VOCABULARY)
   assert.ok(stats.totalWordTokens > 100_000, 'expected large token sample')
-  assert.ok(
-    stats.missRate < 0.001,
-    `tap miss rate ${(stats.missRate * 100).toFixed(2)}% must be < 0.1% (${stats.missTokens}/${stats.totalWordTokens})`,
+  assert.equal(
+    stats.missTokens,
+    0,
+    `tap misses ${stats.missTokens}/${stats.totalWordTokens} (${(stats.missRate * 100).toFixed(2)}%)`,
   )
 })
 
-test('u1.B has few untappable content surfaces after enrich', async () => {
+test('u1.B has no untappable content surfaces after enrich', async () => {
   const { BUNDLED_LESSONS } = await import('../src/lib/bundled-lessons')
   const { BUNDLED_VOCABULARY } = await import('../src/lib/phase1/content')
   const { untappableSurfaces } = await import('../src/lib/pathway/content-quality')
@@ -682,8 +683,19 @@ test('u1.B has few untappable content surfaces after enrich', async () => {
   assert.ok(lesson)
   const stats = measureLessonTapCoverage(lesson, BUNDLED_VOCABULARY)
   const misses = untappableSurfaces(lesson, BUNDLED_VOCABULARY)
-  assert.ok(stats.missRate < 0.08, `u1.B miss rate ${(stats.missRate * 100).toFixed(1)}% too high`)
-  assert.ok(misses.length < 40, `u1.B has ${misses.length} unique untappable surfaces: ${misses.slice(0, 12).join(', ')}`)
+  assert.equal(stats.missTokens, 0, `u1.B still missing lemmas: ${misses.slice(0, 12).join(', ')}`)
+  assert.equal(misses.length, 0, `u1.B has ${misses.length} unique untappable surfaces: ${misses.slice(0, 12).join(', ')}`)
+})
+
+test('names and glued words become real dictionary taps', async () => {
+  const { BUNDLED_VOCABULARY } = await import('../src/lib/bundled-vocabulary')
+  const { tokenizeFrench } = await import('../src/lib/clickable-text')
+  const luc = tokenizeFrench('BonjourLuc! Ça va?', 'g', BUNDLED_VOCABULARY)
+  const words = luc.filter((token) => /[A-Za-zÀ-ÿ]/.test(token.text) && !/^[.,!?;:]+$/.test(token.text))
+  assert.ok(words.some((token) => token.text === 'Bonjour'))
+  assert.ok(words.some((token) => token.text === 'Luc' && token.lemmaId))
+  const lille = tokenizeFrench('Tu es à Lille aujourd\'hui ?', 'c', BUNDLED_VOCABULARY)
+  assert.ok(lille.some((token) => token.text === 'Lille' && token.lemmaId))
 })
 
 test('subscribeLocalVault is exported for cross-tab Review sync', async () => {
