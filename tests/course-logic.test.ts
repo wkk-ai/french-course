@@ -45,16 +45,18 @@ test('Module 1 lesson content resolves when the database stub is empty', () => {
   assert.ok(content?.exercises?.length)
 })
 
-test('the first authored lesson is active for a new learner', () => {
-  assert.equal(deriveChapterStatus('one', ['one', 'two'], new Set()), 'active')
-  assert.equal(deriveChapterStatus('two', ['one', 'two'], new Set()), 'locked')
+test('every playable lesson stays open; status is not-started, in-progress, or completed', () => {
+  assert.equal(deriveChapterStatus('one', ['one', 'two'], new Set()), 'not-started')
+  assert.equal(deriveChapterStatus('two', ['one', 'two'], new Set()), 'not-started')
+  assert.equal(deriveChapterStatus('two', ['one', 'two'], new Set(), { two: 40 }), 'in-progress')
   assert.equal(deriveChapterStatus('three', ['one', 'two'], new Set()), 'coming-soon')
 })
 
-test('completing a chapter exposes the next authored chapter', () => {
+test('completing a chapter marks it done without locking the rest', () => {
   const completed = new Set(['one'])
   assert.equal(deriveChapterStatus('one', ['one', 'two'], completed), 'completed')
-  assert.equal(deriveChapterStatus('two', ['one', 'two'], completed), 'active')
+  assert.equal(deriveChapterStatus('two', ['one', 'two'], completed), 'not-started')
+  assert.equal(deriveChapterStatus('one', ['one', 'two'], completed, { one: 80 }), 'completed')
 })
 
 test('SM-2 resets a missed card and scores contextual exercises', () => {
@@ -719,13 +721,12 @@ test('HomeClient uses lightweight bundled-chapter-ids only', async () => {
   assert.equal(shell.includes('bundled-lessons'), false)
 })
 
-test('guest unlock uses local completed chapters only', async () => {
+test('every lesson is open; progress is not a lock', async () => {
   const { isLessonUnlocked } = await import('../src/lib/lesson-unlock')
   const ids = ['a', 'b', 'c']
   assert.equal(isLessonUnlocked('a', [], ids), true)
-  assert.equal(isLessonUnlocked('b', [], ids), false)
-  assert.equal(isLessonUnlocked('b', ['a'], ids), true)
-  assert.equal(isLessonUnlocked('a', ['a'], ids), true)
+  assert.equal(isLessonUnlocked('b', [], ids), true)
+  assert.equal(isLessonUnlocked('c', ['a'], ids), true)
 })
 
 test('home catalog is pathway-only (no login, no supabase)', async () => {

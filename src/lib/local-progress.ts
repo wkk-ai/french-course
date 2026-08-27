@@ -1,9 +1,16 @@
 /** Local completed-chapter IDs — backup when remote complete_chapter / FK fails. */
 
 const KEY = 'french-course:completed-chapters'
+const IN_PROGRESS_KEY = 'french-course:in-progress'
 const STREAK_KEY = 'french-course:local-streak'
 const DAILY_WORDS_KEY = 'french-course:daily-words'
 const DAILY_ARTICLES_KEY = (date: string) => `french-course:daily-articles:${date}`
+const PROGRESS_EVENT = 'french-course-progress'
+
+function notifyProgress() {
+  if (typeof window === 'undefined') return
+  window.dispatchEvent(new Event(PROGRESS_EVENT))
+}
 
 export function readLocalCompletedChapters(): string[] {
   if (typeof window === 'undefined') return []
@@ -22,7 +29,43 @@ export function markLocalChapterCompleted(chapterId: string) {
   const next = new Set(readLocalCompletedChapters())
   next.add(chapterId)
   localStorage.setItem(KEY, JSON.stringify([...next]))
+  clearLessonInProgress(chapterId)
   bumpLocalStreak()
+  notifyProgress()
+}
+
+export function readInProgressPercents(): Record<string, number> {
+  if (typeof window === 'undefined') return {}
+  try {
+    const parsed = JSON.parse(localStorage.getItem(IN_PROGRESS_KEY) ?? '{}') as unknown
+    if (!parsed || typeof parsed !== 'object') return {}
+    const out: Record<string, number> = {}
+    for (const [id, value] of Object.entries(parsed as Record<string, unknown>)) {
+      const percent = typeof value === 'number' ? value : Number(value)
+      if (Number.isFinite(percent) && percent > 0) out[id] = Math.min(99, Math.round(percent))
+    }
+    return out
+  } catch {
+    return {}
+  }
+}
+
+export function setLessonInProgress(chapterId: string, percent: number) {
+  if (typeof window === 'undefined' || percent <= 0) return
+  if (readLocalCompletedChapters().includes(chapterId)) return
+  const map = readInProgressPercents()
+  map[chapterId] = Math.min(99, Math.max(1, Math.round(percent)))
+  localStorage.setItem(IN_PROGRESS_KEY, JSON.stringify(map))
+  notifyProgress()
+}
+
+export function clearLessonInProgress(chapterId: string) {
+  if (typeof window === 'undefined') return
+  const map = readInProgressPercents()
+  if (!(chapterId in map)) return
+  delete map[chapterId]
+  localStorage.setItem(IN_PROGRESS_KEY, JSON.stringify(map))
+  notifyProgress()
 }
 
 export function mergeCompletedChapterIds(remote: Iterable<string>): Set<string> {
@@ -136,6 +179,7 @@ export function readLocalDailyReadingHistory(): Array<{ date: string; words_read
 export function clearLocalLearnerData() {
   if (typeof window === 'undefined') return
   localStorage.removeItem(KEY)
+  localStorage.removeItem(IN_PROGRESS_KEY)
   localStorage.removeItem(STREAK_KEY)
   localStorage.removeItem(DAILY_WORDS_KEY)
   localStorage.removeItem('ladf-vocab-vault-v1')
@@ -157,8 +201,12 @@ export function clearLocalLearnerData() {
 export function subscribeCompletedChapters(listener: () => void): () => void {
   if (typeof window === 'undefined') return () => {}
   const onStorage = (event: StorageEvent) => {
-    if (event.key === KEY || event.key === STREAK_KEY) listener()
+    if (event.key === KEY || event.key === STREAK_KEY || event.key === IN_PROGRESS_KEY) listener()
   }
   window.addEventListener('storage', onStorage)
-  return () => window.removeEventListener('storage', onStorage)
+  window.addEventListener(PROGRESS_EVENT, listener)
+  return () => {
+    window.removeEventListener('storage', onStorage)
+    window.removeEventListener(PROGRESS_EVENT, listener)
+  }
 }

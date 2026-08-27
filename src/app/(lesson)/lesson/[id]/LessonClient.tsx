@@ -11,12 +11,9 @@ import { isExerciseAnswered, isExerciseCorrect } from '@/lib/exercises/grading'
 import { RichText } from '@/components/RichText'
 import { joinFrenchTokens, isPunctuationToken, tokenizeFrench } from '@/lib/clickable-text'
 import { CONJUGATION_TENSES, conjugationsForWord, isConjugableVerb } from '@/lib/french-conjugations'
-import { isCanonicalChapterId } from '@/lib/course-catalog'
 import { calculateLessonScore, didPassProve, PROVE_PASS_SCORE } from '@/lib/lesson-score'
-import { BUNDLED_CHAPTER_IDS } from '@/lib/bundled-chapter-ids'
+import { addLocalDailyWords, markLocalChapterCompleted, setLessonInProgress, shouldCountDailyArticle } from '@/lib/local-progress'
 import { bumpLocalMistakeCount, enqueueLocalVocabulary } from '@/lib/local-vocab-vault'
-import { addLocalDailyWords, markLocalChapterCompleted, mergeCompletedChapterIds, shouldCountDailyArticle } from '@/lib/local-progress'
-import { isLessonUnlocked } from '@/lib/lesson-unlock'
 import { BUNDLED_VOCABULARY } from '@/lib/bundled-vocabulary'
 import { PATHWAY_BY_CHAPTER_ID } from '@/lib/pathway/catalog'
 import { lemmaIdsFromLesson } from '@/lib/review/lemmas-from-lesson'
@@ -97,7 +94,7 @@ export default function LessonClient({
   const [remediationCategories] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [gate, setGate] = useState<'loading' | 'ready' | 'login' | 'locked'>('loading')
+  const [gate, setGate] = useState<'loading' | 'ready'>('loading')
   const router = useRouter()
   const hasConversation = Boolean(content.conversation?.lines.length)
 
@@ -150,15 +147,17 @@ export default function LessonClient({
         if (fromUrl === 'conversation' && !hasConversation) setStage('exercise')
         else setStage(fromUrl)
       }
-      const raw = sessionStorage.getItem(DRAFT_KEY(chapterId))
-      if (!raw) return
-      const parsed = JSON.parse(raw) as { stage?: Stage; answers?: Record<string, ExerciseAnswer>; exerciseIndex?: number }
-      if (!isStage(fromUrl) && parsed.stage) setStage(parsed.stage)
-      if (parsed.answers) setAnswers(parsed.answers)
-      if (typeof parsed.exerciseIndex === 'number' && parsed.exerciseIndex >= 0) setExerciseIndex(parsed.exerciseIndex)
+      const raw = localStorage.getItem(DRAFT_KEY(chapterId)) ?? sessionStorage.getItem(DRAFT_KEY(chapterId))
+      if (raw) {
+        const parsed = JSON.parse(raw) as { stage?: Stage; answers?: Record<string, ExerciseAnswer>; exerciseIndex?: number }
+        if (!isStage(fromUrl) && parsed.stage) setStage(parsed.stage)
+        if (parsed.answers) setAnswers(parsed.answers)
+        if (typeof parsed.exerciseIndex === 'number' && parsed.exerciseIndex >= 0) setExerciseIndex(parsed.exerciseIndex)
+      }
     } catch {
       // ignore corrupt draft
     }
+    setGate('ready')
   }, [chapterId, hasConversation])
 
   const goToStage = (next: Stage, historyMode: 'push' | 'replace' = 'push') => {
@@ -203,7 +202,9 @@ export default function LessonClient({
   useEffect(() => {
     if (gate !== 'ready') return
     try {
-      sessionStorage.setItem(DRAFT_KEY(chapterId), JSON.stringify({ stage, answers, exerciseIndex }))
+      const payload = JSON.stringify({ stage, answers, exerciseIndex })
+      localStorage.setItem(DRAFT_KEY(chapterId), payload)
+      sessionStorage.setItem(DRAFT_KEY(chapterId), payload)
     } catch {
       // quota
     }
@@ -219,20 +220,6 @@ export default function LessonClient({
     window.addEventListener('beforeunload', onBeforeUnload)
     return () => window.removeEventListener('beforeunload', onBeforeUnload)
   }, [answers, stage])
-
-  useEffect(() => {
-    void Promise.resolve().then(() => {
-      const completed = mergeCompletedChapterIds([])
-      const orderedAuthored = BUNDLED_CHAPTER_IDS.filter((id) => isCanonicalChapterId(id))
-      const allowed = isLessonUnlocked(chapterId, completed, orderedAuthored)
-      if (!allowed) {
-        setGate('locked')
-        router.replace('/')
-        return
-      }
-      setGate('ready')
-    })
-  }, [chapterId, router])
 
   const dictVocabulary = useMemo(() => {
     const byId = new Map(BUNDLED_VOCABULARY.map((word) => [word.id, word]))
@@ -289,6 +276,11 @@ export default function LessonClient({
     : answeredAll ? 100
     : 50 + Math.round((Object.keys(answers).length / Math.max(1, content.exercises?.length ?? 1)) * 45)
   const remediateLinks = useMemo(() => siblingRemediationLinks(chapterId), [chapterId])
+
+  useEffect(() => {
+    if (gate !== 'ready') return
+    setLessonInProgress(chapterId, Math.min(99, Math.max(1, progress)))
+  }, [chapterId, progress, gate])
 
   useEffect(() => {
     if (exercises.length === 0) {
@@ -504,6 +496,7 @@ export default function LessonClient({
       markLocalChapterCompleted(chapterId)
       try {
         sessionStorage.removeItem(DRAFT_KEY(chapterId))
+        localStorage.removeItem(DRAFT_KEY(chapterId))
       } catch {
         // ignore
       }
@@ -518,9 +511,7 @@ export default function LessonClient({
   if (gate !== 'ready') {
     return (
       <main className="mx-auto flex min-h-screen max-w-[680px] items-center justify-center p-6">
-        <p className="text-on-surface-variant">
-          {gate === 'locked' ? 'This lesson is not unlocked yet.' : gate === 'login' ? 'Redirecting to sign in…' : 'Loading lesson…'}
-        </p>
+        <p className="text-on-surface-variant">Loading lesson…</p>
       </main>
     )
   }

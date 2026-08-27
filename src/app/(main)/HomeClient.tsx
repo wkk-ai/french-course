@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
-import { Clock, Lock, Play, Star } from 'lucide-react'
+import { Clock, Circle, Play, Star } from 'lucide-react'
 import { hasLessonContent } from '@/lib/course'
 import {
   PATHWAY_BY_CHAPTER_ID,
@@ -13,7 +13,7 @@ import {
 } from '@/lib/pathway/catalog'
 import { deriveChapterStatus } from '@/lib/progression'
 import { BUNDLED_CHAPTER_IDS } from '@/lib/bundled-chapter-ids'
-import { mergeCompletedChapterIds, readLocalCompletedChapters, readLocalDailyWords, subscribeCompletedChapters } from '@/lib/local-progress'
+import { mergeCompletedChapterIds, readLocalCompletedChapters, readLocalDailyWords, readInProgressPercents, subscribeCompletedChapters } from '@/lib/local-progress'
 import { SaveCourseCard } from '@/components/SaveCourseCard'
 
 type Module = {
@@ -33,34 +33,43 @@ type Chapter = {
   lesson_content: unknown
 }
 
-type Progress = { chapter_id: string; status: 'locked' | 'active' | 'completed' }
+type Progress = { chapter_id: string; status: 'not-started' | 'in-progress' | 'completed' }
 
 function ChapterCard({
   chapter,
   moduleOrder,
   status,
+  percent,
   pathway,
 }: {
   chapter: Chapter
   moduleOrder: number
   status: ReturnType<typeof deriveChapterStatus>
+  percent?: number
   pathway?: PathwaySubChapter
 }) {
   const label = pathway
     ? pathwayLabel(moduleOrder, pathway)
     : `${moduleOrder}.${chapter.order_index} ${chapter.title}`
+  const shownPercent = Math.max(0, Math.min(99, percent ?? 0))
   const statusContent = {
     completed: { label: 'Completed', icon: <Star className="size-6 fill-success text-success" />, tone: 'text-success' },
-    active: { label: 'Up next', icon: <Play className="size-6 fill-primary text-primary" />, tone: 'text-primary' },
-    locked: { label: 'Locked', icon: <Lock className="size-6 text-on-surface-variant" />, tone: 'text-on-surface-variant' },
+    'in-progress': {
+      label: `In progress · ${shownPercent}%`,
+      icon: <Play className="size-6 fill-primary text-primary" />,
+      tone: 'text-primary',
+    },
+    'not-started': {
+      label: 'Not started',
+      icon: <Circle className="size-6 text-on-surface-variant" />,
+      tone: 'text-on-surface-variant',
+    },
     'coming-soon': { label: 'Coming soon', icon: <Clock className="size-6 text-on-surface-variant" />, tone: 'text-on-surface-variant' },
   }[status]
 
   const card = (
     <div
-      className={`tactile-card flex items-center gap-4 p-4 ${status === 'active' ? 'border-b-primary' : ''} ${
-        status === 'locked' || status === 'coming-soon' ? 'bg-surface-container-low opacity-75' : ''
-      }`}
+      className={`tactile-card flex items-center gap-4 p-4 ${status === 'in-progress' ? 'border-b-primary' : ''}`}
     >
       <div className="flex size-14 shrink-0 items-center justify-center rounded-full border-[5px] border-surface-container-high bg-surface-container-lowest">
         {statusContent.icon}
@@ -76,16 +85,21 @@ function ChapterCard({
         </div>
         <h3 className="mt-1 break-words text-body-ui font-bold">{label}</h3>
         <p className="mt-1 text-sm text-on-surface-variant">{chapter.description}</p>
+        {status === 'in-progress' ? (
+          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-container-high">
+            <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${shownPercent}%` }} />
+          </div>
+        ) : null}
       </div>
     </div>
   )
 
-  return status === 'active' || status === 'completed' ? (
+  return status === 'coming-soon' ? (
+    <div>{card}</div>
+  ) : (
     <Link href={`/lesson/${chapter.id}/`} className="outline-none transition-opacity hover:opacity-90">
       {card}
     </Link>
-  ) : (
-    <div>{card}</div>
   )
 }
 
@@ -97,6 +111,7 @@ export default function HomeClient({
   chapters: Chapter[]
 }) {
   const [progressByChapter, setProgressByChapter] = useState<Map<string, Progress['status']>>(new Map())
+  const [inProgressPercents, setInProgressPercents] = useState<Record<string, number>>({})
   const [wordsRead, setWordsRead] = useState(0)
   const [progressReady, setProgressReady] = useState(false)
 
@@ -105,6 +120,7 @@ export default function HomeClient({
       const map = new Map<string, Progress['status']>()
       for (const id of mergeCompletedChapterIds([])) map.set(id, 'completed')
       setProgressByChapter(map)
+      setInProgressPercents(readInProgressPercents())
       setWordsRead(readLocalDailyWords())
       setProgressReady(true)
     })
@@ -119,6 +135,7 @@ export default function HomeClient({
         }
         return next
       })
+      setInProgressPercents(readInProgressPercents())
     })
   }, [])
 
@@ -133,7 +150,7 @@ export default function HomeClient({
 
   const DAILY_GOAL = 300
   const authoredIds = useMemo(() => {
-    // Prefer bundled pathway order so Home matches lesson unlock (incl. Prove D).
+    // Prefer bundled pathway order so Home status matches every playable lesson.
     const fromBundle = BUNDLED_CHAPTER_IDS.filter((id) => courseChapters.some((c) => c.id === id && hasLessonContent(c.lesson_content)))
     return fromBundle.length ? fromBundle : authoredChapters.map((item) => item.id)
   }, [authoredChapters, courseChapters])
@@ -229,7 +246,8 @@ export default function HomeClient({
                             key={sub.id}
                             chapter={chapter}
                             moduleOrder={module.order_index}
-                            status={deriveChapterStatus(chapter.id, authoredIds, completedIds)}
+                            status={deriveChapterStatus(chapter.id, authoredIds, completedIds, inProgressPercents)}
+                            percent={inProgressPercents[chapter.id]}
                             pathway={PATHWAY_BY_CHAPTER_ID.get(chapter.id)?.sub}
                           />
                         )
@@ -246,7 +264,8 @@ export default function HomeClient({
                       key={chapter.id}
                       chapter={chapter}
                       moduleOrder={module.order_index}
-                      status={deriveChapterStatus(chapter.id, authoredIds, completedIds)}
+                      status={deriveChapterStatus(chapter.id, authoredIds, completedIds, inProgressPercents)}
+                      percent={inProgressPercents[chapter.id]}
                       pathway={PATHWAY_BY_CHAPTER_ID.get(chapter.id)?.sub}
                     />
                   ))

@@ -29,8 +29,8 @@
 7. **[2026-07-27] RPC `chapter_vocabulary` re-seeds Marc/Paris into Review**
    Do instead: remote `complete_chapter` migration applied; keep client `filterReviewPool` as belt-and-suspenders.
 
-8. **[2026-08-24] No login on phone; never ship factory in client**
-   Do instead: guest unlock via `isLessonUnlocked` + local completed ids. Finish = `markLocalChapterCompleted` + vault. Compact JSON from `emit-course-data` (never import `BUNDLED_LESSONS` in client — freeze). Save-course caches JSON + slim pages. iPhone: Safari Add to Home Screen, Save course once on wifi.
+8. **[2026-08-27] No login on phone; never ship factory in client**
+   Do instead: all modules/units/lessons stay open (no sequential lock). Track not-started / in-progress percent / completed via local storage. Finish = `markLocalChapterCompleted` + vault. Compact JSON from `emit-course-data` (never import `BUNDLED_LESSONS` in client — freeze). Save-course caches JSON + slim pages. iPhone: Safari Add to Home Screen, Save course once on wifi.
 
 9. **[2026-07-25] Prove D must gate at 70%, no hints**
    Do instead: `didPassProve`; `allowHints={!isProve}`; exclude rem from Prove score; fail → remediate B/C.
@@ -56,8 +56,8 @@
 5. **[2026-07-25] Theory must teach meanings before grammar examples**
    Do instead: every Theory First brief starts with **Words to learn first (meanings)**; never *mon frère* before *frère = brother*; deep multi-section briefs.
 
-6. **[2026-07-25] Match / unlock / mobile safe-area**
-   Do instead: shuffle both match columns; unlock via `BUNDLED_CHAPTER_IDS` (20/module incl. D); Today’s Reading M1 X/20 + daily 300 words; mobile nav `pb-safe` + main `pb-[calc(4rem+env(safe-area))]`.
+6. **[2026-08-27] Match / open lessons / mobile safe-area**
+   Do instead: shuffle both match columns; every playable lesson is open (status: not started / in progress % / completed). Today’s Reading M1 X/20 + daily 300 words; mobile nav `pb-safe` + main `pb-[calc(4rem+env(safe-area))]`.
 
 7. **[2026-07-25] Learn / Review / Rules wiring**
    Do instead: resolve `BUNDLED_LESSONS` (720 A/B/C/D); Review + rule unlock scan all `BUNDLED_CHAPTER_IDS`; lesson page pathway fallback if DB row missing; static-generate all playable IDs; **DB must seed all 720 rows** or complete/FK fail.
@@ -82,8 +82,8 @@
 6. **[2026-07-27] Center `today` baked at static export build**
    Do instead: compute heatmap “today” in client (`new Date()`), never from SSG page props.
 
-7. **[2026-07-25] Home progress flash before remote load**
-   Do instead: boot Home with loading state until progress merge finishes (don’t paint false “Up next”).
+7. **[2026-08-27] Home progress flash before local load**
+   Do instead: boot Home with loading state until local completed + in-progress percents load (don’t paint false Not started).
 
 8. **[2026-07-27] `completeLesson` catch marks local complete on any throw**
    Do instead: mark local only after enqueue intent succeeds; never on pre-save auth failure.
