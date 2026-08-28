@@ -551,6 +551,41 @@ test('Jobs unit theory uses real work sentences, not quote-talk', async () => {
     assert.ok(/au bureau/.test(body) && /à l'école/.test(body), `${id} missing place examples`)
     const reading = (lesson.reading ?? []).map((p) => p.tokens.map((t) => t.text).join(' ')).join('\n')
     assert.equal(/J'utilise\s*«|utilise «/i.test(reading), false, `${id} reading quote-talk`)
+    for (const line of body.split('\n')) {
+      const trimmed = line.trim()
+      if (trimmed.includes('→') && !trimmed.startsWith('**')) {
+        assert.ok(/^[-*]\s+/.test(trimmed) || /^\d+\.\s+/.test(trimmed), `${id} wall: ${trimmed.slice(0, 90)}`)
+      }
+    }
+  }
+})
+
+test('every bundled theory brief uses bullets for arrow examples', async () => {
+  const { BUNDLED_LESSONS, BUNDLED_CHAPTER_IDS } = await import('../src/lib/bundled-lessons')
+  let walls = 0
+  for (const id of BUNDLED_CHAPTER_IDS) {
+    const body = BUNDLED_LESSONS[id]?.brief?.body ?? ''
+    for (const line of body.split('\n')) {
+      const trimmed = line.trim()
+      if (!trimmed || trimmed.startsWith('**')) continue
+      if (trimmed.includes('→') && !/^[-*]\s+/.test(trimmed) && !/^\d+\.\s+/.test(trimmed)) {
+        walls += 1
+        if (walls === 1) assert.fail(`${id}: ${trimmed.slice(0, 120)}`)
+      }
+    }
+  }
+  assert.equal(walls, 0)
+})
+
+test('bundled readings and talk use real sentences, not quote-talk', async () => {
+  const { BUNDLED_LESSONS, BUNDLED_CHAPTER_IDS } = await import('../src/lib/bundled-lessons')
+  const quoteTalk = /J'utilise\s*«|utilisent aussi «|pratique «|mots du jour|Mots utiles :/i
+  for (const id of BUNDLED_CHAPTER_IDS) {
+    const lesson = BUNDLED_LESSONS[id]
+    const reading = (lesson.reading ?? []).map((p) => p.tokens.map((t) => t.text).join(' ')).join('\n')
+    const talk = (lesson.conversation?.lines ?? []).map((l) => l.text).join('\n')
+    assert.equal(quoteTalk.test(reading), false, `${id} reading quote-talk`)
+    assert.equal(quoteTalk.test(talk), false, `${id} talk quote-talk`)
   }
 })
 

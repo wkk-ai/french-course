@@ -4,6 +4,7 @@ import { FACTORY_CHAPTER_IDS, getFactoryLessons, PHASE1_CHAPTER_IDS, getPhase1Le
 import { PATHWAY_BY_CHAPTER_ID } from '@/lib/pathway/catalog'
 import { deepenLessonToModule1Bar } from '@/lib/pathway/deepen-lesson'
 import { BUNDLED_CHAPTER_IDS as CATALOG_CHAPTER_IDS } from '@/lib/bundled-chapter-ids'
+import { M03_U2_HAND_LESSONS } from '@/lib/pathway/hand-lessons'
 
 function roleFor(chapterId: string, title?: string): 'A' | 'B' | 'C' | 'D' {
   const hit = PATHWAY_BY_CHAPTER_ID.get(chapterId)
@@ -29,6 +30,7 @@ function getBundledLessons(): Record<string, LessonContent> {
     _bundled = withDepth({
       ...getFactoryLessons(),
       ...MODULE1_LESSONS,
+      ...M03_U2_HAND_LESSONS,
     })
   }
   return _bundled

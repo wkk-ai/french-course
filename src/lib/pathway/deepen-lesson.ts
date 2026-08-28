@@ -2,10 +2,12 @@ import type { LessonContent } from '@/lib/course'
 import { conversationLine, readingParagraphs } from '@/lib/lesson-text'
 import { BUNDLED_VOCABULARY } from '@/lib/bundled-vocabulary'
 import { sanitizeLessonContent } from '@/lib/pathway/sanitize-lesson'
-import { looksFrenchLemma, worldForTheme } from '@/lib/pathway/craft-from-theme'
+import { worldForTheme } from '@/lib/pathway/craft-from-theme'
 import { MODULE1_CHAPTER_IDS } from '@/lib/module1-content'
+import { bulletizeTheory } from '@/lib/pathway/bulletize-theory'
+import { M03_U2_HAND_LESSONS } from '@/lib/pathway/hand-lessons'
 
-const HAND_IDS = new Set<string>(MODULE1_CHAPTER_IDS)
+const HAND_IDS = new Set<string>([...MODULE1_CHAPTER_IDS, ...Object.keys(M03_U2_HAND_LESSONS)])
 
 function briefMin(role: 'A' | 'B' | 'C' | 'D'): number {
   if (role === 'A') return 2500
@@ -76,16 +78,15 @@ function replaceShellDialogue(lesson: LessonContent, chapterId: string): LessonC
   let h = 0
   for (let i = 0; i < chapterId.length; i += 1) h = (h * 31 + chapterId.charCodeAt(i)) >>> 0
   const [a, b, place] = pairs[h % pairs.length]
-  const topic = `la leçon ${chapterId.slice(-3)}`
   const rebuilt = [
     { speaker: a, text: `Bonjour ${b} !` },
     { speaker: b, text: `Bonjour ${a} ! Ça va ?` },
     { speaker: a, text: `Ça va bien, merci. Et toi ?` },
     { speaker: b, text: `Ça va. Tu es à ${place} aujourd'hui ?` },
-    { speaker: a, text: `Oui. On parle de « ${topic} » ?` },
-    { speaker: b, text: `Oui. Encore un exemple, s'il te plaît.` },
-    { speaker: a, text: `D'accord. Écoute bien cette phrase.` },
-    { speaker: b, text: `Merci. C'est plus clair maintenant.` },
+    { speaker: a, text: `Oui. J'habite ici.` },
+    { speaker: b, text: `Moi aussi. On prend un café ?` },
+    { speaker: a, text: `D'accord. S'il te plaît.` },
+    { speaker: b, text: `Merci. C'est bien ici.` },
     { speaker: a, text: `Bonjour, comment allez-vous ?` },
     { speaker: b, text: `Très bien, merci. Et vous ?` },
     { speaker: a, text: `À bientôt à ${place} !` },
@@ -95,7 +96,7 @@ function replaceShellDialogue(lesson: LessonContent, chapterId: string): LessonC
     ...lesson,
     conversation: {
       title: `${a} et ${b} à ${place}`,
-      setting: `${a} et ${b} parlent à ${place} de « ${topic} ».`,
+      setting: `${a} et ${b} se retrouvent à ${place}.`,
       lines: rebuilt.map((line, index) =>
         conversationLine(line.speaker, line.text, `hand-fix-${chapterId.slice(-4)}-${index}`, BUNDLED_VOCABULARY),
       ),
@@ -115,10 +116,6 @@ function ensureReadingMin(lesson: LessonContent, chapterId: string, isHand: bool
     })
   }
 
-  const meanings = parseMeanings(lesson.brief?.body ?? '')
-    .map(([fr]) => fr.replace(/[()]/g, '').split('/')[0]?.trim() ?? '')
-    .filter((fr) => looksFrenchLemma(fr))
-  const extra = meanings.slice(0, 8).join(', ') || 'bonjour, merci, oui, non'
   const world = worldForTheme({ id: chapterId })
   const details = [
     'près de la gare',
@@ -129,12 +126,14 @@ function ensureReadingMin(lesson: LessonContent, chapterId: string, isHand: bool
     'devant la mairie',
   ]
   const templates = [
-    `${world.a} arrive ${details[0]} à ${world.place}. ${world.b} est déjà là. Ils parlent de ${extra}. ${world.a} dit bonjour. ${world.b} répond merci.`,
-    `À ${world.place}, ${world.b} pose une vraie question. ${world.a} répond avec ${extra}. Ils restent calmes. Puis ils disent au revoir.`,
-    `${world.a} écrit trois phrases. ${world.b} lit à voix haute ${details[1]} à ${world.place}. Les mots restent : ${extra}.`,
-    `${world.b} répète une phrase complète. ${world.a} écoute, puis ajoute encore « ${meanings[0] ?? 'bonjour'} ». Ils quittent ${world.place}.`,
-    `Plus tard à ${world.place}, ${world.a} et ${world.b} utilisent encore ${extra}. La conversation reste simple et polie. Merci. À bientôt.`,
-    `${world.a} dit s'il vous plaît ${details[2]}. ${world.b} dit à bientôt. À ${world.place}, ces mots suffisent : ${extra}.`,
+    `${world.a} arrive ${details[0]} à ${world.place}. ${world.b} est déjà là. ${world.a} dit : « Bonjour. » ${world.b} répond : « Merci. Ça va ? » Ils restent un moment, puis ils disent à bientôt.`,
+    `À ${world.place}, ${world.b} pose une vraie question : « Tu es là aujourd'hui ? » ${world.a} répond : « Oui. J'habite ici. » Ils restent calmes. Puis ils disent au revoir et merci.`,
+    `${world.a} dit : « Je suis à ${world.place}. » ${world.b} lit à voix haute ${details[1]}. Ils disent encore merci, s'il vous plaît, et à bientôt. La conversation reste simple.`,
+    `${world.b} répète une phrase complète. ${world.a} écoute, puis dit encore bonjour. Ils quittent ${world.place} ensemble. Merci. Au revoir. À bientôt.`,
+    `Plus tard à ${world.place}, ${world.a} et ${world.b} se disent merci. ${world.a} dit : « Tu vas bien ? » ${world.b} dit : « Oui, merci. » La conversation reste simple et polie.`,
+    `${world.a} dit s'il vous plaît ${details[2]}. ${world.b} dit à bientôt. À ${world.place}, bonjour et merci suffisent. Ils se disent aussi au revoir.`,
+    `${world.a} et ${world.b} marchent ${details[3]} à ${world.place}. ${world.a} dit : « On y va ? » ${world.b} dit : « D'accord. » Merci. À bientôt.`,
+    `${world.b} dit : « Tu es à ${world.place} demain ? » ${world.a} dit : « Oui. À demain. » Ils partent ${details[4]}. Au revoir.`,
   ]
   const seen = new Set(
     reading.map((paragraph) =>
@@ -206,6 +205,9 @@ export function deepenLessonToModule1Bar(
   let base = isHand ? lesson : sanitizeLessonContent(lesson, BUNDLED_VOCABULARY)
   if (isHand && chapterId) base = replaceShellDialogue(base, chapterId)
   let brief = base.brief
+  if (brief?.body) {
+    brief = { ...brief, body: bulletizeTheory(brief.body) }
+  }
   // Hand briefs already tutor-deep — only pad factory / thin stubs.
   if (brief && (!isHand || brief.body.length < briefMin(role))) {
     brief = { ...brief, body: ensureBriefMin(brief.body, briefMin(role), role) }
