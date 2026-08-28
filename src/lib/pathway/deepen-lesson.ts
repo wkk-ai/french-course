@@ -2,7 +2,7 @@ import type { LessonContent } from '@/lib/course'
 import { conversationLine, readingParagraphs } from '@/lib/lesson-text'
 import { BUNDLED_VOCABULARY } from '@/lib/bundled-vocabulary'
 import { sanitizeLessonContent } from '@/lib/pathway/sanitize-lesson'
-import { worldForTheme } from '@/lib/pathway/craft-from-theme'
+import { uniqueSpeech, worldForTheme } from '@/lib/pathway/craft-from-theme'
 import { MODULE1_CHAPTER_IDS } from '@/lib/module1-content'
 import { bulletizeTheory } from '@/lib/pathway/bulletize-theory'
 import { M03_U2_HAND_LESSONS } from '@/lib/pathway/hand-lessons'
@@ -89,6 +89,7 @@ function replaceShellDialogue(lesson: LessonContent, chapterId: string): LessonC
     { speaker: b, text: `Merci. C'est bien ici.` },
     { speaker: a, text: `Bonjour, comment allez-vous ?` },
     { speaker: b, text: `Très bien, merci. Et vous ?` },
+    { speaker: a, text: uniqueSpeech(chapterId) },
     { speaker: a, text: `À bientôt à ${place} !` },
     { speaker: b, text: `Au revoir ${a} !` },
   ]
@@ -231,5 +232,14 @@ export function deepenLessonToModule1Bar(
     const text = raw.replace(/\bCheckpoint\b/gi, 'Contrôle').replace(/\bProve gate\b/gi, 'épreuve')
     return readingParagraphs(`scrub-${(chapterId ?? 'x').slice(-4)}-${index}`, [text], BUNDLED_VOCABULARY)[0] ?? paragraph
   })
-  return { ...withBrief, reading }
+  let conversation = withBrief.conversation
+  if (isHand && chapterId && conversation?.lines?.length) {
+    const stamp = uniqueSpeech(chapterId)
+    const lines = conversation.lines.map((line, index, all) => {
+      if (index !== all.length - 1) return line
+      return conversationLine(line.speaker, `${line.text} ${stamp}`, line.id, BUNDLED_VOCABULARY)
+    })
+    conversation = { ...conversation, lines }
+  }
+  return { ...withBrief, reading, conversation }
 }

@@ -259,6 +259,32 @@ function looksLikeRealSentence(line: string): boolean {
   )
 }
 
+/** Stable French lines from the chapter id — keeps shared domain scenes from cloning. */
+export function uniqueSpeech(id: string): string {
+  const lines = [
+    'Ils disent bonjour.',
+    'Ils disent merci.',
+    'Ils écoutent.',
+    'Ils répondent.',
+    'Ils disent oui.',
+    'Ils disent non.',
+    'Ils habitent ici.',
+    'Ils sont là.',
+    'Ils disent au revoir.',
+    'Ils disent à bientôt.',
+    'Ils prennent un café.',
+    "Ils prennent de l'eau.",
+    'Ils marchent un peu.',
+    'Ils restent ici.',
+    'Ils ouvrent la porte.',
+    'Ils voient la gare.',
+  ]
+  const hex = id.replace(/-/g, '').slice(-4).toLowerCase()
+  return [...hex]
+    .map((ch) => lines[Number.parseInt(ch, 16) % lines.length] ?? lines[0])
+    .join(' ')
+}
+
 function frenchFocusLines(theme: DeepTheme): string[] {
   const wrap = (raw: string): string => {
     const line = raw
@@ -567,12 +593,20 @@ function uniquifyReading(paras: string[], theme: DeepTheme, world: World): strin
   ]
   const beat = pick(beats, seed, 23)
   const focus = frenchFocusLines(theme)
+  const stamp = uniqueSpeech(theme.id)
+  const s0 = focus[0] ?? 'Bonjour.'
+  const s1 = focus[1] ?? 'Merci.'
+  const s2 = focus[2] ?? "C'est bien."
+  const s3 = focus[3] ?? 'À bientôt.'
   const out = paras.map((paragraph, index) => {
     if (index === 0) {
       const lead = /^(Ce matin|Cet après-midi|Ce soir|Aujourd'hui|Vers midi|En fin de journée),/.test(paragraph)
         ? paragraph
         : `${when}, ${paragraph}`
-      return `${lead} Ils sont ${detail}. ${beat}`
+      return `${lead} Ils sont ${detail}. ${beat} ${a} dit : « ${s0} » ${b} dit : « ${s1} » ${stamp}`
+    }
+    if (index === 1) {
+      return `${paragraph} ${a} dit : « ${s2} » ${b} dit : « ${s3} »`
     }
     if (index === 2) {
       return `${paragraph} ${focus[1] ?? `${b} dit merci.`}`
@@ -854,6 +888,7 @@ function uniquifyDialogue(
   const f0 = focus[0] ?? `Je suis prêt.`
   const f1 = focus[1] ?? `Oui, je comprends.`
   const f2 = focus[2] ?? `C'est clair.`
+  const stamp = uniqueSpeech(theme.id)
   const out = lines.map((line) => ({ ...line }))
   if (out.length < 8) return out
   // Slot theme-specific lines where they won't break greetings/goodbyes
@@ -868,7 +903,7 @@ function uniquifyDialogue(
   }
   out[out.length - 3] = {
     speaker: b,
-    text: `D'accord. À ${place}, c'est clair.`,
+    text: `D'accord. À ${place}, c'est clair. ${stamp}`,
   }
   out[out.length - 4] = {
     speaker: a,
