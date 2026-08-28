@@ -534,6 +534,26 @@ test('all 720 bundled lessons pass validateChapterContent (no author pads / EN l
   }
 })
 
+test('Jobs unit theory uses real work sentences, not quote-talk', async () => {
+  const { BUNDLED_LESSONS } = await import('../src/lib/bundled-lessons')
+  const ids = [
+    '22222222-0000-0000-0000-000000000302',
+    '22222222-0000-0000-0000-000000000321',
+    '22222222-0000-0000-0000-000000000322',
+    '22222222-0000-0000-0000-00000000032d',
+  ]
+  for (const id of ids) {
+    const lesson = BUNDLED_LESSONS[id]
+    assert.ok(lesson?.brief?.body, id)
+    const body = lesson.brief.body
+    assert.equal(/J'utilise\s*«|Tu comprends\s*«|On dit\s*«/i.test(body), false, id)
+    assert.ok(/Je travaille/.test(body), `${id} missing Je travaille`)
+    assert.ok(/au bureau/.test(body) && /à l'école/.test(body), `${id} missing place examples`)
+    const reading = (lesson.reading ?? []).map((p) => p.tokens.map((t) => t.text).join(' ')).join('\n')
+    assert.equal(/J'utilise\s*«|utilise «/i.test(reading), false, `${id} reading quote-talk`)
+  }
+})
+
 test('u1.B brief has no Deep practice author pad', async () => {
   const { BUNDLED_LESSONS } = await import('../src/lib/bundled-lessons')
   const lesson = BUNDLED_LESSONS['22222222-0000-0000-0000-000000000111']

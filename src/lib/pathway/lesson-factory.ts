@@ -11,6 +11,7 @@ export type DeepTheme = Phase1Theme & {
   registerTrio?: [string, string, string]
   readingFr?: string[]
   theorySections?: Array<{ heading: string; body: string }>
+  briefBody?: string
 }
 
 /** Build a Module-1 Learn A craft lesson from theme + vocabulary (no pad emitters). */

@@ -15,6 +15,7 @@ export type DeepTheme = Phase1Theme & {
   registerTrio?: [string, string, string]
   readingFr?: string[]
   theorySections?: Array<{ heading: string; body: string }>
+  briefBody?: string
 }
 
 type World = { seed: number; a: string; b: string; place: string }
@@ -243,33 +244,54 @@ function cleanChunks(theme: DeepTheme): Array<[string, string]> {
   return meanings.slice(0, 6)
 }
 
+const DOMAIN_FOCUS: Record<Domain, string[]> = {
+  greeting: [`Je m'appelle Marc.`, `Tu habites à Paris ?`, `Je suis français.`, `Enchanté.`],
+  home: [`J'habite dans un appartement.`, `Il y a une cuisine.`, `Entre, s'il te plaît.`, `C'est joli.`],
+  cafe: [`Je prends un café.`, `L'addition, s'il vous plaît.`, `Je voudrais un thé.`, `Merci.`],
+  city: [`Il y a une rue.`, `Où est la gare ?`, `Je vais au magasin.`, `C'est près d'ici.`],
+  family: [`Mon frère est grand.`, `J'ai une sœur.`, `Voici ma mère.`, `Nous sommes une famille.`],
+  health: [`Je dois me reposer.`, `Tu peux marcher ?`, `Il faut boire de l'eau.`, `Je suis malade.`],
+  school: [`Je vais à l'école.`, `J'ai un cours à dix heures.`, `Tu as ton emploi du temps ?`, `Le professeur arrive à neuf heures.`],
+  work: [`Je travaille au bureau.`, `Tu travailles à Paris ?`, `Je vais au bureau à neuf heures.`, `Je rentre à six heures.`],
+  past: [`J'ai mangé.`, `Tu as fini ?`, `Hier, j'ai marché.`, `Nous avons parlé.`],
+  future: [`Je vais aller à Paris.`, `Tu vas partir tôt ?`, `Demain je reste ici.`, `On se voit après ?`],
+  register: [`Comment allez-vous ?`, `Ça va ?`, `Bonjour, s'il vous plaît.`, `Salut.`],
+  food: [`Je mange du pain.`, `Tu bois de l'eau ?`, `On dîne à sept heures.`, `C'est bon.`],
+  travel: [`Je prends le train.`, `Où est la gare ?`, `J'ai un billet.`, `On part demain.`],
+  generic: [`Je suis prêt.`, `Oui, je comprends.`, `Merci beaucoup.`, `À bientôt.`],
+}
+
+function looksLikeRealSentence(line: string): boolean {
+  return (
+    /\b(je|tu|il|elle|nous|vous|on|ils|elles|j'|c'est|il y a|voici)\b/i.test(line) ||
+    (line.split(/\s+/).length >= 3 && /[.!?]$/.test(line))
+  )
+}
+
 function frenchFocusLines(theme: DeepTheme): string[] {
-  const words = lemmas(theme)
   const wrap = (raw: string): string => {
     const line = raw
       .replace(/^Je pratique\s*:\s*/i, '')
       .replace(/^Encore\s*:\s*/i, '')
+      .replace(/^Tu utilises\s*«?\s*/i, '')
+      .replace(/^C'est\s*«\s*/i, '')
+      .replace(/[».]+$/g, '')
       .trim()
     if (!line) return ''
-    // Bare lemma / short gloss → speak it as a real sentence
-    if (line.split(/\s+/).length <= 2 && !/[.!?]$/.test(line) && !/\b(je|tu|il|elle|nous|vous|on|j')\b/i.test(line)) {
-      return `Aujourd'hui j'utilise « ${line} ».`
-    }
-    return line
+    if (/j'utilise\s*«|tu comprends\s*«|on dit\s*«/i.test(line)) return ''
+    if (/…|\.\.\./.test(line)) return ''
+    if (/\b(reading|grammar|checkpoint|theme|vocabulary|drill)\b/i.test(line)) return ''
+    if (looksLikeRealSentence(line)) return /[.!?]$/.test(line) ? line : `${line}.`
+    return ''
   }
-  const fromTheme = theme.focus
-    .map(wrap)
-    .filter((line) => looksFrenchLemma(line) || /[àâäéèêëîïôöùûüç]/i.test(line) || /\b(je|tu|il|nous|vous|j')\b/i.test(line))
-  if (fromTheme.length >= 2) return fromTheme.slice(0, 8)
-  const w0 = L(words, 0, 'bonjour')
-  const w1 = L(words, 1, 'merci')
-  const w2 = L(words, 2, 'oui')
-  return [
-    `J'utilise « ${w0} » aujourd'hui.`,
-    `Tu comprends « ${w1} » ?`,
-    `On dit « ${w0} » ici.`,
-    `Moi aussi, j'utilise « ${w2} ».`,
-  ]
+  const fromTheme = theme.focus.map(wrap).filter(Boolean)
+  const defaults = DOMAIN_FOCUS[detectDomain(theme)]
+  const merged = [...fromTheme]
+  for (const line of defaults) {
+    if (merged.length >= 4) break
+    if (!merged.includes(line)) merged.push(line)
+  }
+  return merged.slice(0, 8)
 }
 
 function expandBrief(body: string, theme: DeepTheme, min: number): string {
@@ -301,6 +323,13 @@ export function buildCraftBrief(theme: DeepTheme): NonNullable<LessonContent['br
   const groupB = meanings.slice(mid)
   const trio = theme.registerTrio ?? ['Bonjour, comment allez-vous ?', 'Salut, ça va ?', 'Hé, ça va ?']
 
+  const titleBase = theme.title.replace(/^Prove:\s*/i, '').replace(/^Checkpoint:\s*/i, '')
+  const title = role === 'D' ? `Show what you know — ${titleBase}` : titleBase
+
+  if (theme.briefBody && theme.briefBody.includes('Words to learn first (meanings)')) {
+    return { title, body: theme.briefBody, ruleSlugs: theme.ruleSlugs }
+  }
+
   const purpose =
     domain === 'home'
       ? `name rooms and say where you live`
@@ -312,7 +341,11 @@ export function buildCraftBrief(theme: DeepTheme): NonNullable<LessonContent['br
             ? `meet people and use the main polite words`
             : domain === 'health'
               ? `say what you must / can / need for health`
-              : `use this pattern in real speech: ${grammar}`
+              : domain === 'work'
+                ? `say where you work and when you go and come back`
+                : domain === 'school'
+                  ? `talk about school, classes, and your timetable`
+                  : `use this pattern in real speech: ${grammar}`
 
   const proveNote =
     role === 'D'
@@ -366,9 +399,8 @@ export function buildCraftBrief(theme: DeepTheme): NonNullable<LessonContent['br
 
   body = expandBrief(body, theme, briefMinChars(role) + 200)
 
-  const titleBase = theme.title.replace(/^Prove:\s*/i, '').replace(/^Checkpoint:\s*/i, '')
   return {
-    title: role === 'D' ? `Show what you know — ${titleBase}` : titleBase,
+    title,
     body,
     ruleSlugs: theme.ruleSlugs,
   }
@@ -436,7 +468,7 @@ function buildReading(theme: DeepTheme, world: World): string[] {
         `${b} demande : « Où est la gare ? » ${a} répond : « Tout droit, puis à gauche. »`,
         `Ils voient un café et un marché. ${a} dit : « Il y a beaucoup de monde. »`,
         `Les mots du jour apparaissent dans la ville : ${extra}.`,
-        `${a} utilise « ${w0} ». ${b} utilise « ${w1} ». Ils avancent sans stress.`,
+        `${a} dit : « ${focus[0] ?? 'C\'est clair.'} » ${b} dit : « ${focus[1] ?? 'Oui, je comprends.'} » Ils avancent sans stress.`,
         `Une personne demande le chemin. ${a} répond avec *vous* et s'il vous plaît.`,
         `${b} dit : « On va au magasin ? » ${a} dit oui. Ils entrent et disent bonjour.`,
         `Plus tard, ils restent assis. ${a} décrit ${place}. ${b} écoute et pose une question.`,
@@ -463,7 +495,7 @@ function buildReading(theme: DeepTheme, world: World): string[] {
         `${a} ne se sent pas bien à ${place}. ${b} dit : « Tu dois te reposer. »`,
         `${a} répond : « Je peux marcher un peu. » ${b} insiste : « Il faut boire de l'eau. »`,
         `Ils parlent de santé avec soin. Mots utiles : ${extra}.`,
-        `${b} utilise « ${w0} ». ${a} utilise « ${w1} ».`,
+        `${b} dit : « ${focus[0] ?? 'C\'est clair.'} » ${a} dit : « ${focus[1] ?? 'Oui, je comprends.'} ».`,
         `Un pharmacien les aide. Ils disent bonjour et s'il vous plaît.`,
         `${a} comprend le conseil. ${b} répète la phrase importante.`,
         `Plus tard, ${a} se sent mieux. ${b} dit : « Tu peux sortir demain. »`,
@@ -474,30 +506,30 @@ function buildReading(theme: DeepTheme, world: World): string[] {
     ],
     school: [
       [
-        `${a} et ${b} sont à l'école près de ${place}. Le cours commence.`,
-        `${a} dit : « J'étudie le français. » ${b} dit : « Moi aussi. »`,
-        `Le professeur explique. Les étudiants écoutent. Mots du jour : ${extra}.`,
-        `${a} utilise « ${w0} » dans une phrase. ${b} répond avec « ${w1} ».`,
-        `Après le cours, ils révisent ensemble sans stress.`,
-        `${b} pose une question. ${a} donne un exemple clair.`,
-        `Ils écrivent trois phrases sur le cahier.`,
-        `Dans la rue, ils répètent encore une fois.`,
-        `À bientôt à ${place}. Le français avance un peu chaque jour.`,
-        `Fin de journée d'école : merci au professeur, au revoir aux amis.`,
+        `${a} et ${b} sont à l'école près de ${place}. Le cours commence à neuf heures.`,
+        `${a} dit : « J'ai un cours à dix heures. » ${b} montre son emploi du temps.`,
+        `Le professeur arrive. ${b} est étudiante. ${a} va aussi à l'école aujourd'hui.`,
+        `${a} demande : « Tu as un cours ? » ${b} répond : « Oui. Je vais à l'école à huit heures. »`,
+        `Après le cours, ils parlent près de la gare. ${a} rentre à quatre heures.`,
+        `${b} pose une question : « À quelle heure tu pars demain ? » ${a} donne l'heure.`,
+        `Ils disent trois phrases : je vais à l'école, j'ai un cours, je rentre à cinq heures.`,
+        `Dans la rue : « Tu vas à l'école ? — Oui, j'ai un cours. »`,
+        `À bientôt à ${place}. Demain, encore l'école et l'emploi du temps.`,
+        `Fin de journée : merci au professeur, au revoir aux amis. Ils rentrent à la maison.`,
       ],
     ],
     work: [
       [
-        `${a} travaille à ${place}. ${b} arrive pour une réunion.`,
-        `${a} dit bonjour. ${b} dit : « On parle du travail ? »`,
-        `Ils utilisent les mots du jour : ${extra}.`,
-        `${a} explique avec « ${w0} ». ${b} note « ${w1} ».`,
-        `La réunion reste simple et polie. *Vous* avec un client, *tu* entre collègues amis.`,
-        `${b} demande un conseil. ${a} répond clairement.`,
-        `Après, ils boivent un café et répètent deux phrases.`,
-        `${a} écrit un court message. ${b} le lit.`,
-        `Merci, à bientôt, bonne journée.`,
-        `Le travail à ${place} est un lieu pour parler vrai.`,
+        `${a} travaille à ${place}. Ce matin, il va au bureau à neuf heures. ${b} va à l'école : elle a un cours à dix heures.`,
+        `${a} dit : « Bonjour. Je pars à neuf heures. Je rentre à six heures. » ${b} répond : « Moi, je vais à l'école à huit heures. »`,
+        `Au bureau, ${a} travaille avec une collègue. Ils disent : « Tu travailles où ? » — « Je travaille à ${place}. »`,
+        `${b} montre son emploi du temps : lundi, un cours ; mardi, encore un cours ; mercredi, elle rentre tôt.`,
+        `Le professeur arrive à neuf heures. ${b} a un cours à dix heures. Elle est étudiante. ${a} va au bureau.`,
+        `${a} demande : « À quelle heure tu pars ? » ${b} dit : « Je pars à huit heures. Et toi ? » — « Je pars à neuf heures. »`,
+        `Vendredi, ${a} travaille à ${place} et ${b} va à l'école. Ils se disent au revoir près de la gare.`,
+        `Le soir, ${a} rentre à six heures. ${b} rentre à quatre heures. Ils sont contents : la journée est bonne.`,
+        `Samedi, ${a} reste à la maison. Dimanche, ${b} a l'emploi du temps de la semaine.`,
+        `Lundi revient. ${a} va au bureau. ${b} va à l'école. À ${place}, on part, on travaille, on rentre.`,
       ],
     ],
     past: [
@@ -505,7 +537,7 @@ function buildReading(theme: DeepTheme, world: World): string[] {
         `Hier, ${a} et ${b} étaient à ${place}. Ils ont parlé beaucoup.`,
         `${a} dit : « J'ai mangé. » ${b} dit : « J'ai fini. »`,
         `Ils racontent la journée avec le passé. Mots utiles : ${extra}.`,
-        `${a} utilise « ${w0} ». ${b} utilise « ${w1} ».`,
+        `${a} dit : « ${focus[0] ?? 'C\'est clair.'} » ${b} dit : « ${focus[1] ?? 'Oui, je comprends.'} »`,
         `Ce matin, ils parlent d'hier et aujourd'hui.`,
         `${b} demande : « Qu'est-ce que tu as fait ? » ${a} répond avec une phrase complète.`,
         `Ils écrivent trois phrases au passé.`,
@@ -519,7 +551,7 @@ function buildReading(theme: DeepTheme, world: World): string[] {
         `Demain, ${a} et ${b} vont à ${place}. Ils préparent le plan.`,
         `${a} dit : « Je vais partir tôt. » ${b} dit : « Je vais venir aussi. »`,
         `Ils parlent du futur avec des mots simples : ${extra}.`,
-        `${a} utilise « ${w0} ». ${b} utilise « ${w1} ».`,
+        `${a} dit : « ${focus[0] ?? 'C\'est clair.'} » ${b} dit : « ${focus[1] ?? 'Oui, je comprends.'} »`,
         `${b} demande : « Qu'est-ce que tu vas faire ? » ${a} répond clairement.`,
         `Ils écrivent trois phrases avec aller + verbe.`,
         `Le soir, ils répètent le plan une dernière fois.`,
@@ -547,7 +579,7 @@ function buildReading(theme: DeepTheme, world: World): string[] {
         `${a} et ${b} mangent à ${place}. Le repas est simple.`,
         `${a} dit : « J'aime le pain. » ${b} dit : « Je prends de l'eau. »`,
         `Ils parlent de nourriture. Mots du jour : ${extra}.`,
-        `${a} utilise « ${w0} ». ${b} utilise « ${w1} ».`,
+        `${a} dit : « ${focus[0] ?? 'C\'est clair.'} » ${b} dit : « ${focus[1] ?? 'Oui, je comprends.'} »`,
         `Le serveur apporte l'addition. Ils disent merci.`,
         `Après le repas, ils marchent un peu.`,
         `Ils écrivent trois phrases sur ce qu'ils mangent.`,
@@ -562,7 +594,7 @@ function buildReading(theme: DeepTheme, world: World): string[] {
         `${a} dit : « Le train part bientôt. » ${b} dit : « On y va. »`,
         `À la gare, ils disent s'il vous plaît et merci.`,
         `Mots utiles pour le voyage : ${extra}.`,
-        `${a} utilise « ${w0} ». ${b} utilise « ${w1} ».`,
+        `${a} dit : « ${focus[0] ?? 'C\'est clair.'} » ${b} dit : « ${focus[1] ?? 'Oui, je comprends.'} »`,
         `Dans le train, ils parlent du voyage.`,
         `Ils écrivent : Je vais à ${place}.`,
         `À l'arrivée : bonjour à la ville, à bientôt aux amis.`,
@@ -573,8 +605,8 @@ function buildReading(theme: DeepTheme, world: World): string[] {
     generic: [
       [
         `${whenCap(seed)}, ${a} retrouve ${b} à ${place}. Ils ont le temps de parler bien — pas seulement de répéter une liste.`,
-        `${a} commence : « ${focus[0] ?? `Aujourd'hui j'utilise « ${w0} ».`} » ${b} écoute, puis répond.`,
-        `${b} dit : « ${focus[1] ?? `Moi, je comprends « ${w1} ».`} » Ils restent sur le même sujet.`,
+        `${a} commence : « ${focus[0] ?? 'Je suis prêt.'} » ${b} écoute, puis répond.`,
+        `${b} dit : « ${focus[1] ?? 'Oui, je comprends.'} » Ils restent sur le même sujet.`,
         `Le sujet du jour arrive dans la conversation. Mots utiles : ${extra}.`,
         `${a} change un peu la phrase : je, tu, il. Le sens reste clair.`,
         `Une personne arrive. ${a} passe à *vous* un moment. Puis ils reviennent à *tu*.`,
@@ -592,8 +624,6 @@ function buildReading(theme: DeepTheme, world: World): string[] {
 
 function uniquifyReading(paras: string[], theme: DeepTheme, world: World): string[] {
   const { a, b, place, seed } = world
-  const w = lemmas(theme)
-  const extra = w.slice(0, 8).join(', ') || 'bonjour, merci'
   const details = ['dans la rue', 'devant le café', 'près de la gare', 'à la maison', 'à l\'école', 'sur la place']
   const detail = pick(details, seed, 19)
   const when = whenCap(seed)
@@ -621,26 +651,25 @@ function uniquifyReading(paras: string[], theme: DeepTheme, world: World): strin
   ]
   const beat = pick(beats, seed, 23)
   const focus = frenchFocusLines(theme)
-  const stamp = `« ${L(w, 0, 'bonjour')} », « ${L(w, 1, 'merci')} », « ${L(w, 2, 'oui')} »`
   const out = paras.map((paragraph, index) => {
     if (index === 0) {
       const lead = /^(Ce matin|Cet après-midi|Ce soir|Aujourd'hui|Vers midi|En fin de journée),/.test(paragraph)
         ? paragraph
         : `${when}, ${paragraph}`
-      return `${lead} Ils sont ${detail}. ${beat} Ils disent aussi ${stamp}. ${focus[0] ?? `${a} utilise ${L(w, 0, 'bonjour')}.`}`
+      return `${lead} Ils sont ${detail}. ${beat}`
     }
     if (index === 2) {
-      return `${paragraph} ${focus[1] ?? `${b} comprend « ${L(w, 1, 'merci')} ».`}`
+      return `${paragraph} ${focus[1] ?? `${b} dit merci.`}`
     }
     if (index === paras.length - 1) {
-      return `${paragraph} ${a} et ${b} quittent ${place} avec « ${L(w, 3, 'non')} » encore clair.`
+      return `${paragraph} ${a} et ${b} quittent ${place}. Merci. À bientôt.`
     }
     return paragraph
   })
   const wordCount = out.join(' ').split(/\s+/).filter(Boolean).length
   if (wordCount < 230) {
     out.push(
-      `${a} et ${b} restent ${detail} à ${place}. Ils disent ${extra}. ${beat} Merci. À bientôt. Au revoir.`,
+      `${a} et ${b} restent ${detail} à ${place}. ${beat} Merci. À bientôt. Au revoir.`,
     )
   }
   return out
@@ -667,10 +696,10 @@ export function buildCraftDialogue(theme: DeepTheme): Array<{ speaker: string; t
   const w2 = L(w, 2, 'oui')
   const domain = detectDomain(theme)
   const focus = frenchFocusLines(theme)
-  const f0 = focus[0] ?? `Aujourd'hui j'utilise « ${w0} ».`
-  const f1 = focus[1] ?? `Tu comprends « ${w1} » ?`
-  const f2 = focus[2] ?? `On dit « ${w0} » ici.`
-  const f3 = focus[3] ?? `Moi aussi, j'utilise « ${w2} ».`
+  const f0 = focus[0] ?? `Je suis prêt.`
+  const f1 = focus[1] ?? `Oui, je comprends.`
+  const f2 = focus[2] ?? `C'est clair.`
+  const f3 = focus[3] ?? `Merci, à bientôt.`
 
   const scripts: Record<Domain, Array<{ speaker: string; text: string }>> = {
     greeting: [
@@ -886,7 +915,7 @@ export function buildCraftDialogue(theme: DeepTheme): Array<{ speaker: string; t
       { speaker: b, text: `Ça va bien, merci. Et toi ?` },
       { speaker: a, text: f0 },
       { speaker: b, text: `Oui. ${f1}` },
-      { speaker: a, text: `À ${place}, j'entends aussi « ${w0} ».` },
+      { speaker: a, text: `À ${place}, c'est une bonne journée.` },
       { speaker: b, text: `Moi aussi. ${f2}` },
       { speaker: a, text: `Encore une fois : ${f3}` },
       { speaker: b, text: `C'est clair. Merci.` },
@@ -911,9 +940,9 @@ function uniquifyDialogue(
   const focus = frenchFocusLines(theme)
   const w = lemmas(theme)
   const { a, b, place, seed } = world
-  const f0 = focus[0] ?? `Aujourd'hui j'utilise « ${L(w, 0, 'bonjour')} ».`
-  const f1 = focus[1] ?? `Tu comprends « ${L(w, 1, 'merci')} » ?`
-  const f2 = focus[2] ?? `On dit « ${L(w, 2, 'oui')} » à ${place}.`
+  const f0 = focus[0] ?? `Je suis prêt.`
+  const f1 = focus[1] ?? `Oui, je comprends.`
+  const f2 = focus[2] ?? `C'est clair.`
   const out = lines.map((line) => ({ ...line }))
   if (out.length < 8) return out
   // Slot theme-specific lines where they won't break greetings/goodbyes
@@ -928,12 +957,11 @@ function uniquifyDialogue(
   }
   out[out.length - 3] = {
     speaker: b,
-    text: `D'accord. À ${place}, j'entends aussi « ${L(w, seed % Math.max(w.length, 1), 'merci')} ».`,
+    text: `D'accord. À ${place}, c'est clair.`,
   }
-  // Last unique beat from later lemmas so same-focus themes still diverge
   out[out.length - 4] = {
     speaker: a,
-    text: `Et « ${L(w, (seed + 3) % Math.max(w.length, 1), 'oui')} », tu le dis souvent ?`,
+    text: f2,
   }
   return out
 }

@@ -1,11 +1,52 @@
 /** Hand-crafted deep themes (Module-1 bar) incl. Prove D. */
 
+import {
+  M03_U2_JOBS_A_BRIEF,
+  M03_U2_JOBS_D_BRIEF,
+  M03_U2_SCHOOL_B_BRIEF,
+  M03_U2_TIMETABLE_C_BRIEF,
+} from '@/lib/pathway/briefs/m03-unit2'
+
 export type ThemeExercise = { category: string; prompt: string; options: string[]; answer: number }
 export type ThemeLine = { speaker: string; text: string }
 export type Phase1Theme = {
   id: string; title: string; grammar: string; ruleSlugs: string[]; meanings: Array<[string, string]>; focus: string[]; dialogue: ThemeLine[]; exercises: ThemeExercise[];
-  role?: 'A' | 'B' | 'C' | 'D'; moduleTitle?: string; unitTitle?: string; chunks?: Array<[string, string]>; traps?: string[]; registerTrio?: [string, string, string]; readingFr?: string[]; theorySections?: Array<{ heading: string; body: string }>
+  role?: 'A' | 'B' | 'C' | 'D'; moduleTitle?: string; unitTitle?: string; chunks?: Array<[string, string]>; traps?: string[]; registerTrio?: [string, string, string]; readingFr?: string[]; theorySections?: Array<{ heading: string; body: string }>; briefBody?: string
 }
+
+const U2_WORK_MEANINGS: Array<[string, string]> = [
+  ['travailler', 'to work'],
+  ['travail', 'work / a job (noun)'],
+  ['bureau', 'office'],
+  ['école', 'school'],
+  ['cours', 'class / lesson'],
+  ['emploi du temps', 'timetable / schedule'],
+  ['aller', 'to go'],
+  ['partir', 'to leave'],
+  ['rentrer', 'to go home / come back'],
+  ['étudiant', 'student'],
+  ['professeur', 'teacher'],
+  ["aujourd'hui", 'today'],
+]
+const U2_WORK_CHUNKS: Array<[string, string]> = [
+  ['Je travaille.', 'I work'],
+  ['Je vais au bureau.', 'I go to the office'],
+  ["Je vais à l'école.", 'I go to school'],
+  ["J'ai un cours.", 'I have a class'],
+  ['Je pars à neuf heures.', 'I leave at nine'],
+  ['Je rentre à six heures.', 'I come home at six'],
+  ['Tu travailles où ?', 'Where do you work?'],
+]
+const U2_WORK_TRAPS = [
+  'travail is the noun; travailler is the verb — never Je suis travail.',
+  'au bureau (à + le). à l\'école (vowel). à Paris (city).',
+  'tu travailles (extra -e). nous travaillons. vous travaillez.',
+]
+const U2_WORK_REGISTER: [string, string, string] = [
+  'Bonjour, vous travaillez ici ?',
+  'Tu travailles au bureau aujourd\'hui ?',
+  'T\'es au bureau ?',
+]
 
 export const PHASE1_THEMES: Phase1Theme[] = [
   {
@@ -890,11 +931,12 @@ export const PHASE1_THEMES: Phase1Theme[] = [
     moduleTitle: "La journée",
     unitTitle: "Unit 2",
     ruleSlugs: ["er-present", "numbers-and-age"],
-    meanings: [["travail", "work"], ["école", "school"], ["emploi du temps", "schedule"], ["cours", "class"], ["bureau", "office"], ["merci", "thank you"], ["bonjour", "hello"], ["au revoir", "goodbye"], ["s'il vous plaît", "please (formal)"], ["encore", "again / still"], ["aujourd'hui", "today"]],
-    focus: ["Je travaille.", "Je vais au bureau."],
-    chunks: [["Je travaille.", "say as one chunk"], ["Je vais au bureau.", "say as one chunk"], ["travail", "work"], ["école", "school"], ["emploi du temps", "schedule"], ["cours", "class"], ["bureau", "office"], ["merci", "thank you"]],
-    traps: ["Meanings first before any grammar example that uses those words.", "Quiz French forms/meanings only — never plot or proper-name flashcards.", "Dictionary verbs are infinitives; conjugate from the infinitive lemma.", "Stay on: -ER; schedules."],
-    registerTrio: ["Bonjour, pourriez-vous m'aider, s'il vous plaît ?", "Bonjour, vous pouvez m'aider ?", "Hé, tu peux m'aider ?"],
+    meanings: U2_WORK_MEANINGS,
+    focus: ["Je travaille au bureau.", "Je vais au bureau.", "Je pars à neuf heures.", "Je rentre à six heures."],
+    chunks: U2_WORK_CHUNKS,
+    traps: U2_WORK_TRAPS,
+    registerTrio: U2_WORK_REGISTER,
+    briefBody: M03_U2_JOBS_A_BRIEF,
     readingFr: ["Leçon « Jobs ». Structure du jour : -ER; schedules. Le mot « travail » signifie « work ». Le mot « école » signifie « school ». Le mot « emploi du temps » signifie « schedule ». Le mot « cours » signifie « class ». Le mot « bureau » signifie « office ». Le mot « merci » signifie « thank you ». Le mot « bonjour » signifie « hello ». Le mot « au revoir » signifie « goodbye ». Le mot « s'il vous plaît » signifie « please (formal) ». Le mot « encore » signifie « again / still ». Lisez chaque sens deux fois avant de continuer.", "Production guidée. Répétez, puis cachez le modèle : Je travaille. Je vais au bureau. Changez le pronom sujet. Gardez le même sens. Les verbes s'apprennent à l'infinitif pour la conjugaison complète.", "Dialogue d'entraînement (formes et sens, pas l'histoire) : Ami : « Tu travailles où ? » Toi : « Je travaille à Paris. » Ami : « Tu vas au bureau ? » Toi : « Oui. » Ami : « Tu aimes ton travail ? » Toi : « Oui, j'aime mon travail. » Ami : « Tu pars à quelle heure ? » Toi : « À neuf heures. » Ami : « Tu rentres quand ? » Toi : « À six heures. » Ami : « OK ! » Toi : « Merci ! »", "Pièges. N'interrogez jamais le scénario. Interrogez la forme française et le sens anglais. Articles, prépositions, accords, registre (tu/vous). Relisez : Je travaille. Je vais au bureau.", "Lecture de consolidation. Vous devez pouvoir expliquer chaque mot utile de cette page. Notez huit chunks. Demain, cinq lemmes difficiles avant la leçon suivante. Politesse : bonjour, merci, s'il vous plaît, au revoir, à bientôt. Quand une réponse est fausse, revenez à la liste de sens, puis à la règle. Le but n'est pas de finir en une minute : le but est de comprendre et de produire demain sans aide. Encore : Je travaille. Je vais au bureau. Travaillez lentement. La précision aujourd'hui évite les erreurs demain."],
     theorySections: [{"heading": "9. Pattern detail", "body": "Hand-crafted focus for « Jobs ». Grammar: -ER; schedules. Produce six pronoun variants of the first focus line. Meanings first."}, {"heading": "10. Spiral & Review", "body": "Pull one older tool into two new sentences. Enqueue reviewable lemmas only (no proper nouns). Repair with meaning + form."}, {"heading": "11. Dictionary & conjugations", "body": "Every meaningful word needs a lemma. Multiwords count. Open full tense sets from the infinitive."}, {"heading": "12. Register & chunks", "body": "Practice the register trio. Learn chunks as wholes. Vous with strangers; tu with friends."}],
     dialogue: [
@@ -915,9 +957,9 @@ export const PHASE1_THEMES: Phase1Theme[] = [
     ],
     exercises: [
       { category: "er-verbs-present", prompt: "I work:", options: ["Je travaille.", "Je travailler.", "Je travailles."], answer: 0 },
-      { category: "vocab-meaning", prompt: "travail =", options: ["work", "school", "coffee"], answer: 0 },
+      { category: "vocab-meaning", prompt: "travail =", options: ["work / a job (noun)", "school", "coffee"], answer: 0 },
       { category: "vocab-meaning", prompt: "bureau =", options: ["office", "bed", "street"], answer: 0 },
-      { category: "aller", prompt: "I go:", options: ["Je vais…", "Je aller…", "Je vas…"], answer: 0 },
+      { category: "aller", prompt: "I go to the office:", options: ["Je vais au bureau.", "Je aller au bureau.", "Je vas au bureau."], answer: 0 },
     ],
   },
   {
@@ -928,11 +970,12 @@ export const PHASE1_THEMES: Phase1Theme[] = [
     moduleTitle: "La journée",
     unitTitle: "Unit 2",
     ruleSlugs: ["er-present", "numbers-and-age"],
-    meanings: [["travail", "work"], ["école", "school"], ["emploi du temps", "schedule"], ["cours", "class"], ["bureau", "office"], ["merci", "thank you"], ["bonjour", "hello"], ["au revoir", "goodbye"], ["s'il vous plaît", "please (formal)"], ["encore", "again / still"], ["aujourd'hui", "today"]],
-    focus: ["Je vais à l'école.", "J'ai un cours."],
-    chunks: [["Je vais à l'école.", "say as one chunk"], ["J'ai un cours.", "say as one chunk"], ["travail", "work"], ["école", "school"], ["emploi du temps", "schedule"], ["cours", "class"], ["bureau", "office"], ["merci", "thank you"]],
-    traps: ["Meanings first before any grammar example that uses those words.", "Quiz French forms/meanings only — never plot or proper-name flashcards.", "Dictionary verbs are infinitives; conjugate from the infinitive lemma.", "Stay on: -ER; schedules."],
-    registerTrio: ["Bonjour, pourriez-vous m'aider, s'il vous plaît ?", "Bonjour, vous pouvez m'aider ?", "Hé, tu peux m'aider ?"],
+    meanings: U2_WORK_MEANINGS,
+    focus: ["Je vais à l'école.", "J'ai un cours à dix heures.", "Tu as ton emploi du temps ?", "Le professeur arrive à neuf heures."],
+    chunks: U2_WORK_CHUNKS,
+    traps: U2_WORK_TRAPS,
+    registerTrio: U2_WORK_REGISTER,
+    briefBody: M03_U2_SCHOOL_B_BRIEF,
     readingFr: ["Leçon « School ». Structure du jour : -ER; schedules. Le mot « travail » signifie « work ». Le mot « école » signifie « school ». Le mot « emploi du temps » signifie « schedule ». Le mot « cours » signifie « class ». Le mot « bureau » signifie « office ». Le mot « merci » signifie « thank you ». Le mot « bonjour » signifie « hello ». Le mot « au revoir » signifie « goodbye ». Le mot « s'il vous plaît » signifie « please (formal) ». Le mot « encore » signifie « again / still ». Lisez chaque sens deux fois avant de continuer.", "Production guidée. Répétez, puis cachez le modèle : Je vais à l'école. J'ai un cours. Changez le pronom sujet. Gardez le même sens. Les verbes s'apprennent à l'infinitif pour la conjugaison complète.", "Dialogue d'entraînement (formes et sens, pas l'histoire) : Ami : « Tu vas à l'école ? » Toi : « Oui, je vais à l'école. » Ami : « Tu as un cours ? » Toi : « Oui, j'ai un cours. » Ami : « À quelle heure ? » Toi : « À dix heures. » Ami : « Tu aimes l'école ? » Toi : « Oui. » Ami : « C'est intéressant ? » Toi : « Oui, c'est intéressant. » Ami : « Bon cours ! » Toi : « Merci ! »", "Pièges. N'interrogez jamais le scénario. Interrogez la forme française et le sens anglais. Articles, prépositions, accords, registre (tu/vous). Relisez : Je vais à l'école. J'ai un cours.", "Lecture de consolidation. Vous devez pouvoir expliquer chaque mot utile de cette page. Notez huit chunks. Demain, cinq lemmes difficiles avant la leçon suivante. Politesse : bonjour, merci, s'il vous plaît, au revoir, à bientôt. Quand une réponse est fausse, revenez à la liste de sens, puis à la règle. Le but n'est pas de finir en une minute : le but est de comprendre et de produire demain sans aide. Encore : Je vais à l'école. J'ai un cours. Travaillez lentement. La précision aujourd'hui évite les erreurs demain."],
     theorySections: [{"heading": "9. Pattern detail", "body": "Hand-crafted focus for « School ». Grammar: -ER; schedules. Produce six pronoun variants of the first focus line. Meanings first."}, {"heading": "10. Spiral & Review", "body": "Pull one older tool into two new sentences. Enqueue reviewable lemmas only (no proper nouns). Repair with meaning + form."}, {"heading": "11. Dictionary & conjugations", "body": "Every meaningful word needs a lemma. Multiwords count. Open full tense sets from the infinitive."}, {"heading": "12. Register & chunks", "body": "Practice the register trio. Learn chunks as wholes. Vous with strangers; tu with friends."}],
     dialogue: [
@@ -966,11 +1009,12 @@ export const PHASE1_THEMES: Phase1Theme[] = [
     moduleTitle: "La journée",
     unitTitle: "Unit 2",
     ruleSlugs: ["er-present", "numbers-and-age"],
-    meanings: [["travail", "work"], ["école", "school"], ["emploi du temps", "schedule"], ["cours", "class"], ["bureau", "office"], ["merci", "thank you"], ["bonjour", "hello"], ["au revoir", "goodbye"], ["s'il vous plaît", "please (formal)"], ["encore", "again / still"], ["aujourd'hui", "today"]],
-    focus: ["Un emploi du temps complet."],
-    chunks: [["Un emploi du temps complet.", "say as one chunk"], ["travail", "work"], ["école", "school"], ["emploi du temps", "schedule"], ["cours", "class"], ["bureau", "office"], ["merci", "thank you"]],
-    traps: ["Meanings first before any grammar example that uses those words.", "Quiz French forms/meanings only — never plot or proper-name flashcards.", "Dictionary verbs are infinitives; conjugate from the infinitive lemma.", "Stay on: -ER; schedules."],
-    registerTrio: ["Bonjour, pourriez-vous m'aider, s'il vous plaît ?", "Bonjour, vous pouvez m'aider ?", "Hé, tu peux m'aider ?"],
+    meanings: U2_WORK_MEANINGS,
+    focus: ["Lundi, je vais au bureau.", "Mardi, j'ai un cours.", "Je pars à neuf heures.", "Voici mon emploi du temps."],
+    chunks: U2_WORK_CHUNKS,
+    traps: U2_WORK_TRAPS,
+    registerTrio: U2_WORK_REGISTER,
+    briefBody: M03_U2_TIMETABLE_C_BRIEF,
     readingFr: ["Leçon « Checkpoint: emploi du temps ». Structure du jour : -ER; schedules. Le mot « travail » signifie « work ». Le mot « école » signifie « school ». Le mot « emploi du temps » signifie « schedule ». Le mot « cours » signifie « class ». Le mot « bureau » signifie « office ». Le mot « merci » signifie « thank you ». Le mot « bonjour » signifie « hello ». Le mot « au revoir » signifie « goodbye ». Le mot « s'il vous plaît » signifie « please (formal) ». Le mot « encore » signifie « again / still ». Lisez chaque sens deux fois avant de continuer.", "Production guidée. Répétez, puis cachez le modèle : Un emploi du temps complet. Changez le pronom sujet. Gardez le même sens. Les verbes s'apprennent à l'infinitif pour la conjugaison complète.", "Dialogue d'entraînement (formes et sens, pas l'histoire) : Ami : « Tu travailles lundi ? » Toi : « Oui. » Ami : « Et mardi ? » Toi : « J'ai un cours. » Ami : « Mercredi ? » Toi : « Je vais au bureau. » Ami : « Jeudi soir ? » Toi : « Je reste à la maison. » Ami : « Vendredi ? » Toi : « Je pars tôt. » Ami : « Super emploi du temps ! » Toi : « Merci ! »", "Pièges. N'interrogez jamais le scénario. Interrogez la forme française et le sens anglais. Articles, prépositions, accords, registre (tu/vous). Relisez : Un emploi du temps complet.", "Lecture de consolidation. Vous devez pouvoir expliquer chaque mot utile de cette page. Notez huit chunks. Demain, cinq lemmes difficiles avant la leçon suivante. Politesse : bonjour, merci, s'il vous plaît, au revoir, à bientôt. Quand une réponse est fausse, revenez à la liste de sens, puis à la règle. Le but n'est pas de finir en une minute : le but est de comprendre et de produire demain sans aide. Encore : Un emploi du temps complet. Travaillez lentement. La précision aujourd'hui évite les erreurs demain."],
     theorySections: [{"heading": "9. Pattern detail", "body": "Hand-crafted focus for « Checkpoint: emploi du temps ». Grammar: -ER; schedules. Produce six pronoun variants of the first focus line. Meanings first."}, {"heading": "10. Spiral & Review", "body": "Pull one older tool into two new sentences. Enqueue reviewable lemmas only (no proper nouns). Repair with meaning + form."}, {"heading": "11. Dictionary & conjugations", "body": "Every meaningful word needs a lemma. Multiwords count. Open full tense sets from the infinitive."}, {"heading": "12. Register & chunks", "body": "Practice the register trio. Learn chunks as wholes. Vous with strangers; tu with friends."}],
     dialogue: [
@@ -3279,16 +3323,17 @@ export const PHASE1_THEMES: Phase1Theme[] = [
   {
     id: "22222222-0000-0000-0000-00000000032d",
     title: "Prove: Jobs",
-    grammar: "-ER; schedules · Prove gate (no hints)",
+    grammar: "-ER; schedules",
     role: "D",
     moduleTitle: "La journée",
     unitTitle: "Unit 2",
     ruleSlugs: ["er-present", "numbers-and-age"],
-    meanings: [["travail", "work"], ["école", "school"], ["emploi du temps", "schedule"], ["cours", "class"], ["bureau", "office"], ["merci", "thank you"], ["bonjour", "hello"], ["au revoir", "goodbye"], ["s'il vous plaît", "please (formal)"], ["encore", "again / still"], ["aujourd'hui", "today"]],
-    focus: ["Je pratique : travail.","Tu utilises « école ».","C'est « travail ».","Encore : emploi du temps."],
-    chunks: [["Je travaille.", "prove chunk"], ["Je vais au bureau.", "prove chunk"]],
-    traps: ["Prove is timed mixed practice — no story memory.", "If you fail, remediate B/C — do not skip meanings.", "Only French forms and meanings count."],
-    registerTrio: ["Bonjour, pourriez-vous m'aider, s'il vous plaît ?", "Bonjour, vous pouvez m'aider ?", "Hé, tu peux m'aider ?"],
+    meanings: U2_WORK_MEANINGS,
+    focus: ["Je travaille au bureau.", "Je vais à l'école.", "J'ai un cours à dix heures.", "Je pars à neuf heures."],
+    chunks: U2_WORK_CHUNKS,
+    traps: U2_WORK_TRAPS,
+    registerTrio: U2_WORK_REGISTER,
+    briefBody: M03_U2_JOBS_D_BRIEF,
     readingFr: ["Épreuve (Prove) — unité 2, module 03. Pas d'indices. Montrez que vous maîtrisez : -ER; schedules.", "Relisez vite les sens : « travail » = work. « école » = school. « emploi du temps » = schedule. « cours » = class. « bureau » = office. « merci » = thank you. « bonjour » = hello. « au revoir » = goodbye.", "Produisez sans regarder : Je travaille. Je vais au bureau. Puis changez les pronoms.", "Contrôle final : expliquez la règle en une phrase claire, puis donnez trois exemples corrects. Aucune question sur l'histoire. Seulement le français. Si vous échouez, revenez à Apply/Integrate avant de rejouer Prove. Politesse et précision restent obligatoires. Bon courage.", "Encore une passe froide : Je travaille. Je vais au bureau. Chronométrez-vous. Qualité avant vitesse."],
     theorySections: [{"heading": "Prove rules", "body": "No hints. Mixed items from this unit. Fail → remediate B/C. Pass → unit complete."}, {"heading": "What is tested", "body": "-ER; schedules. Meanings + forms only."}],
     dialogue: [
@@ -3308,10 +3353,10 @@ export const PHASE1_THEMES: Phase1Theme[] = [
       { speaker: "Toi", text: "Au revoir." },
     ],
     exercises: [
-      { category: "er-present", prompt: "Prove — correct French:", options: ["Je travaille.", "Je suis Paris.", "C'est française."], answer: 0 },
-      { category: "vocab-meaning", prompt: "travail =", options: ["work", "plot", "name"], answer: 0 },
-      { category: "er-present", prompt: "Prove — second form:", options: ["Je vais au bureau.", "Je suis Paris.", "C'est française."], answer: 0 },
-      { category: "vocab-meaning", prompt: "Chunks should be learned as:", options: ["Whole phrases", "Plot spoilers", "Character names"], answer: 0 },
+      { category: "er-present", prompt: "I work at the office:", options: ["Je travaille au bureau.", "Je suis travail.", "Je travailler au bureau."], answer: 0 },
+      { category: "vocab-meaning", prompt: "bureau =", options: ["office", "school", "breakfast"], answer: 0 },
+      { category: "aller", prompt: "I go to school:", options: ["Je vais à l'école.", "Je aller à l'école.", "Je vas à l'école."], answer: 0 },
+      { category: "vocab-meaning", prompt: "travail =", options: ["work / a job (noun)", "to work (verb)", "today"], answer: 0 },
     ],
   },
   {

@@ -8,8 +8,8 @@
 
 ## Execution & Validation (Highest Priority)
 
-1. **[2026-08-27] Factory = domain hand-feel craft (no pads / no quiz-chat)**
-   Do instead: `craft-from-theme` picks domain from title/grammar first (never lemma-`bonjour` false greeting). Real apartment/café/city/family… scripts + focus uniquify on dialogue AND reading. Shared name/place world with real dictionary lemmas. No pad emitters. CI: `npm test` + `measure-content-pads` → `failing: 0 / 720`. Still generator — not 705 human rewrites. Schema: `theme-craft-schema.ts`. Live host: Hostinger, not Pages.
+1. **[2026-08-28] Factory = domain hand-feel craft (no pads / no quiz-chat)**
+   Do instead: `craft-from-theme` picks domain from title/grammar first (never lemma-`bonjour` false greeting). Real apartment/café/city/family… scripts + focus uniquify on dialogue AND reading. Theory examples = real speech (*Je travaille au bureau*), never *J'utilise « travail »*. Shared name/place world with real dictionary lemmas. No pad emitters. CI: `npm test` + `measure-content-pads` → `failing: 0 / 720`. Still generator — not 705 human rewrites. Schema: `theme-craft-schema.ts`. Live host: Hostinger, not Pages.
 
 2. **[2026-08-27] Reading tap “Not in the dictionary” / names as real lemmas**
    Do instead: every tappable surface needs a bank lemma — people and cities too (`vocabulary-proper-names.ts`, ids 7000+). Do not treat allowlist as a pass. CI: `measureBundledTapCoverage` missTokens = 0. Re-tokenize reading/dialogue in `LessonClient` via `joinFrenchTokens` + `tokenizeFrench`. Capitalized Tours/Nice prefer the proper-noun lemma.
