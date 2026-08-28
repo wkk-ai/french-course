@@ -237,7 +237,7 @@ export function deepenLessonToModule1Bar(
     const stamp = uniqueSpeech(chapterId)
     const lines = conversation.lines.map((line, index, all) => {
       if (index !== all.length - 1) return line
-      return conversationLine(line.speaker, `${line.text} ${stamp}`, line.id, BUNDLED_VOCABULARY)
+      return conversationLine(line.speaker, `${line.text} ${stamp}`, `hand-stamp-${chapterId.slice(-4)}`, BUNDLED_VOCABULARY)
     })
     conversation = { ...conversation, lines }
   }

@@ -102,5 +102,5 @@
 2. **[2026-08-26] `tests/**/*.test.ts` fails on GitHub Actions**
    Do instead: `tsx --test tests/*.test.ts` — Linux npm does not expand `**`.
 
-3. **[2026-08-26] Private course lives on Hostinger, not Pages**
-   Do instead: deploy `out/` (no `NEXT_PUBLIC_BASE_PATH`) to `french.worldhealthshop.com` (`public_html/french`). Folder password via `.htaccess` + `.htpasswd` (user `french`). Do not deploy to `worldhealthshop.com` itself. Keep GitHub **private**. CI workflow tests only — never `deploy-pages` (that would republish the course).
+3. **[2026-08-28] Hostinger deploy is local-only; never the shop**
+   Do instead: cloud agents have no Hostinger login. On this Mac: `hosting_deployStaticWebsite` with domain `french.worldhealthshop.com` (root = `public_html/french`). Never `worldhealthshop.com`. After `npm run build` (no `NEXT_PUBLIC_BASE_PATH`), copy `.htaccess` + `.htpasswd` back into `out/` (Next wipes them), zip `out/` as `french_YYYYMMDD_HHMMSS.zip`. Gate user `french`; pass in `/tmp/french-course-gate-pass.txt`. Keep GitHub **private**. CI = tests only, never `deploy-pages`.
