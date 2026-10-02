@@ -96,11 +96,14 @@
 
 ## Shell & Command Reliability
 
-1. **[2026-07-24] Assumed `gh` on PATH**
+1. **[2026-10-02] Keep-alive pings a deleted Supabase host**
+   Do instead: if ping fails with `Could not resolve host`, the GitHub secret `NEXT_PUBLIC_SUPABASE_URL` is stale. Match it to `get_project_url`, reset URL + anon key, `gh workflow run "Supabase keep-alive"`, confirm ping green. Current project: `ezjyeyakrabzybszsquc`.
+
+2. **[2026-07-24] Assumed `gh` on PATH**
    Do instead: use `/tmp/ghcli/*/bin/gh` (or locate) for Pages deploy watches when `gh` is missing.
 
-2. **[2026-08-26] `tests/**/*.test.ts` fails on GitHub Actions**
+3. **[2026-08-26] `tests/**/*.test.ts` fails on GitHub Actions**
    Do instead: `tsx --test tests/*.test.ts` — Linux npm does not expand `**`.
 
-3. **[2026-08-28] Hostinger deploy is local-only; never the shop**
+4. **[2026-08-28] Hostinger deploy is local-only; never the shop**
    Do instead: cloud agents have no Hostinger login. On this Mac: `hosting_deployStaticWebsite` with domain `french.worldhealthshop.com` (root = `public_html/french`). Never `worldhealthshop.com`. After `npm run build` (no `NEXT_PUBLIC_BASE_PATH`), copy `.htaccess` + `.htpasswd` back into `out/` (Next wipes them), zip `out/` as `french_YYYYMMDD_HHMMSS.zip`. Gate user `french`; pass in `/tmp/french-course-gate-pass.txt`. Keep GitHub **private**. CI = tests only, never `deploy-pages`.
