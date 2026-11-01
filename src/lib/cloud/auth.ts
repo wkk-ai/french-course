@@ -1,18 +1,18 @@
-import { NEON_AUTH_URL } from '@/lib/cloud/config'
+import { AUTH_RELAY_URL } from '@/lib/cloud/config'
 
 /**
- * Email + password login against Neon Auth (Better Auth), with plain fetch.
+ * Email + password login against Neon Auth, through a small relay (neon-functions/auth-relay).
  *
- * Why not cookies only: the site lives on github.io and Neon on neon.tech. iPhone Safari blocks
- * cross-site cookies, so we keep the session token from the sign-in response in this phone's
- * storage and send it as a Bearer header. Cookies are still sent (credentials: 'include') as a fallback.
+ * Why the relay: the site lives on github.io and Neon on neon.tech. iPhone Safari blocks cookies
+ * between different sites, and Neon Auth only accepts its session cookie. The relay holds that cookie
+ * for us and returns it as an opaque session string, kept in this phone's storage. No browser cookies are used.
  */
 
 const SESSION_KEY = 'french-course:auth-session'
 const AUTH_EVENT = 'french-course-auth'
 
 export type CloudUser = { id: string; email: string; name: string }
-type StoredSession = { token: string | null; user: CloudUser; savedAt: string }
+type StoredSession = { session: string; user: CloudUser; savedAt: string }
 type Result<T> = { ok: true; data: T } | { ok: false; error: string }
 
 let jwtCache: { token: string; exp: number } | null = null
@@ -23,7 +23,7 @@ function readStored(): StoredSession | null {
     const raw = localStorage.getItem(SESSION_KEY)
     if (!raw) return null
     const parsed = JSON.parse(raw) as StoredSession
-    return parsed?.user?.id ? parsed : null
+    return parsed?.user?.id && typeof parsed.session === 'string' ? parsed : null
   } catch {
     return null
   }
@@ -68,11 +68,10 @@ export function subscribeAuth(listener: () => void): () => void {
   }
 }
 
-function authHeaders(extra?: Record<string, string>): Headers {
-  const headers = new Headers(extra)
-  const token = readStored()?.token
-  if (token) headers.set('Authorization', `Bearer ${token}`)
-  return headers
+async function relay(path: string, body: unknown, session?: string): Promise<Response> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  if (session) headers['x-session'] = session
+  return fetch(`${AUTH_RELAY_URL}${path}`, { method: 'POST', credentials: 'omit', headers, body: JSON.stringify(body ?? {}) })
 }
 
 /** Turn server and network errors into short, plain messages. */
@@ -90,51 +89,46 @@ export function friendlyAuthError(status: number | null, message: string | undef
   return message?.trim() || 'Sign in failed.'
 }
 
-async function postAuth(path: string, body: unknown): Promise<Result<{ token: string | null; user: CloudUser }>> {
+async function postAuth(path: '/sign-in' | '/sign-up', body: unknown): Promise<Result<{ session: string; user: CloudUser }>> {
   let response: Response
   try {
-    response = await fetch(`${NEON_AUTH_URL}${path}`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    })
+    response = await relay(path, body)
   } catch {
     return { ok: false, error: friendlyAuthError(null, undefined) }
   }
   const payload = (await response.json().catch(() => ({}))) as {
-    token?: string | null
+    session?: string
     user?: { id?: string; email?: string; name?: string }
     message?: string
     code?: string
   }
-  if (!response.ok || !payload.user?.id) {
+  if (!response.ok || !payload.user?.id || !payload.session) {
     return { ok: false, error: friendlyAuthError(response.ok ? 500 : response.status, payload.message ?? payload.code) }
   }
-  const token = response.headers.get('set-auth-token') ?? payload.token ?? null
   return {
     ok: true,
-    data: { token, user: { id: payload.user.id, email: payload.user.email ?? '', name: payload.user.name ?? '' } },
+    data: { session: payload.session, user: { id: payload.user.id, email: payload.user.email ?? '', name: payload.user.name ?? '' } },
   }
 }
 
 export async function signIn(email: string, password: string): Promise<Result<CloudUser>> {
-  const result = await postAuth('/sign-in/email', { email: email.trim(), password, rememberMe: true })
+  const result = await postAuth('/sign-in', { email: email.trim(), password })
   if (!result.ok) return result
-  writeStored({ token: result.data.token, user: result.data.user, savedAt: new Date().toISOString() })
+  writeStored({ session: result.data.session, user: result.data.user, savedAt: new Date().toISOString() })
   return { ok: true, data: result.data.user }
 }
 
 export async function signUp(name: string, email: string, password: string): Promise<Result<CloudUser>> {
-  const result = await postAuth('/sign-up/email', { name: name.trim() || email.trim(), email: email.trim(), password })
+  const result = await postAuth('/sign-up', { name: name.trim() || email.trim(), email: email.trim(), password })
   if (!result.ok) return result
-  writeStored({ token: result.data.token, user: result.data.user, savedAt: new Date().toISOString() })
+  writeStored({ session: result.data.session, user: result.data.user, savedAt: new Date().toISOString() })
   return { ok: true, data: result.data.user }
 }
 
 export async function signOut(): Promise<void> {
+  const session = readStored()?.session
   try {
-    await fetch(`${NEON_AUTH_URL}/sign-out`, { method: 'POST', credentials: 'include', headers: authHeaders({ 'Content-Type': 'application/json' }), body: '{}' })
+    if (session) await relay('/sign-out', {}, session)
   } catch {
     // offline: still sign out on this phone
   }
@@ -154,11 +148,12 @@ export type JwtResult = { ok: true; jwt: string } | { ok: false; reason: 'offlin
 
 /** Short-lived token (15 min) the database accepts. Refreshed from the session when needed. */
 export async function getDatabaseToken(): Promise<JwtResult> {
-  if (!readStored()) return { ok: false, reason: 'signed-out' }
+  const session = readStored()?.session
+  if (!session) return { ok: false, reason: 'signed-out' }
   if (jwtCache && jwtCache.exp - Date.now() > 60_000) return { ok: true, jwt: jwtCache.token }
   let response: Response
   try {
-    response = await fetch(`${NEON_AUTH_URL}/token`, { credentials: 'include', headers: authHeaders() })
+    response = await relay('/token', {}, session)
   } catch {
     return { ok: false, reason: 'offline' }
   }
@@ -167,7 +162,7 @@ export async function getDatabaseToken(): Promise<JwtResult> {
     return { ok: false, reason: 'signed-out', detail: 'token 401' }
   }
   const payload = (await response.json().catch(() => ({}))) as { token?: string }
-  const jwt = payload.token ?? response.headers.get('set-auth-jwt') ?? undefined
+  const jwt = payload.token
   if (!response.ok || !jwt) return { ok: false, reason: 'server', detail: `token ${response.status}` }
   jwtCache = { token: jwt, exp: decodeExp(jwt) || Date.now() + 10 * 60_000 }
   return { ok: true, jwt }

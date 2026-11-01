@@ -17,6 +17,7 @@ Goal: hold a normal conversation and a business conversation. Rare, literary voc
 ## Login and sync (Neon)
 
 - Email + password login (Neon Auth). Asked once per phone; after that the app opens offline.
+- Login goes through a small relay (`neon-functions/auth-relay`, Neon Function `authrelay` in project `french-course-auth-proxy`, US East because Functions are not in São Paulo yet). Reason: iPhone Safari blocks cookies between github.io and neon.tech; the relay keeps the Neon Auth cookie and the app uses no browser cookies. Redeploy it with the Neon MCP `deploy_function` or `neon functions deploy authrelay --src neon-functions/auth-relay/index.mjs`.
 - Progress is saved on the phone first, then synced to Neon when online (table `learner_state`, one row per person per key; row security means each person only reads and writes their own rows).
 - Merge rules never lose progress from either device (`src/lib/cloud/merge.ts`).
 - Neon project: `french-course` (`flat-sky-76475546`, São Paulo region). The database sleeps when idle and wakes in under a second; no keep-alive job is needed.
