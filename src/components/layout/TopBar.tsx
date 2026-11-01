@@ -1,8 +1,9 @@
 'use client'
 
-import { Flame, RotateCcw, Trophy } from 'lucide-react'
+import { Flame, Trophy } from 'lucide-react'
+import { AccountMenu } from '@/components/auth/AccountMenu'
 import { useEffect, useState } from 'react'
-import { clearLocalLearnerData, mergeCompletedChapterIds, readLocalStreak, subscribeCompletedChapters } from '@/lib/local-progress'
+import { mergeCompletedChapterIds, readLocalStreak, subscribeCompletedChapters } from '@/lib/local-progress'
 import { getAllLocalVocabulary } from '@/lib/local-vocab-vault'
 
 export default function TopBar() {
@@ -25,11 +26,6 @@ export default function TopBar() {
     return subscribeCompletedChapters(refreshStats)
   }, [])
 
-  const resetPhone = () => {
-    if (!window.confirm('Erase progress on this phone? Lessons stay saved. You start the pathway again.')) return
-    clearLocalLearnerData()
-    refreshStats()
-  }
 
   return (
     <header className="fixed top-0 left-0 right-0 md:left-24 h-16 pt-safe bg-surface-container-lowest border-b-2 border-surface-variant flex items-center justify-between px-4 z-40">
@@ -46,9 +42,7 @@ export default function TopBar() {
           <span className="text-label-caps text-primary">XP</span>
           <span className="font-bold text-primary">{xp}</span>
         </div>
-        <button onClick={resetPhone} title="Reset this phone" aria-label="Reset this phone" className="rounded-lg p-3 text-on-surface-variant hover:bg-surface-container-low min-h-[44px] min-w-[44px] flex items-center justify-center">
-          <RotateCcw className="size-4" />
-        </button>
+        <AccountMenu />
       </div>
     </header>
   )

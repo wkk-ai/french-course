@@ -15,6 +15,9 @@ import { deriveChapterStatus } from '@/lib/progression'
 import { BUNDLED_CHAPTER_IDS } from '@/lib/bundled-chapter-ids'
 import { mergeCompletedChapterIds, readLocalCompletedChapters, readLocalDailyWords, readInProgressPercents, subscribeCompletedChapters } from '@/lib/local-progress'
 import { SaveCourseCard } from '@/components/SaveCourseCard'
+import { TRACKS, chapterIdsForTrack, trackForModuleOrder, type TrackId } from '@/lib/pathway/tracks'
+
+const TRACK_PREF_KEY = 'french-course:home-track'
 
 type Module = {
   id: string
@@ -114,6 +117,7 @@ export default function HomeClient({
   const [inProgressPercents, setInProgressPercents] = useState<Record<string, number>>({})
   const [wordsRead, setWordsRead] = useState(0)
   const [progressReady, setProgressReady] = useState(false)
+  const [trackId, setTrackId] = useState<TrackId>('conversation')
 
   useEffect(() => {
     void Promise.resolve().then(() => {
@@ -122,6 +126,12 @@ export default function HomeClient({
       setProgressByChapter(map)
       setInProgressPercents(readInProgressPercents())
       setWordsRead(readLocalDailyWords())
+      try {
+        const saved = localStorage.getItem(TRACK_PREF_KEY)
+        if (saved === 'conversation' || saved === 'business' || saved === 'advanced') setTrackId(saved)
+      } catch {
+        // storage blocked: default track
+      }
       setProgressReady(true)
     })
   }, [])
@@ -158,10 +168,25 @@ export default function HomeClient({
     () => new Set([...progressByChapter].filter(([, status]) => status === 'completed').map(([id]) => id)),
     [progressByChapter],
   )
-  const completedPlayable = authoredIds.filter((id) => completedIds.has(id)).length
-  const mastery = authoredIds.length ? Math.round((completedPlayable / authoredIds.length) * 100) : 0
+  const track = TRACKS.find((item) => item.id === trackId) ?? TRACKS[0]
+  const trackChapterIds = useMemo(() => {
+    const playable = new Set(authoredIds)
+    return chapterIdsForTrack(trackId).filter((id) => playable.has(id))
+  }, [authoredIds, trackId])
+  const completedPlayable = trackChapterIds.filter((id) => completedIds.has(id)).length
+  const mastery = trackChapterIds.length ? Math.round((completedPlayable / trackChapterIds.length) * 100) : 0
+  const chooseTrack = (next: TrackId) => {
+    setTrackId(next)
+    try {
+      localStorage.setItem(TRACK_PREF_KEY, next)
+    } catch {
+      // ignore
+    }
+  }
+  const visibleModules = courseModules.filter((module) => trackForModuleOrder(module.order_index) === trackId)
+    .sort((a, b) => track.moduleOrders.indexOf(a.order_index) - track.moduleOrders.indexOf(b.order_index))
   const chaptersById = useMemo(() => new Map(courseChapters.map((chapter) => [chapter.id, chapter])), [courseChapters])
-  const authoredTotal = authoredIds.length
+  const authoredTotal = trackChapterIds.length
   const authoredDone = completedPlayable
   const dailyPct = Math.min(100, Math.round((wordsRead / DAILY_GOAL) * 100))
   const dailyLabel =
@@ -187,18 +212,37 @@ export default function HomeClient({
         </div>
       </section>
 
+      <nav aria-label="Tracks" className="grid grid-cols-3 gap-2">
+        {TRACKS.map((item) => {
+          const active = item.id === trackId
+          return (
+            <button
+              key={item.id}
+              type="button"
+              aria-pressed={active}
+              onClick={() => chooseTrack(item.id)}
+              className={`min-h-16 rounded-xl border-2 px-2 py-2 text-center ${active ? 'border-primary bg-primary text-on-primary' : 'border-surface-variant bg-surface-container-lowest text-on-surface'} ${item.optional && !active ? 'border-dashed' : ''}`}
+            >
+              <span className="block text-sm font-bold leading-tight">{item.title}</span>
+              <span className={`block text-[11px] ${active ? 'text-on-primary/80' : 'text-on-surface-variant'}`}>{item.short}</span>
+            </button>
+          )
+        })}
+      </nav>
+
       <section className="tactile-card p-5">
-        <p className="text-label-caps text-on-surface-variant">PATHWAY</p>
+        <p className="text-label-caps text-on-surface-variant">{track.title.toUpperCase()} TRACK{track.optional ? ' · OPTIONAL' : ''}</p>
+        <p className="mt-1 text-sm text-on-surface-variant">{track.description}</p>
         <div className="mt-2 flex items-end justify-between gap-4">
           <div>
             <p className="text-headline-lg text-success">{mastery}%</p>
             <p className="text-sm text-on-surface-variant">
-              {authoredDone}/{authoredTotal || 0} playable chapters done
+              {authoredDone}/{authoredTotal || 0} chapters done in this track
             </p>
           </div>
         </div>
         <div className="mt-4">
-          <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-on-surface-variant">Pathway progress</p>
+          <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-on-surface-variant">Track progress</p>
           <div className="h-2 overflow-hidden rounded-full bg-surface-container-high">
             <div className="h-full rounded-full bg-success transition-all" style={{ width: `${mastery}%` }} />
           </div>
@@ -209,7 +253,7 @@ export default function HomeClient({
         {!progressReady ? (
           <p className="py-8 text-center text-on-surface-variant">Loading…</p>
         ) : (
-        courseModules.map((module) => {
+        visibleModules.map((module) => {
           const pathwayModule = PATHWAY_BY_MODULE_ID.get(module.id)
           const units = pathwayModule ? unitsForModule(pathwayModule) : []
           const playableCount = pathwayModule

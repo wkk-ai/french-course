@@ -102,5 +102,8 @@
 2. **[2026-08-26] `tests/**/*.test.ts` fails on GitHub Actions**
    Do instead: `tsx --test tests/*.test.ts` — Linux npm does not expand `**`.
 
-3. **[2026-08-28] Hostinger deploy is local-only; never the shop**
+3. **[2026-11-01] Live host is now GitHub Pages + Neon login (owner decision)**
+   Do instead: deploy = push to `main` (`deploy-pages.yml`, tests gate it). Base path `/french-course`. Neon project `flat-sky-76475546` (Auth + Data API, table `learner_state` with RLS). No Supabase anymore. Cloud sessions cannot reach neon.tech; test login from the owner's browser. The Hostinger note below is history.
+
+4. **[2026-08-28] (old) Hostinger deploy is local-only; never the shop**
    Do instead: cloud agents have no Hostinger login. On this Mac: `hosting_deployStaticWebsite` with domain `french.worldhealthshop.com` (root = `public_html/french`). Never `worldhealthshop.com`. After `npm run build` (no `NEXT_PUBLIC_BASE_PATH`), copy `.htaccess` + `.htpasswd` back into `out/` (Next wipes them), zip `out/` as `french_YYYYMMDD_HHMMSS.zip`. Gate user `french`; pass in `/tmp/french-course-gate-pass.txt`. Keep GitHub **private**. CI = tests only, never `deploy-pages`.

@@ -8,7 +8,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "L'Art du Français",
     short_name: 'Art du Français',
-    description: 'French course on this phone. No login. Save the course once, then study offline.',
+    description: 'French for real conversation. Save the course once, then study offline.',
     start_url: `${basePath}/`,
     display: 'standalone',
     background_color: '#f9f9f9',

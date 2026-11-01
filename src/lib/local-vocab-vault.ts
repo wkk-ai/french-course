@@ -57,6 +57,7 @@ function writeStore(store: VaultStore) {
   if (typeof window === 'undefined') return
   const latest = readStore()
   localStorage.setItem(STORAGE_KEY, JSON.stringify(mergeStores(store, latest)))
+  window.dispatchEvent(new Event('french-course-vault'))
 }
 
 /** Listen for cross-tab vault writes (storage events fire in other tabs only). */

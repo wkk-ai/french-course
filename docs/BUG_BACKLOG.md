@@ -160,13 +160,16 @@ Last updated: **2026-07-27** (dictionary tap miss driven to 0% across 720 lesson
 | R3-03 | open | Quiz seeds in later themes use junk options ("plot", "story", "never") and meta prompts | `themes-m07-m36.ts` (generator rewrites; output not human-reviewed) |
 | R3-04 | open | Dialogue seeds are template chat ("Tu travailles sur : PC regular ?") | `themes-m07-m36.ts` |
 | R3-05 | open | Modules 2-36 never read by a native speaker | all generated lessons |
-| R3-06 | open | Scope too big for the goal: ~15,000 lemmas planned, conversation needs ~2,000 | `COURSE_STRUCTURE.md` |
-| R3-07 | open | Hard/literary content (passé simple, droit, philosophie, littérature) mixed into the main path; should be a skippable track | `public/rules-data/*`, pathway themes |
+| R3-06 | fixed | Scope too big for the goal: ~15,000 lemmas planned, conversation needs ~2,000 | `COURSE_STRUCTURE.md` |
+| R3-07 | fixed | Hard/literary content (passé simple, droit, philosophie, littérature) mixed into the main path; should be a skippable track | `public/rules-data/*`, pathway themes |
 | R3-08 | fixed | Dead Supabase keep-alive job (daily ping, app has no database) | workflow removed |
 | R3-09 | fixed | `package.json` named `temp_project` | renamed `french-course` |
-| R3-10 | open | README/PRD/napkin disagree about live host and about Supabase; README deploy section marked TODO | README |
+| R3-10 | fixed | README/PRD/napkin disagree about live host and about Supabase | README now says GitHub Pages + Neon; PRD still describes Supabase (historic) |
 | R3-11 | open | Conjugation table in dictionary popup shows participle without agreement for être verbs (only a note) and bare endings under "je" | `LessonClient.tsx` conjugate sheet; new `src/lib/tenses/format.ts` has the correct phrase builder to reuse |
 | R3-12 | fixed | No always-open guide to tenses | `/tenses/` (11 pages) |
 | R3-13 | fixed | Lessons had no visual real-life material | Module 1 units 1-4 Learn A |
 | R3-14 | open | Real-life documents only in 4 chapters of Module 1 | `src/lib/visual/module1-documents.ts` |
 | R3-15 | fixed | No listen-only audio | `SpeakButton` (needs iPhone test, voice may need download) |
+| R3-16 | open | Business track has no hand-written lessons (email, meetings, phone, negotiation); it reuses generated modules 14, 21, 29, 31 | `tracks.ts` |
+| R3-17 | open | Login not yet tested on iPhone Safari (cross-site cookies). App sends the session token as a Bearer header to avoid this, unverified | `src/lib/cloud/auth.ts` |
+| R3-18 | open | Neon Auth still allows new sign-ups; turn off after owner account exists | Neon Console |

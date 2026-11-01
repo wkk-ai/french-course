@@ -1,4 +1,25 @@
-# French Course Structure — Grand Pathway (Complete Edition)
+# French Course Structure
+
+> **2026-11-01 reshape: this section overrides the older plan below.**
+>
+> **Goal:** hold a normal conversation and a business conversation in French. Not literary or academic French.
+>
+> | Track | Modules (catalog order) | Level | Status |
+> | --- | --- | --- | --- |
+> | **Conversation** (main path, do first) | 1-13, 15, 17, 18, 19, 26 | A1 to B2 | M01 hand-written; rest generated, needs review |
+> | **Business** | 14, 21, 29, 31 | B1 to B2 | Generated, needs review; hand-written work lessons (email, meetings, phone, negotiation) not written yet |
+> | **Advanced reading** (optional, skippable) | 16, 20, 22-25, 27, 28, 30, 32-36 | B2 to C1 | Generated; kept but not needed for the goal |
+>
+> **Vocabulary target:** about 2,000-3,000 common words for conversation (not 15,000). Rare words live in Advanced reading.
+>
+> **Always open:** Tenses guide ("How do I say it?") for jumping straight to any tense.
+>
+> Source of truth for tracks: `src/lib/pathway/tracks.ts`.
+
+---
+
+## Older plan (kept for reference)
+
 
 | Field | Value |
 | --- | --- |

@@ -125,6 +125,7 @@ export function bumpLocalStreak() {
     current = 1
   }
   localStorage.setItem(STREAK_KEY, JSON.stringify({ current, lastDate: today }))
+  notifyProgress()
 }
 
 /** True the first time this chapter counts toward today's articles_completed. */
@@ -166,6 +167,7 @@ export function addLocalDailyWords(words: number, date = localDateString()) {
   const map = readDailyWordsMap()
   map[date] = (map[date] ?? 0) + words
   localStorage.setItem(DAILY_WORDS_KEY, JSON.stringify(map))
+  notifyProgress()
 }
 
 export function readLocalDailyWords(date = localDateString()): number {
@@ -184,6 +186,7 @@ export function clearLocalLearnerData() {
   localStorage.removeItem(DAILY_WORDS_KEY)
   localStorage.removeItem('ladf-vocab-vault-v1')
   localStorage.removeItem('french-course:offline-version')
+  localStorage.removeItem('french-course:last-sync')
   for (const key of Object.keys(localStorage)) {
     if (key.startsWith('french-course:lesson-draft:')) localStorage.removeItem(key)
     if (key.startsWith('french-course:daily-articles:')) localStorage.removeItem(key)

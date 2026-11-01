@@ -6,7 +6,7 @@ Goal: hold a normal conversation and a business conversation. Rare, literary voc
 
 ## What is in the app
 
-- **Learn**: 36 modules x 5 units x A/B/C/D (720 chapters). Module 1 is hand-written. Later modules are generated and still being audited.
+- **Learn**, in three tracks: **Conversation** (main path), **Business** (work French), **Advanced reading** (optional, skippable). 36 modules x 5 units x A/B/C/D (720 chapters). Module 1 is hand-written; later modules are generated and still being audited. Track list: `src/lib/pathway/tracks.ts`.
 - **Real-life documents** inside lessons: chat, menu, bill, family tree, agenda (Module 1 so far). Words are tappable. English can be hidden.
 - **Tenses** tab: "How do I say it?" Pick a goal (talk about the future, say what happened, be polite, say "if"...). Each page has when to use it, how to build it, everyday and work sentences, full conjugation tables and a quiz. Always open, no order.
 - **Listen button**: the phone reads French aloud. Listen only. No voice recording or grading.
@@ -14,9 +14,15 @@ Goal: hold a normal conversation and a business conversation. Rare, literary voc
 - **Rules**: grammar rulebook.
 - **Center**: progress stats.
 
-## No accounts, no database
+## Login and sync (Neon)
 
-Progress and review live on the phone (local storage). The app does not call Supabase at runtime. Old Supabase files (`supabase/`, `src/utils/supabase/`) are leftovers and can be removed.
+- Email + password login (Neon Auth). Asked once per phone; after that the app opens offline.
+- Progress is saved on the phone first, then synced to Neon when online (table `learner_state`, one row per person per key; row security means each person only reads and writes their own rows).
+- Merge rules never lose progress from either device (`src/lib/cloud/merge.ts`).
+- Neon project: `french-course` (`flat-sky-76475546`, São Paulo region). The database sleeps when idle and wakes in under a second; no keep-alive job is needed.
+- The Neon addresses in `src/lib/cloud/config.ts` are public by design. Never put a database password or connection string in the app.
+- After creating your own account, turn off new sign-ups: Neon Console > project french-course > Auth > Email and password > disable sign-up.
+- Honest limit: GitHub Pages is a public static host. Login protects your progress, not the lesson text (the lesson files can still be downloaded by anyone who knows the address).
 
 ## Run
 
@@ -33,7 +39,7 @@ npm run dev
 npm test                              # logic, content and tenses tests
 npx tsx scripts/measure-content-pads.ts   # must say failing: 0 / 720
 npm run lint
-npm run build                         # needs internet (Google Fonts)
+npm run build:pages                   # same build as the deploy; needs internet (Google Fonts)
 ```
 
 ## Offline on iPhone
@@ -47,6 +53,9 @@ Open the site in Safari, Add to Home Screen, open "Save course" once on wifi.
 - [docs/BUG_BACKLOG.md](./docs/BUG_BACKLOG.md): bug list
 - [AGENTS.md](./AGENTS.md) and [.claude/napkin.md](./.claude/napkin.md): rules and past mistakes
 
-## Deployment
+## Deployment: GitHub Pages
 
-TODO owner to confirm: the napkin says the live site is on Hostinger (deployed from the owner's Mac), older docs said GitHub Pages. There is no deploy workflow in this repo.
+- Every push to `main` runs tests, the content check and the build, then publishes to https://wkk-ai.github.io/french-course/ (`.github/workflows/deploy-pages.yml`). A failing test blocks the deploy.
+- One-time setup: GitHub repo > Settings > Pages > Source: GitHub Actions (or `GH_TOKEN=... python3 scripts/configure-github-pages.py`).
+- A private repo needs a paid GitHub plan for Pages; otherwise make the repo public.
+- No secrets are needed.

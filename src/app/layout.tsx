@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Nunito_Sans, Source_Serif_4 } from "next/font/google";
 import { PwaRegistration } from "@/components/PwaRegistration";
+import { AuthGate } from "@/components/auth/AuthGate";
 import "./globals.css";
 
 const nunitoSans = Nunito_Sans({
@@ -17,7 +18,7 @@ const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
 export const metadata: Metadata = {
   title: "L'Art du Français",
-  description: "Learn French through structured reading. No login. Save the course on your phone.",
+  description: "French for real conversation: daily life and work. Works offline on your phone.",
   applicationName: "L'Art du Français",
   appleWebApp: {
     capable: true,
@@ -48,7 +49,7 @@ export default function RootLayout({
     <html lang="en" className={`${nunitoSans.variable} ${sourceSerif.variable} antialiased h-full`}>
       <body className="font-ui bg-background text-on-surface h-full flex flex-col">
         <PwaRegistration />
-        {children}
+        <AuthGate>{children}</AuthGate>
       </body>
     </html>
   );

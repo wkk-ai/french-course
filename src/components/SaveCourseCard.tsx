@@ -46,7 +46,7 @@ export function SaveCourseCard() {
       <p className="mt-1 text-sm text-on-surface-variant">
         {saved
           ? `${lessonCount || 'All'} lessons stay on this iPhone. Progress stays here too — no account.`
-          : `One wifi save. Then Airplane Mode works. ${sizeLabel}. Progress stays on this phone. No login.`}
+          : `One wifi save. Then Airplane Mode works. ${sizeLabel}. Progress is saved on this phone and synced to your account when online.`}
       </p>
       {progress && (
         <p className="mt-3 text-sm font-bold text-primary">
