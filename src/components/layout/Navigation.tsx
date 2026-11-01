@@ -2,12 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BookOpen, ScrollText, BarChart2, RotateCcw } from 'lucide-react';
+import { BookOpen, ScrollText, BarChart2, RotateCcw, Clock } from 'lucide-react';
 import { useReviewSessionLock } from '@/components/review/ReviewSessionLock';
 
 const navItems = [
   { name: 'Learn', href: '/', icon: BookOpen },
   { name: 'Review', href: '/review/', icon: RotateCcw },
+  { name: 'Tenses', href: '/tenses/', icon: Clock },
   { name: 'Rules', href: '/rules/', icon: ScrollText },
   { name: 'Center', href: '/center/', icon: BarChart2 },
 ];

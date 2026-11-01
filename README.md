@@ -1,66 +1,52 @@
 # L'Art du Français
 
-Reading-first French learning with structured grammar, vocabulary review, and learner analytics. The shipped starter curriculum contains Module 1 (four complete lessons); the remaining 44 chapters are visible as authored-pathway placeholders.
+French for real conversation: daily life and work. Reading-first, with tappable words, visual real-life documents, a tenses guide you can open any time, spaced review and a grammar rulebook.
 
-## Requirements
+Goal: hold a normal conversation and a business conversation. Rare, literary vocabulary belongs in separate skippable modules.
 
-- Node.js 20+
-- A Supabase project or local Supabase CLI stack
+## What is in the app
 
-## Setup
+- **Learn**: 36 modules x 5 units x A/B/C/D (720 chapters). Module 1 is hand-written. Later modules are generated and still being audited.
+- **Real-life documents** inside lessons: chat, menu, bill, family tree, agenda (Module 1 so far). Words are tappable. English can be hidden.
+- **Tenses** tab: "How do I say it?" Pick a goal (talk about the future, say what happened, be polite, say "if"...). Each page has when to use it, how to build it, everyday and work sentences, full conjugation tables and a quiz. Always open, no order.
+- **Listen button**: the phone reads French aloud. Listen only. No voice recording or grading.
+- **Review**: spaced repetition on words you met.
+- **Rules**: grammar rulebook.
+- **Center**: progress stats.
 
-1. Copy `.env.example` to `.env.local` and set the public Supabase URL and anon key.
-2. Apply database changes and seed the curriculum:
+## No accounts, no database
 
-```bash
-supabase db reset       # local development: migrations + seed
-# or
-supabase db push        # linked hosted project: migrations
-supabase db execute --file supabase/seed.sql --linked
-```
+Progress and review live on the phone (local storage). The app does not call Supabase at runtime. Old Supabase files (`supabase/`, `src/utils/supabase/`) are leftovers and can be removed.
 
-3. Install dependencies and run the app:
+## Run
+
+Needs Node.js 20+.
 
 ```bash
 npm install
 npm run dev
 ```
 
-## Verification
+## Check before shipping
 
 ```bash
+npm test                              # logic, content and tenses tests
+npx tsx scripts/measure-content-pads.ts   # must say failing: 0 / 720
 npm run lint
-npm run build
-npm run build:pages   # same as CI (GitHub Pages base path)
+npm run build                         # needs internet (Google Fonts)
 ```
 
-## GitHub Pages
+## Offline on iPhone
 
-The app is a **static export** (`out/`) suitable for GitHub Pages. Supabase stays hosted; the browser loads course data and user progress at runtime.
+Open the site in Safari, Add to Home Screen, open "Save course" once on wifi.
 
-1. In the repo: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
-2. Add repository secrets: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
-3. Push to `main`; the workflow `.github/workflows/deploy-pages.yml` builds and deploys.
-4. Site URL: `https://wkk-ai.github.io/french-course/`
-5. In **Supabase Auth → URL Configuration**, set Site URL and redirect URLs to that URL (and `/login`).
+## Docs
 
-Local preview of the Pages build:
+- [PRD.md](./PRD.md): product ideas (some parts are out of date)
+- [COURSE_STRUCTURE.md](./COURSE_STRUCTURE.md): pathway design
+- [docs/BUG_BACKLOG.md](./docs/BUG_BACKLOG.md): bug list
+- [AGENTS.md](./AGENTS.md) and [.claude/napkin.md](./.claude/napkin.md): rules and past mistakes
 
-```bash
-npm run build:pages
-npx serve out
-```
+## Deployment
 
-For day-to-day development, use `npm run dev` (no base path). Only set `NEXT_PUBLIC_BASE_PATH=/french-course` when building for GitHub Pages.
-
-## Hosted Supabase checklist
-
-- Add the production URL in Supabase Auth → URL Configuration → Site URL and Redirect URLs.
-- Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in the deployment environment.
-- Apply `supabase/migrations/` before loading `supabase/seed.sql`.
-- Do not expose the service-role key to the browser. This app does not require it at runtime.
-
-## Current product boundary
-
-- Functional: authentication, progression, four Module 1 lessons, clickable dictionary, conjugation modal, grammar Rulebook, SM-2 review, mistake queue, analytics, and offline shell caching.
-- Planned content: 44 additional lesson bodies and the expanded vocabulary corpus described in [COURSE_STRUCTURE.md](./COURSE_STRUCTURE.md).
+TODO owner to confirm: the napkin says the live site is on Hostinger (deployed from the owner's Mac), older docs said GitHub Pages. There is no deploy workflow in this repo.

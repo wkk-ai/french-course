@@ -9,6 +9,8 @@ import { ExerciseCard } from '@/components/lesson/ExerciseCard'
 import { buildRemediationExercises } from '@/lib/exercises/remediation'
 import { isExerciseAnswered, isExerciseCorrect } from '@/lib/exercises/grading'
 import { RichText } from '@/components/RichText'
+import { LifeDocuments } from '@/components/visual/LifeDocuments'
+import { getLessonDocuments } from '@/lib/visual/module1-documents'
 import { joinFrenchTokens, isPunctuationToken, tokenizeFrench } from '@/lib/clickable-text'
 import { CONJUGATION_TENSES, conjugationsForWord, isConjugableVerb } from '@/lib/french-conjugations'
 import { calculateLessonScore, didPassProve, PROVE_PASS_SCORE } from '@/lib/lesson-score'
@@ -97,6 +99,7 @@ export default function LessonClient({
   const [gate, setGate] = useState<'loading' | 'ready'>('loading')
   const router = useRouter()
   const hasConversation = Boolean(content.conversation?.lines.length)
+  const lifeDocuments = useMemo(() => getLessonDocuments(chapterId), [chapterId])
 
   useEffect(() => {
     if (!activeWordId) return
@@ -567,6 +570,10 @@ export default function LessonClient({
 
         {stage === 'reading' && (
           <section className="mt-8">
+            <LifeDocuments
+              documents={lifeDocuments}
+              renderFrench={(text, prefix) => renderTokens(tokenizeFrench(text, prefix, dictVocabulary))}
+            />
             <div className="relative rounded-xl border-2 border-surface-variant border-b-4 bg-reading-bg p-6">
               <div className="absolute right-4 top-4 flex items-center gap-2">
                 <Eye className="size-4 text-on-surface-variant" />

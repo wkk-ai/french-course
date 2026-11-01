@@ -1,0 +1,563 @@
+/**
+ * Tenses guide — "How do I say it?" path.
+ * Hand-written. Goal: spoken conversation (daily life + work), not literary French.
+ * Every French example has an English meaning. Native-speaker review still recommended.
+ */
+
+export type TimelinePosition = 'past' | 'now' | 'future' | 'wish'
+
+export type GuideExample = { fr: string; en: string }
+
+export type GuideStep = { title: string; body: string; example?: GuideExample }
+
+export type GuideQuestion = {
+  id: string
+  prompt: string
+  options: string[]
+  answer: number
+  explanation: string
+}
+
+export type TenseGoal = {
+  slug: string
+  /** What the learner wants to do, in plain words. */
+  title: string
+  /** The French forms, as a reminder line. */
+  subtitle: string
+  /** Core = needed for normal conversation. Optional = skippable. */
+  level: 'Core' | 'Core · later' | 'Optional'
+  /** Where it sits on the timeline picture. */
+  timeline: { position: TimelinePosition; label: string }
+  summary: string
+  whenToUse: string[]
+  steps: GuideStep[]
+  life: GuideExample[]
+  work: GuideExample[]
+  traps: string[]
+  /** Engine tense names to show as full tables. */
+  tenses: string[]
+  /** Which verb groups to show tables for. */
+  verbGroups: Array<'regular' | 'core' | 'more'>
+  /** Extra hand-built table for compound structures (futur proche, venir de…). */
+  structure?: { title: string; verb: string; rows: Array<[string, string]> }
+  quiz: GuideQuestion[]
+}
+
+export const REGULAR_VERBS = ['parler', 'finir', 'vendre'] as const
+export const CORE_IRREGULAR_VERBS = ['être', 'avoir', 'aller', 'faire'] as const
+export const MORE_IRREGULAR_VERBS = ['pouvoir', 'vouloir', 'devoir', 'savoir', 'venir', 'prendre', 'dire', 'voir', 'partir', 'mettre'] as const
+
+export const TENSE_GOALS: TenseGoal[] = [
+  {
+    slug: 'now',
+    title: 'Talk about now and habits',
+    subtitle: 'Présent · je parle, je finis, je vends',
+    level: 'Core',
+    timeline: { position: 'now', label: 'Présent' },
+    summary: 'The tense you use most. One form covers “I speak”, “I am speaking” and “I do speak”.',
+    whenToUse: [
+      'Things that are true now: Je suis fatigué.',
+      'Habits and routines: Je prends le métro tous les jours.',
+      'Things happening around now: Je travaille sur un projet.',
+      'Plans with a time word: Je pars demain.',
+    ],
+    steps: [
+      { title: 'Regular -er verbs (most verbs)', body: 'Drop -er and add -e, -es, -e, -ons, -ez, -ent.', example: { fr: 'parler → je parle, nous parlons', en: 'to speak → I speak, we speak' } },
+      { title: '-ir verbs like finir', body: 'Add -is, -is, -it, -issons, -issez, -issent.', example: { fr: 'finir → je finis, nous finissons', en: 'to finish → I finish, we finish' } },
+      { title: '-re verbs like vendre', body: 'Drop -re and add -s, -s, nothing, -ons, -ez, -ent.', example: { fr: 'vendre → je vends, il vend', en: 'to sell → I sell, he sells' } },
+      { title: 'Learn four irregular verbs by heart', body: 'être, avoir, aller and faire are the most used verbs in French. Everything else builds on them.' },
+    ],
+    life: [
+      { fr: "Je m'appelle Julie et j'habite à Lyon.", en: 'My name is Julie and I live in Lyon.' },
+      { fr: 'Tu veux un café ?', en: 'Do you want a coffee?' },
+      { fr: 'On mange à huit heures.', en: 'We eat at eight. (on = we, everyday speech)' },
+      { fr: 'Elle prend le métro tous les matins.', en: 'She takes the metro every morning.' },
+    ],
+    work: [
+      { fr: 'Je travaille dans une banque.', en: 'I work in a bank.' },
+      { fr: 'Nous préparons la réunion de lundi.', en: "We are preparing Monday's meeting." },
+      { fr: 'Le client attend votre réponse.', en: 'The client is waiting for your answer.' },
+      { fr: 'Je vous envoie le document.', en: "I'm sending you the document." },
+    ],
+    traps: [
+      'There is no separate “I am speaking” form. Je parle means both I speak and I am speaking.',
+      'On means “we” in everyday speech: On y va ! = Let’s go!',
+      '-er verbs: tu parles ends in -s, il parle does not. They sound the same when spoken.',
+    ],
+    tenses: ['Présent'],
+    verbGroups: ['regular', 'core', 'more'],
+    quiz: [
+      { id: 'now-1', prompt: 'Nous ___ français. (parler)', options: ['parlons', 'parlez', 'parlent'], answer: 0, explanation: 'Nous always ends in -ons in the present.' },
+      { id: 'now-2', prompt: 'Ils ___ en retard. (être)', options: ['sont', 'sommes', 'êtes'], answer: 0, explanation: 'Ils / elles + être = sont.' },
+      { id: 'now-3', prompt: 'Tu ___ à quelle heure ? (finir)', options: ['finis', 'finit', 'finissons'], answer: 0, explanation: 'Tu + -ir verb = -is.' },
+      { id: 'now-4', prompt: 'How do you say “I am working”?', options: ['Je suis travaillant.', 'Je travaille.', "J'ai travaillé."], answer: 1, explanation: 'French uses the plain present for “I am working”.' },
+      { id: 'now-5', prompt: 'Elle ___ deux enfants. (avoir)', options: ['a', 'as', 'ont'], answer: 0, explanation: 'Il / elle / on + avoir = a.' },
+    ],
+  },
+  {
+    slug: 'plans',
+    title: 'Say what you are going to do',
+    subtitle: 'Futur proche · je vais partir',
+    level: 'Core',
+    timeline: { position: 'future', label: 'Futur proche' },
+    summary: 'The everyday way to talk about the future. aller + infinitive. Easy and used all the time.',
+    whenToUse: [
+      'Plans and intentions: Ce soir, je vais cuisiner.',
+      'Things you are sure will happen soon: Il va pleuvoir.',
+      'Almost any friendly conversation about tomorrow, tonight or next week.',
+    ],
+    steps: [
+      { title: 'Conjugate aller in the present', body: 'je vais, tu vas, il va, nous allons, vous allez, ils vont.' },
+      { title: 'Add the infinitive of the action', body: 'The second verb never changes. It stays in the infinitive.', example: { fr: 'Je vais manger.', en: "I'm going to eat." } },
+      { title: 'Negative goes around aller', body: 'Ne … pas surrounds aller, not the infinitive.', example: { fr: 'Je ne vais pas venir.', en: "I'm not going to come." } },
+      { title: 'Add a time word', body: 'demain, ce soir, la semaine prochaine, dans deux jours, bientôt.' },
+    ],
+    life: [
+      { fr: 'Ce soir, je vais cuisiner pour des amis.', en: "Tonight I'm going to cook for friends." },
+      { fr: 'Demain, on va visiter le musée.', en: "Tomorrow we're going to visit the museum." },
+      { fr: 'Tu vas venir à la fête ?', en: 'Are you going to come to the party?' },
+      { fr: 'Il va pleuvoir, prends un parapluie.', en: "It's going to rain, take an umbrella." },
+    ],
+    work: [
+      { fr: "Je vais vous envoyer l'offre cet après-midi.", en: "I'm going to send you the offer this afternoon." },
+      { fr: 'Nous allons lancer le produit en mars.', en: "We're going to launch the product in March." },
+      { fr: 'La réunion va commencer dans cinq minutes.', en: 'The meeting is going to start in five minutes.' },
+    ],
+    traps: [
+      'Do not conjugate the second verb: je vais parler, never je vais parle.',
+      'In conversation people use this far more than the “real” future (next page).',
+      'The present tense also works with a time word: Je pars demain.',
+    ],
+    tenses: ['Présent'],
+    verbGroups: [],
+    structure: {
+      title: 'aller + infinitive',
+      verb: 'parler',
+      rows: [
+        ['je', 'je vais parler'],
+        ['tu', 'tu vas parler'],
+        ['il / elle / on', 'il va parler'],
+        ['nous', 'nous allons parler'],
+        ['vous', 'vous allez parler'],
+        ['ils / elles', 'ils vont parler'],
+      ],
+    },
+    quiz: [
+      { id: 'plans-1', prompt: 'How do you say “Tomorrow I’m going to work from home”?', options: ['Demain, je vais travailler à la maison.', 'Demain, je vais travaille à la maison.', 'Demain, je suis travailler à la maison.'], answer: 0, explanation: 'aller (conjugated) + infinitive.' },
+      { id: 'plans-2', prompt: 'Nous ___ visiter Paris.', options: ['vais', 'allons', 'allez'], answer: 1, explanation: 'Nous + aller = allons.' },
+      { id: 'plans-3', prompt: 'Which means “They are going to arrive soon”?', options: ['Ils vont arriver bientôt.', 'Ils sont arrivés bientôt.', 'Ils allez arriver bientôt.'], answer: 0, explanation: 'Ils + vont + infinitive.' },
+      { id: 'plans-4', prompt: 'Tu ___ venir ce soir ?', options: ['vas', 'va', 'vais'], answer: 0, explanation: 'Tu + aller = vas.' },
+      { id: 'plans-5', prompt: 'How do you say “I’m not going to leave”?', options: ['Je ne vais pas partir.', 'Je vais ne pas partir.', 'Je ne pas vais partir.'], answer: 0, explanation: 'Ne … pas goes around aller.' },
+    ],
+  },
+  {
+    slug: 'future',
+    title: 'Make promises and talk about the future',
+    subtitle: 'Futur simple · je parlerai, je finirai, je vendrai',
+    level: 'Core',
+    timeline: { position: 'future', label: 'Futur simple' },
+    summary: 'The “will” tense. Firmer than aller + infinitive. Very common in business emails, promises and announcements.',
+    whenToUse: [
+      'Promises and firm commitments: Je vous répondrai demain.',
+      'Predictions: Il fera beau ce week-end.',
+      'Announcements and written business French: La réunion aura lieu à dix heures.',
+      'After quand (when): Quand tu arriveras, appelle-moi.',
+    ],
+    steps: [
+      { title: 'Take the whole infinitive', body: 'Add -ai, -as, -a, -ons, -ez, -ont.', example: { fr: 'parler → je parlerai, nous parlerons', en: 'to speak → I will speak, we will speak' } },
+      { title: '-re verbs lose the final e', body: 'vendre → je vendrai.', example: { fr: 'vendre → tu vendras', en: 'to sell → you will sell' } },
+      { title: 'Irregular stems, same endings', body: 'être → ser-, avoir → aur-, aller → ir-, faire → fer-, pouvoir → pourr-, vouloir → voudr-, devoir → devr-, savoir → saur-, venir → viendr-, voir → verr-, envoyer → enverr-.', example: { fr: 'Nous irons à Lyon.', en: 'We will go to Lyon.' } },
+    ],
+    life: [
+      { fr: "Je t'appellerai demain.", en: "I'll call you tomorrow." },
+      { fr: 'Il fera beau ce week-end.', en: 'The weather will be nice this weekend.' },
+      { fr: 'Quand tu arriveras, on mangera.', en: 'When you arrive, we will eat.' },
+      { fr: "Un jour, j'habiterai à Paris.", en: 'One day I will live in Paris.' },
+    ],
+    work: [
+      { fr: 'Je vous répondrai avant vendredi.', en: 'I will answer you before Friday.' },
+      { fr: 'Nous livrerons la commande lundi.', en: 'We will deliver the order on Monday.' },
+      { fr: 'La réunion aura lieu à dix heures.', en: 'The meeting will take place at ten.' },
+      { fr: 'Le directeur sera présent.', en: 'The director will be present.' },
+    ],
+    traps: [
+      'Friends: Je vais t’appeler. Contracts and emails: Je vous appellerai. Same meaning, firmer tone.',
+      'After quand / dès que French uses the future where English uses the present: Quand tu arriveras…',
+      'The stem can be irregular but the endings never change.',
+    ],
+    tenses: ['Futur simple'],
+    verbGroups: ['regular', 'core', 'more'],
+    quiz: [
+      { id: 'future-1', prompt: 'Je ___ à mon chef demain. (parler)', options: ['parlerai', 'parlerais', 'parlait'], answer: 0, explanation: 'Infinitive + -ai.' },
+      { id: 'future-2', prompt: 'Ils ___ là à midi. (être)', options: ['seront', 'seraient', 'étaient'], answer: 0, explanation: 'être → ser- + -ont.' },
+      { id: 'future-3', prompt: 'Nous ___ à Lyon en mai. (aller)', options: ['irons', 'allons', 'allerons'], answer: 0, explanation: 'aller has the irregular stem ir-.' },
+      { id: 'future-4', prompt: 'Which is a firm business promise: “I will send it on Monday”?', options: ["Je l'enverrai lundi.", "Je l'envoyais lundi.", "Je l'ai envoyé lundi."], answer: 0, explanation: 'envoyer → enverr- + -ai.' },
+      { id: 'future-5', prompt: 'Demain il ___ beau. (faire)', options: ['fera', 'fait', 'ferait'], answer: 0, explanation: 'faire → fer- + -a.' },
+    ],
+  },
+  {
+    slug: 'past-done',
+    title: 'Say what happened',
+    subtitle: 'Passé composé · j’ai parlé, je suis allé',
+    level: 'Core',
+    timeline: { position: 'past', label: 'Passé composé' },
+    summary: 'The main past tense in conversation. For things that happened and are finished.',
+    whenToUse: [
+      'Finished events: Hier, j’ai vu un film.',
+      'A sequence of things in a story: Je me suis levé, j’ai mangé, je suis parti.',
+      'Anything with a clear end or time: ce matin, la semaine dernière, en 2020.',
+    ],
+    steps: [
+      { title: 'Auxiliary + past participle', body: 'Use avoir (most verbs) or être (see step 3) in the present, then the participle.', example: { fr: "J'ai mangé une pizza.", en: 'I ate a pizza.' } },
+      { title: 'Make the participle', body: '-er → -é (parlé), -ir → -i (fini), -re → -u (vendu). Irregulars: avoir eu, être été, faire fait, prendre pris, voir vu, pouvoir pu, vouloir voulu, devoir dû, savoir su, dire dit, mettre mis, venir venu.' },
+      { title: 'Use être for movement and change verbs', body: 'aller, venir, arriver, partir, rester, entrer, sortir, rentrer, tomber, naître, mourir, and every reflexive verb (se lever → je me suis levé). The participle then agrees with the subject.', example: { fr: 'Elle est arrivée à huit heures.', en: 'She arrived at eight.' } },
+    ],
+    life: [
+      { fr: "Hier, j'ai vu un film.", en: 'Yesterday I saw a film.' },
+      { fr: 'Elle est arrivée à huit heures.', en: 'She arrived at eight.' },
+      { fr: 'Nous avons mangé au restaurant.', en: 'We ate at the restaurant.' },
+      { fr: "Je me suis levé à sept heures.", en: 'I got up at seven.' },
+    ],
+    work: [
+      { fr: "J'ai envoyé le contrat ce matin.", en: 'I sent the contract this morning.' },
+      { fr: "Nous avons signé l'accord la semaine dernière.", en: 'We signed the agreement last week.' },
+      { fr: 'Le directeur est parti hier soir.', en: 'The director left yesterday evening.' },
+      { fr: 'Vous avez reçu mon e-mail ?', en: 'Did you receive my email?' },
+    ],
+    traps: [
+      'Negation wraps the auxiliary: Je n’ai pas mangé.',
+      'With être the participle agrees: elle est partie, ils sont partis.',
+      'One tense covers “I ate”, “I have eaten” and “I did eat”.',
+    ],
+    tenses: ['Passé composé'],
+    verbGroups: ['regular', 'core', 'more'],
+    quiz: [
+      { id: 'past-done-1', prompt: 'Hier, nous ___ une pizza. (manger)', options: ['avons mangé', 'sommes mangé', 'mangeons'], answer: 0, explanation: 'manger takes avoir.' },
+      { id: 'past-done-2', prompt: 'Elle ___ au bureau. (aller)', options: ['est allée', 'a allé', 'va allée'], answer: 0, explanation: 'aller takes être and the participle agrees: allée.' },
+      { id: 'past-done-3', prompt: 'How do you say “I didn’t finish the report”?', options: ["Je n'ai pas fini le rapport.", 'Je ne pas ai fini le rapport.', "Je n'ai fini pas le rapport."], answer: 0, explanation: 'ne … pas wraps the auxiliary.' },
+      { id: 'past-done-4', prompt: 'Past participle of prendre?', options: ['pris', 'prendu', 'pri'], answer: 0, explanation: 'prendre → pris (irregular).' },
+      { id: 'past-done-5', prompt: 'Which verb uses être?', options: ['partir', 'manger', 'finir'], answer: 0, explanation: 'partir is a movement verb: je suis parti.' },
+    ],
+  },
+  {
+    slug: 'past-background',
+    title: 'Describe the past and what used to be',
+    subtitle: 'Imparfait · je parlais, je finissais, j’étais',
+    level: 'Core',
+    timeline: { position: 'past', label: 'Imparfait' },
+    summary: 'The “scene-setting” past: how things were, what you used to do, what was going on when something happened.',
+    whenToUse: [
+      'Habits in the past: Quand j’étais petit, je jouais dehors.',
+      'Descriptions: weather, age, feelings, places. Il faisait froid.',
+      'Something in progress when something else happened: Je dormais quand tu as téléphoné.',
+      'Polite softening: Je voulais vous parler du contrat.',
+    ],
+    steps: [
+      { title: 'Start from the nous form of the present', body: 'nous parlons → parl-, nous finissons → finiss-, nous prenons → pren-.' },
+      { title: 'Add -ais, -ais, -ait, -ions, -iez, -aient', body: 'The endings are the same for every verb.', example: { fr: 'je parlais, nous parlions', en: 'I used to speak, we used to speak' } },
+      { title: 'One exception: être', body: 'The stem is ét-: j’étais, tu étais, il était, nous étions, vous étiez, ils étaient.' },
+    ],
+    life: [
+      { fr: "Quand j'étais petit, j'habitais à Lyon.", en: 'When I was little I lived in Lyon.' },
+      { fr: 'Il pleuvait et il faisait froid.', en: 'It was raining and it was cold.' },
+      { fr: 'Nous mangions toujours chez ma grand-mère le dimanche.', en: 'We always used to eat at my grandmother’s on Sundays.' },
+      { fr: "Je dormais quand tu as téléphoné.", en: 'I was sleeping when you called.' },
+    ],
+    work: [
+      { fr: 'À l’époque, nous travaillions avec trois clients.', en: 'Back then we worked with three clients.' },
+      { fr: 'Je voulais vous parler du contrat.', en: 'I wanted to talk to you about the contract. (polite)' },
+      { fr: "L'entreprise employait vingt personnes.", en: 'The company employed twenty people.' },
+    ],
+    traps: [
+      'Passé composé = an event with an end. Imparfait = background or habit.',
+      'Story pattern: imparfait sets the scene, passé composé tells what happened. Il pleuvait quand je suis sorti.',
+      'Je mangeais keeps the e after g so the g stays soft.',
+    ],
+    tenses: ['Imparfait'],
+    verbGroups: ['regular', 'core', 'more'],
+    quiz: [
+      { id: 'past-bg-1', prompt: 'Quand j’étais enfant, je ___ dehors. (jouer)', options: ['jouais', "j'ai joué", 'jouerai'], answer: 0, explanation: 'A past habit uses the imparfait.' },
+      { id: 'past-bg-2', prompt: 'Il ___ froid ce matin-là. (faire)', options: ['faisait', 'a fait', 'fera'], answer: 0, explanation: 'Weather description sets the scene.' },
+      { id: 'past-bg-3', prompt: 'Which sets the scene: “It was raining”?', options: ['Il pleuvait.', 'Il a plu.', 'Il pleuvra.'], answer: 0, explanation: 'Imparfait for background.' },
+      { id: 'past-bg-4', prompt: 'Nous ___ tard chaque soir (used to). (finir)', options: ['finissions', 'finirons', 'avons fini'], answer: 0, explanation: 'nous finissons → finiss- + -ions.' },
+      { id: 'past-bg-5', prompt: 'Je ___ fatigué. (être, was)', options: ['étais', 'suis', 'serai'], answer: 0, explanation: 'être → ét- + -ais.' },
+    ],
+  },
+  {
+    slug: 'recent',
+    title: 'Say what just happened or is happening now',
+    subtitle: 'venir de + infinitif · être en train de + infinitif',
+    level: 'Core',
+    timeline: { position: 'now', label: 'Tout de suite' },
+    summary: 'Two tiny patterns that sound very natural. Just did something? In the middle of something?',
+    whenToUse: [
+      'Something finished a moment ago: Je viens d’arriver.',
+      'Something in progress right now: Je suis en train de conduire.',
+      'Business updates: Je viens de recevoir votre message.',
+    ],
+    steps: [
+      { title: 'Just did: venir (present) + de + infinitive', body: 'de becomes d’ before a vowel.', example: { fr: "Je viens d'arriver.", en: 'I just arrived.' } },
+      { title: 'Doing right now: être (present) + en train de + infinitive', body: 'Stresses that it is happening at this moment.', example: { fr: 'Nous sommes en train de dîner.', en: "We're in the middle of dinner." } },
+    ],
+    life: [
+      { fr: "Je viens d'arriver.", en: 'I just arrived.' },
+      { fr: 'Elle vient de partir.', en: 'She just left.' },
+      { fr: 'Ne m’appelle pas, je suis en train de conduire.', en: "Don't call me, I'm driving." },
+      { fr: 'Nous sommes en train de dîner.', en: "We're in the middle of dinner." },
+    ],
+    work: [
+      { fr: 'Je viens de recevoir votre message.', en: 'I just received your message.' },
+      { fr: 'Nous venons de signer le contrat.', en: 'We just signed the contract.' },
+      { fr: 'Il est en train de finir la présentation.', en: 'He is finishing the presentation right now.' },
+      { fr: 'Je suis en train de vérifier les chiffres.', en: "I'm checking the numbers right now." },
+    ],
+    traps: [
+      'Say Je viens de finir, not “J’ai juste fini”.',
+      'de + vowel → d’: Je viens d’arriver.',
+      'venir de also works in the imparfait: Il venait d’arriver (he had just arrived).',
+    ],
+    tenses: ['Présent'],
+    verbGroups: [],
+    structure: {
+      title: 'venir de + infinitive',
+      verb: 'arriver',
+      rows: [
+        ['je', "je viens d'arriver"],
+        ['tu', "tu viens d'arriver"],
+        ['il / elle / on', "il vient d'arriver"],
+        ['nous', "nous venons d'arriver"],
+        ['vous', "vous venez d'arriver"],
+        ['ils / elles', "ils viennent d'arriver"],
+      ],
+    },
+    quiz: [
+      { id: 'recent-1', prompt: 'How do you say “I just arrived”?', options: ["Je viens d'arriver.", 'Je suis venu arriver.', 'Je viens arriver.'], answer: 0, explanation: 'venir de + infinitive.' },
+      { id: 'recent-2', prompt: 'Nous ___ de signer.', options: ['venons', 'allons', 'sommes'], answer: 0, explanation: 'Nous + venir = venons.' },
+      { id: 'recent-3', prompt: 'How do you say “She is in the middle of working”?', options: ['Elle est en train de travailler.', 'Elle est travaillant.', 'Elle vient travailler.'], answer: 0, explanation: 'être en train de + infinitive.' },
+      { id: 'recent-4', prompt: 'Il vient ___ partir.', options: ['de', 'à', 'en'], answer: 0, explanation: 'venir de + infinitive.' },
+      { id: 'recent-5', prompt: 'How do you say “They are in the middle of eating”?', options: ['Ils sont en train de manger.', 'Ils vont manger.', 'Ils viennent manger.'], answer: 0, explanation: 'être en train de.' },
+    ],
+  },
+  {
+    slug: 'polite',
+    title: 'Be polite: ask, suggest, say what you would like',
+    subtitle: 'Conditionnel · je voudrais, pourriez-vous, on pourrait',
+    level: 'Core',
+    timeline: { position: 'wish', label: 'Conditionnel' },
+    summary: 'The tense of politeness. Use it in shops, restaurants, emails and meetings.',
+    whenToUse: [
+      'Polite requests: Pourriez-vous m’aider ?',
+      'What you would like: Je voudrais un café. J’aimerais réserver une table.',
+      'Soft suggestions and advice: On pourrait y aller. Vous devriez contacter le service client.',
+    ],
+    steps: [
+      { title: 'Take the futur simple stem', body: 'The stem is the same: parler → parler-, être → ser-, aller → ir-, pouvoir → pourr-.' },
+      { title: 'Add the imparfait endings', body: '-ais, -ais, -ait, -ions, -iez, -aient.', example: { fr: 'je voudrais, nous pourrions', en: 'I would like, we could' } },
+      { title: 'Memorize five phrases', body: 'Je voudrais… · J’aimerais… · Pourriez-vous… ? · On pourrait… · Vous devriez…' },
+    ],
+    life: [
+      { fr: "Je voudrais un café, s'il vous plaît.", en: "I'd like a coffee, please." },
+      { fr: "Tu pourrais m'aider ?", en: 'Could you help me?' },
+      { fr: "J'aimerais réserver une table pour deux.", en: "I'd like to book a table for two." },
+      { fr: 'On pourrait aller au cinéma.', en: 'We could go to the cinema.' },
+    ],
+    work: [
+      { fr: "Pourriez-vous m'envoyer le devis ?", en: 'Could you send me the quote?' },
+      { fr: 'Je voudrais prendre rendez-vous.', en: "I'd like to make an appointment." },
+      { fr: 'Nous aimerions discuter du budget.', en: "We'd like to discuss the budget." },
+      { fr: 'Vous devriez contacter le service client.', en: 'You should contact customer service.' },
+    ],
+    traps: [
+      'Je veux un café sounds blunt. Je voudrais un café is the polite version.',
+      'Pouvez-vous… ? is fine; Pourriez-vous… ? is softer.',
+      'The stem matches the futur (serai / serais, irai / irais). Only the ending changes.',
+    ],
+    tenses: ['Conditionnel présent'],
+    verbGroups: ['regular', 'core', 'more'],
+    quiz: [
+      { id: 'polite-1', prompt: 'Which is the most polite way to order?', options: ["Je voudrais de l'eau, s'il vous plaît.", "Je veux de l'eau.", "Donne l'eau."], answer: 0, explanation: 'vouloir in the conditionnel.' },
+      { id: 'polite-2', prompt: '“Pourriez-vous m’aider ?” means…', options: ['Could you help me?', 'Will you help me?', 'Did you help me?'], answer: 0, explanation: 'pourriez = you could (formal).' },
+      { id: 'polite-3', prompt: 'Nous ___ discuter du prix. (aimer, would like)', options: ['aimerions', 'aimons', 'aimerons'], answer: 0, explanation: 'Infinitive + -ions.' },
+      { id: 'polite-4', prompt: 'Tu ___ dormir plus. (devoir, advice)', options: ['devrais', 'dois', 'devras'], answer: 0, explanation: 'devr- + -ais = you should.' },
+      { id: 'polite-5', prompt: 'On ___ manger ici ? (pouvoir, could we?)', options: ['pourrait', 'pourra', 'pouvait'], answer: 0, explanation: 'pourr- + -ait.' },
+    ],
+  },
+  {
+    slug: 'commands',
+    title: 'Give instructions and advice',
+    subtitle: 'Impératif · parle ! parlons ! parlez !',
+    level: 'Core',
+    timeline: { position: 'now', label: 'Impératif' },
+    summary: 'Directions, recipes, advice and polite work phrases like Veuillez patienter.',
+    whenToUse: [
+      'Directions: Tournez à gauche.',
+      'Advice to friends: Ne t’inquiète pas.',
+      'Invitations: Entrez, asseyez-vous.',
+      'Formal emails: Veuillez trouver ci-joint… (please find attached)',
+    ],
+    steps: [
+      { title: 'Take tu / nous / vous from the present', body: 'Drop the pronoun. tu parles → Parle ! · nous parlons → Parlons ! · vous parlez → Parlez !' },
+      { title: '-er verbs drop the -s in the tu form', body: 'Tu parles → Parle ! · Tu vas → Va !' },
+      { title: 'Four irregular verbs', body: 'être: sois / soyons / soyez · avoir: aie / ayons / ayez · savoir: sache / sachons / sachez · vouloir: veuillez (formal).' },
+      { title: 'Negative and pronouns', body: 'Ne parle pas ! · Pronouns come after in positive commands: Dis-moi.' },
+    ],
+    life: [
+      { fr: 'Viens ici !', en: 'Come here!' },
+      { fr: 'Prends la première rue à droite.', en: 'Take the first street on the right.' },
+      { fr: "Ne t'inquiète pas.", en: "Don't worry." },
+      { fr: 'Allons-y !', en: "Let's go!" },
+    ],
+    work: [
+      { fr: "Veuillez patienter, s'il vous plaît.", en: 'Please wait.' },
+      { fr: 'Envoyez-moi le fichier avant midi.', en: 'Send me the file before noon.' },
+      { fr: "N'hésitez pas à me contacter.", en: "Don't hesitate to contact me." },
+      { fr: "Soyez à l'heure.", en: 'Be on time.' },
+    ],
+    traps: [
+      'With strangers and at work use vous: Entrez. Asseyez-vous.',
+      'The tu form of -er verbs has no -s: Parle, not Parles.',
+      'Positive commands put the pronoun after the verb: Dis-moi.',
+    ],
+    tenses: ['Impératif'],
+    verbGroups: ['regular', 'core', 'more'],
+    quiz: [
+      { id: 'commands-1', prompt: 'Tell a friend: “Come here!”', options: ['Viens ici !', 'Venez ici !', 'Tu viens ici !'], answer: 0, explanation: 'tu viens → Viens !' },
+      { id: 'commands-2', prompt: 'Politely, to a stranger: “Please wait.”', options: ['Veuillez patienter.', 'Patiente !', 'Attends !'], answer: 0, explanation: 'Veuillez + infinitive is the formal form.' },
+      { id: 'commands-3', prompt: 'Parler, tu form, as a command?', options: ['Parle !', 'Parles !', 'Parlez !'], answer: 0, explanation: '-er verbs drop the -s.' },
+      { id: 'commands-4', prompt: 'How do you say “Don’t worry” to a friend?', options: ["Ne t'inquiète pas.", 'Ne inquiète pas.', "Pas t'inquiète."], answer: 0, explanation: 'ne … pas around the verb.' },
+      { id: 'commands-5', prompt: 'Être as a command, vous form?', options: ['Soyez', 'Êtes', 'Soit'], answer: 0, explanation: 'être → soyez.' },
+    ],
+  },
+  {
+    slug: 'if',
+    title: 'Say “if…”: conditions and what-ifs',
+    subtitle: 'si + présent → futur · si + imparfait → conditionnel',
+    level: 'Core',
+    timeline: { position: 'wish', label: 'Si…' },
+    summary: 'Two patterns cover almost every “if” sentence you need in conversation and negotiation.',
+    whenToUse: [
+      'Real conditions: S’il pleut, on reste à la maison.',
+      'Daydreams and unreal things: Si j’avais le temps, je voyagerais.',
+      'Offers and negotiation: Si vous commandez cent pièces, nous vous offrirons une remise.',
+    ],
+    steps: [
+      { title: 'Likely: si + présent, then futur / présent / impératif', body: 'The “if” part is in the present. The result can be future, present or a command.', example: { fr: 'Si tu viens, on mangera ensemble.', en: "If you come, we'll eat together." } },
+      { title: 'Unlikely or imaginary: si + imparfait, then conditionnel', body: 'The “if” part is in the imparfait. The result is in the conditionnel.', example: { fr: 'Si j’avais le temps, je voyagerais.', en: 'If I had time, I would travel.' } },
+      { title: 'Never put the future or conditionnel right after si', body: 'Si j’aurais is wrong. Always si + present or imparfait.' },
+    ],
+    life: [
+      { fr: "S'il pleut, on reste à la maison.", en: "If it rains, we stay home." },
+      { fr: 'Si tu veux, on peut y aller.', en: 'If you want, we can go.' },
+      { fr: "Si j'avais plus de temps, je ferais du sport.", en: 'If I had more time, I would do sport.' },
+      { fr: "Si j'étais toi, je partirais.", en: "If I were you, I'd leave." },
+    ],
+    work: [
+      { fr: 'Si vous commandez cent pièces, nous vous offrirons une remise.', en: 'If you order a hundred pieces, we will offer you a discount.' },
+      { fr: "Si vous avez des questions, n'hésitez pas à me contacter.", en: "If you have any questions, don't hesitate to contact me." },
+      { fr: 'Si nous avions plus de budget, nous embaucherions deux personnes.', en: 'If we had more budget, we would hire two people.' },
+    ],
+    traps: [
+      'Never put the future or conditionnel right after si.',
+      'si + il = s’il, si + ils = s’ils. si + elle stays si elle.',
+      'Si tu veux is a friendly everyday offer.',
+    ],
+    tenses: ['Imparfait', 'Conditionnel présent'],
+    verbGroups: ['core'],
+    quiz: [
+      { id: 'if-1', prompt: 'Si tu ___, on mangera ensemble. (venir)', options: ['viens', 'viendras', 'viendrais'], answer: 0, explanation: 'si + present.' },
+      { id: 'if-2', prompt: "Si j'___ du temps, je voyagerais. (avoir)", options: ['avais', 'aurais', 'ai'], answer: 0, explanation: 'si + imparfait → conditionnel.' },
+      { id: 'if-3', prompt: 'Which is correct?', options: ["Si j'avais de l'argent, j'achèterais une maison.", "Si j'aurais de l'argent, j'achèterais une maison.", "Si j'ai de l'argent, j'achèterais une maison."], answer: 0, explanation: 'si + imparfait, conditionnel.' },
+      { id: 'if-4', prompt: 'Si vous commandez cent pièces, nous vous ___ une remise. (offrir)', options: ['offrirons', 'offririons', 'offrirez'], answer: 0, explanation: 'si + present → future.' },
+      { id: 'if-5', prompt: "S'il ___ demain, on restera à la maison. (pleuvoir)", options: ['pleut', 'pleuvra', 'pleuvrait'], answer: 0, explanation: 'si + present, never future.' },
+    ],
+  },
+  {
+    slug: 'must-want',
+    title: 'Say what must happen or what you want others to do',
+    subtitle: 'Subjonctif · il faut que je parte · je veux que tu viennes',
+    level: 'Core · later',
+    timeline: { position: 'wish', label: 'Subjonctif' },
+    summary: 'Use it after il faut que and je veux que. You do not need every trigger to hold a normal conversation.',
+    whenToUse: [
+      'Obligation: Il faut que je parte.',
+      'Wanting someone else to do something: Je veux que tu viennes.',
+      'Emotions about someone else: Je suis content que tu sois là.',
+      'Business: Il faut que nous finissions avant vendredi.',
+    ],
+    steps: [
+      { title: 'Use que + subject + subjonctif', body: 'The trigger (il faut, je veux, je suis content) is followed by que.' },
+      { title: 'Make the form from ils', body: 'Take ils from the present, drop -ent, add -e, -es, -e, -ions, -iez, -ent. ils parlent → que je parle · ils finissent → que je finisse.' },
+      { title: 'Learn the irregulars', body: 'être sois · avoir aie · aller aille · faire fasse · pouvoir puisse · vouloir veuille · savoir sache.' },
+      { title: 'Same subject? Use the infinitive', body: 'Je veux partir (I want to leave). Je veux que tu partes (I want you to leave).' },
+    ],
+    life: [
+      { fr: 'Il faut que je parte.', en: 'I have to leave.' },
+      { fr: 'Je veux que tu viennes.', en: 'I want you to come.' },
+      { fr: 'Je suis content que tu sois là.', en: "I'm glad you're here." },
+      { fr: 'Appelle-moi avant que je parte.', en: 'Call me before I leave.' },
+    ],
+    work: [
+      { fr: 'Il faut que nous finissions avant vendredi.', en: 'We have to finish before Friday.' },
+      { fr: "Je voudrais que vous m'envoyiez le dossier.", en: "I'd like you to send me the file." },
+      { fr: 'Il est important que tout le monde soit présent.', en: 'It is important that everyone is present.' },
+      { fr: 'Bien que le budget soit limité, nous avançons.', en: 'Although the budget is limited, we are moving forward.' },
+    ],
+    traps: [
+      'Same subject → infinitive. Different subjects → que + subjonctif.',
+      'Il faut partir (one must leave) is fine. Il faut que je parte is more personal.',
+      'Start with il faut que and je veux que. The other triggers come with time.',
+    ],
+    tenses: ['Subjonctif présent'],
+    verbGroups: ['regular', 'core', 'more'],
+    quiz: [
+      { id: 'must-1', prompt: 'Il faut que je ___. (partir)', options: ['parte', 'pars', 'partirai'], answer: 0, explanation: 'ils partent → que je parte.' },
+      { id: 'must-2', prompt: 'Je veux que tu ___ à l’heure. (être)', options: ['sois', 'es', 'seras'], answer: 0, explanation: 'être → sois.' },
+      { id: 'must-3', prompt: 'Which is correct?', options: ['Je veux partir.', 'Je veux que je parte.', 'Je veux que partir.'], answer: 0, explanation: 'Same subject → infinitive.' },
+      { id: 'must-4', prompt: 'Il faut que nous ___ ce soir. (finir)', options: ['finissions', 'finissons', 'finirons'], answer: 0, explanation: 'ils finissent → que nous finissions.' },
+      { id: 'must-5', prompt: 'Il faut que vous ___ le contrat. (avoir)', options: ['ayez', 'avez', 'aurez'], answer: 0, explanation: 'avoir → ayez.' },
+    ],
+  },
+  {
+    slug: 'advanced',
+    title: 'Optional: “had done”, “would have done”, “will have done”',
+    subtitle: 'Plus-que-parfait · conditionnel passé · futur antérieur',
+    level: 'Optional',
+    timeline: { position: 'past', label: 'Avant…' },
+    summary: 'Skippable for normal conversation. The first two sometimes appear in business French. Passé simple is for books only: recognise it, never use it.',
+    whenToUse: [
+      'Plus-que-parfait: something that happened before another past event. J’avais fini quand il est arrivé.',
+      'Conditionnel passé: regrets and polite criticism. J’aurais dû vous appeler.',
+      'Futur antérieur: finished by a deadline. J’aurai fini avant midi.',
+    ],
+    steps: [
+      { title: 'Same shape as the passé composé', body: 'Auxiliary + participle. Only the auxiliary tense changes.' },
+      { title: 'Plus-que-parfait = imparfait of avoir/être + participle', body: 'j’avais fini, elle était partie.' },
+      { title: 'Conditionnel passé = conditionnel of avoir/être + participle', body: 'j’aurais voulu, nous aurions préféré.' },
+      { title: 'Futur antérieur = futur of avoir/être + participle', body: 'j’aurai fini, elle sera arrivée.' },
+    ],
+    life: [
+      { fr: "J'avais déjà mangé quand tu es arrivé.", en: 'I had already eaten when you arrived.' },
+      { fr: "J'aurais dû t'appeler.", en: 'I should have called you.' },
+      { fr: "J'aurai fini avant midi.", en: 'I will have finished before noon.' },
+    ],
+    work: [
+      { fr: 'Nous aurions préféré une autre date.', en: 'We would have preferred another date.' },
+      { fr: "J'aurais voulu vous parler du budget.", en: "I would have liked to talk to you about the budget." },
+      { fr: 'Le contrat avait déjà été signé.', en: 'The contract had already been signed.' },
+    ],
+    traps: [
+      'You can hold a normal conversation without these tenses. Come back later.',
+      'J’aurais dû and J’aurais voulu are the two worth learning early.',
+      'Passé simple (il parla, ils furent) is literature. Recognise it, skip it.',
+    ],
+    tenses: ['Plus-que-parfait', 'Conditionnel passé', 'Futur antérieur'],
+    verbGroups: ['core'],
+    quiz: [
+      { id: 'adv-1', prompt: '“I should have called you” =', options: ["J'aurais dû t'appeler.", "J'ai dû t'appeler.", 'Je devais t’appeler.'], answer: 0, explanation: 'conditionnel passé of devoir.' },
+      { id: 'adv-2', prompt: 'J’___ déjà mangé quand tu es arrivé. (avoir, imparfait)', options: ['avais', 'ai', 'aurais'], answer: 0, explanation: 'plus-que-parfait: avais + participle.' },
+      { id: 'adv-3', prompt: 'Nous ___ préféré une autre date. (conditionnel passé)', options: ['aurions', 'avions', 'aurons'], answer: 0, explanation: 'aurions + préféré.' },
+    ],
+  },
+]
+
+export const GOAL_BY_SLUG = new Map(TENSE_GOALS.map((goal) => [goal.slug, goal]))
