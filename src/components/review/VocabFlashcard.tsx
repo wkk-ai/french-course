@@ -76,7 +76,7 @@ export function VocabFlashcard({
               </div>
             )}
             {showConjugate && (
-              <p className="flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wide text-primary">
+              <p className="flex items-center justify-center gap-2 text-xs font-bold text-primary">
                 <BookOpen className="size-3.5" /> Conjugable verb — practice in lessons too
               </p>
             )}
@@ -106,7 +106,7 @@ export function VocabFlashcard({
             type="button"
             disabled={disabled}
             onClick={() => onRate('easy')}
-            className="tactile-button rounded-xl border-2 border-surface-variant bg-surface-container-lowest py-4 font-bold text-on-surface-variant disabled:opacity-50"
+            className="tactile-button rounded-xl bg-surface-container-low py-4 font-bold text-on-surface-variant disabled:opacity-50"
           >
             Easy
           </button>

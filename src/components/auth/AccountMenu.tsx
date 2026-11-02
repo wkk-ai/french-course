@@ -19,7 +19,7 @@ function statusText(status: SyncStatus, lastSync: string | null): string {
   }
 }
 
-export function AccountMenu() {
+export function AccountMenu({ variant = "avatar" }: { variant?: "avatar" | "row" }) {
   const [open, setOpen] = useState(false)
   const user = useSyncExternalStore(subscribeAuth, getCachedUser, () => null)
   const status = useSyncExternalStore(subscribeSync, getSyncStatus, () => ({ state: 'idle' }) as SyncStatus)
@@ -50,15 +50,26 @@ export function AccountMenu() {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        aria-label="Account and sync"
-        className="relative flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-3 text-on-surface-variant hover:bg-surface-container-low"
-      >
-        <UserRound className="size-5" />
-        <span aria-hidden className={`absolute right-2 top-2 size-2.5 rounded-full ${ok ? 'bg-success' : 'bg-warning'}`} />
-      </button>
+      {variant === 'row' ? (
+        <button type="button" onClick={() => setOpen(true)} className="flex w-full items-center gap-3 px-4 py-3 text-left">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary-fixed text-primary"><UserRound className="size-5" /></span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-body-ui font-semibold">Account</span>
+            <span className="block truncate text-sm text-on-surface-variant">{user?.email}</span>
+          </span>
+          <span aria-hidden className={`size-2.5 rounded-full ${ok ? 'bg-success' : 'bg-warning'}`} />
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-label="Account and sync"
+          className="relative flex size-11 items-center justify-center rounded-full bg-surface-container-low text-base font-semibold text-on-surface"
+        >
+          {(user?.name || user?.email || '?').trim().charAt(0).toUpperCase()}
+          <span aria-hidden className={`absolute right-0.5 top-0.5 size-2.5 rounded-full ring-2 ring-white ${ok ? 'bg-success' : 'bg-warning'}`} />
+        </button>
+      )}
       {open && createPortal(
         <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/40 sm:items-center" onClick={() => setOpen(false)}>
           <div
@@ -83,10 +94,10 @@ export function AccountMenu() {
               {statusText(status, getLastSyncAt())}
             </p>
             <div className="mt-4 grid gap-2">
-              <button type="button" onClick={() => void syncNow()} disabled={status.state === 'syncing'} className="flex min-h-12 items-center gap-3 rounded-xl border-2 border-surface-variant px-4 font-bold disabled:opacity-60">
+              <button type="button" onClick={() => void syncNow()} disabled={status.state === 'syncing'} className="flex min-h-12 items-center gap-3 rounded-xl px-4 font-bold disabled:opacity-60">
                 <RefreshCw className="size-4" /> Sync now
               </button>
-              <button type="button" onClick={resetPhone} className="flex min-h-12 items-center gap-3 rounded-xl border-2 border-surface-variant px-4 font-bold">
+              <button type="button" onClick={resetPhone} className="flex min-h-12 items-center gap-3 rounded-xl px-4 font-bold">
                 <RotateCcw className="size-4" /> Reset this phone
               </button>
               <button type="button" onClick={() => void doSignOut()} className="flex min-h-12 items-center gap-3 rounded-xl border-2 border-error/40 px-4 font-bold text-error">

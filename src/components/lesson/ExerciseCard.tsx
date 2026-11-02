@@ -227,7 +227,7 @@ export function ExerciseCard({
   return (
     <article className="tactile-card p-5">
       <p className="text-label-caps text-primary">
-        {exerciseType(exercise).toUpperCase()} · QUESTION {index + 1} OF {total}{sourceLabel}
+        {exerciseType(exercise)} · {index + 1} of {total}{sourceLabel}
       </p>
       <h2 className="mt-2 text-body-ui font-bold">{exercise.prompt}</h2>
 
@@ -239,7 +239,7 @@ export function ExerciseCard({
             value={draftText}
             disabled={locked}
             placeholder="Type your answer…"
-            className="mt-3 w-full rounded-lg border-2 border-surface-variant bg-surface-container-lowest px-3 py-2 text-sm disabled:opacity-70"
+            className="mt-3 w-full rounded-lg bg-surface-container-lowest px-3 py-2 text-sm disabled:opacity-70"
             onChange={(event) => setDraftText(event.target.value)}
             onKeyDown={(event) => {
               if (event.key === 'Enter') confirmDraftText()
@@ -250,7 +250,7 @@ export function ExerciseCard({
               type="button"
               onClick={confirmDraftText}
               disabled={!draftText.trim()}
-              className="tactile-button mt-3 rounded-lg border-primary-container bg-primary px-4 py-2 text-sm font-bold text-on-primary disabled:opacity-50"
+              className="tactile-button mt-3 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-on-primary disabled:opacity-50"
             >
               Confirm
             </button>
@@ -266,7 +266,7 @@ export function ExerciseCard({
             value={draftText}
             disabled={locked}
             placeholder="Type your translation…"
-            className="mt-3 w-full rounded-lg border-2 border-surface-variant bg-surface-container-lowest px-3 py-2 text-sm disabled:opacity-70"
+            className="mt-3 w-full rounded-lg bg-surface-container-lowest px-3 py-2 text-sm disabled:opacity-70"
             onChange={(event) => setDraftText(event.target.value)}
             onKeyDown={(event) => {
               if (event.key === 'Enter') confirmDraftText()
@@ -277,7 +277,7 @@ export function ExerciseCard({
               type="button"
               onClick={confirmDraftText}
               disabled={!draftText.trim()}
-              className="tactile-button mt-3 rounded-lg border-primary-container bg-primary px-4 py-2 text-sm font-bold text-on-primary disabled:opacity-50"
+              className="tactile-button mt-3 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-on-primary disabled:opacity-50"
             >
               Confirm
             </button>
@@ -295,7 +295,7 @@ export function ExerciseCard({
             value={draftText}
             disabled={locked}
             placeholder="Type the conjugated form…"
-            className="mt-3 w-full rounded-lg border-2 border-surface-variant bg-surface-container-lowest px-3 py-2 text-sm disabled:opacity-70"
+            className="mt-3 w-full rounded-lg bg-surface-container-lowest px-3 py-2 text-sm disabled:opacity-70"
             onChange={(event) => setDraftText(event.target.value)}
             onKeyDown={(event) => {
               if (event.key === 'Enter') confirmDraftText()
@@ -306,7 +306,7 @@ export function ExerciseCard({
               type="button"
               onClick={confirmDraftText}
               disabled={!draftText.trim()}
-              className="tactile-button mt-3 rounded-lg border-primary-container bg-primary px-4 py-2 text-sm font-bold text-on-primary disabled:opacity-50"
+              className="tactile-button mt-3 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-on-primary disabled:opacity-50"
             >
               Confirm
             </button>
@@ -370,7 +370,7 @@ export function ExerciseCard({
                 type="button"
                 disabled={locked}
                 onClick={() => pickOrderWord(word, wordIndex)}
-                className="rounded-lg border-2 border-surface-variant bg-surface-container-low px-3 py-2 text-sm font-semibold hover:bg-surface-container-high disabled:opacity-60"
+                className="rounded-lg bg-surface-container-low px-3 py-2 text-sm font-semibold hover:bg-surface-container-high disabled:opacity-60"
               >
                 {word}
               </button>
@@ -392,7 +392,7 @@ export function ExerciseCard({
                 <button
                   type="button"
                   onClick={confirmOrder}
-                  className="tactile-button rounded-lg border-primary-container bg-primary px-4 py-2 text-sm font-bold text-on-primary"
+                  className="tactile-button rounded-lg bg-primary px-4 py-2 text-sm font-bold text-on-primary"
                 >
                   Confirm
                 </button>
@@ -452,7 +452,7 @@ export function ExerciseCard({
                 <button
                   type="button"
                   onClick={confirmMatch}
-                  className="tactile-button rounded-lg border-primary-container bg-primary px-4 py-2 text-sm font-bold text-on-primary"
+                  className="tactile-button rounded-lg bg-primary px-4 py-2 text-sm font-bold text-on-primary"
                 >
                   Confirm match
                 </button>
@@ -527,7 +527,7 @@ export function ExerciseCard({
             <button
               type="button"
               onClick={onRetry}
-              className="tactile-button rounded-lg border-2 border-surface-variant bg-surface-container-low px-4 py-2 text-sm font-bold text-on-surface"
+              className="tactile-button rounded-lg bg-surface-container-low px-4 py-2 text-sm font-bold text-on-surface"
             >
               Try again
             </button>

@@ -317,21 +317,16 @@ export default function ReviewClient() {
   }
 
   return (
-    <div className={`mx-auto flex w-full max-w-[680px] flex-col gap-8 ${inActiveSession ? 'pb-24' : ''}`}>
+    <div className={`mx-auto flex w-full max-w-[680px] flex-col gap-6 ${inActiveSession ? 'pb-24' : ''}`}>
       <header>
-        <p className="text-label-caps text-primary">REVIEW SESSION</p>
         <h1 className="text-headline-lg">Review</h1>
-        <p className="mt-2 text-body-reading text-on-surface-variant">
-          Everything you learn joins one perpetual loop. Practice with mixed exercises or train meanings with flashcards.
-        </p>
       </header>
 
       {showHub && (
-        <section className="tactile-card space-y-4 p-6">
+        <section className="tactile-card space-y-4 p-5">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-label-caps text-on-surface-variant">YOUR LOOP</p>
-              <h2 className="text-headline-md">{pool.length} words in the pool</h2>
+              <h2 className="text-headline-md">{pool.length} words to keep fresh</h2>
               <p className="mt-1 text-sm text-on-surface-variant">
                 Due now: {preview?.dueCount ?? 0} · Weak spots: {weakCount} · ~{preview?.estimatedMinutes ?? 0} min session
               </p>
@@ -345,14 +340,11 @@ export default function ReviewClient() {
             </p>
           ) : (
             <>
-              <p className="text-sm text-on-surface-variant">
-                Your loop never empties once you have learned something. Start a mixed session, or keep reviewing forever from spiral + weak spots.
-              </p>
               <div className="grid gap-3 sm:grid-cols-2">
                 <button
                   type="button"
                   onClick={() => startSession('daily')}
-                  className="tactile-button flex items-center justify-center gap-2 rounded-xl border-primary-container bg-primary py-4 font-bold text-on-primary"
+                  className="tactile-button flex items-center justify-center gap-2 rounded-xl bg-primary py-4 font-bold text-on-primary"
                 >
                   <Play className="size-5" /> Start session
                 </button>
@@ -360,7 +352,7 @@ export default function ReviewClient() {
                   type="button"
                   onClick={() => startSession('continue')}
                   disabled={pool.length === 0}
-                  className="tactile-button flex items-center justify-center gap-2 rounded-xl border-2 border-surface-variant bg-surface-container-lowest py-4 font-bold text-on-surface disabled:opacity-50"
+                  className="tactile-button flex items-center justify-center gap-2 rounded-xl bg-surface-container-low py-4 font-bold text-on-surface disabled:opacity-50"
                 >
                   <InfinityIcon className="size-5" /> Keep reviewing
                 </button>
@@ -382,11 +374,11 @@ export default function ReviewClient() {
             <button
               type="button"
               onClick={() => (hubMode === 'flashcards' ? startFlashcards() : startSession('continue'))}
-              className="tactile-button rounded-xl border-primary-container bg-primary py-4 font-bold text-on-primary"
+              className="tactile-button rounded-xl bg-primary py-4 font-bold text-on-primary"
             >
               Keep reviewing
             </button>
-            <button type="button" onClick={backToHub} className="tactile-button rounded-xl border-2 border-surface-variant bg-surface-container-lowest py-4 font-bold text-on-surface">
+            <button type="button" onClick={backToHub} className="tactile-button rounded-xl bg-surface-container-low py-4 font-bold text-on-surface">
               Back to hub
             </button>
           </div>
@@ -402,7 +394,7 @@ export default function ReviewClient() {
                 ? ` · Missed ${missByVocab.get(task.vocabId)}×`
                 : ''}
             </span>
-            <span>{session.mode === 'daily' ? 'DAILY MIX' : 'KEEP GOING'}</span>
+            <span>{session.mode === 'daily' ? 'Daily mix' : 'Keep going'}</span>
           </div>
           {task.lessonLabel && (
             <p className="rounded-lg border border-primary/20 bg-primary-fixed/20 px-3 py-2 text-sm font-semibold text-primary">
@@ -428,7 +420,7 @@ export default function ReviewClient() {
             <button
               type="button"
               onClick={() => goToNextExercise(task, pendingQuality)}
-              className="tactile-button flex w-full items-center justify-center gap-2 rounded-xl border-primary-container bg-primary py-4 font-bold text-on-primary"
+              className="tactile-button flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-4 font-bold text-on-primary"
             >
               {index + 1 < session.tasks.length ? 'Next' : 'Finish session'}
               <ChevronRight className="size-5" />
@@ -452,11 +444,8 @@ export default function ReviewClient() {
         <section>
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-label-caps text-secondary">VOCABULARY FLASHCARDS</p>
-              <h2 className="text-headline-md">Train meanings</h2>
-              <p className="mt-1 text-sm text-on-surface-variant">
-                Flip cards from your pool. Rate Again · Easy · Hard — Easy words come back less often.
-              </p>
+              <h2 className="text-headline-md">Flashcards</h2>
+              <p className="mt-1 text-sm text-on-surface-variant">Easy words come back less often.</p>
             </div>
             <Layers className="text-secondary" />
           </div>
@@ -484,7 +473,7 @@ export default function ReviewClient() {
             type="button"
             onClick={startFlashcards}
             disabled={pool.length === 0}
-            className="tactile-button mt-4 flex w-full items-center justify-center gap-2 rounded-xl border-primary-container bg-primary py-4 font-bold text-on-primary disabled:opacity-50"
+            className="tactile-button mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-4 font-bold text-on-primary disabled:opacity-50"
           >
             <Layers className="size-5" /> Start flashcards · 20 cards
           </button>
@@ -494,11 +483,11 @@ export default function ReviewClient() {
       {error && <p role="alert" className="rounded-lg bg-error-container p-3 text-sm text-on-error-container">{error}</p>}
 
       {inActiveSession && (
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t-2 border-surface-variant bg-surface-container-lowest p-4 pb-safe md:left-24">
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t bg-surface-container-lowest p-4 pb-safe md:left-24">
           <button
             type="button"
             onClick={confirmExitSession}
-            className="tactile-button flex w-full items-center justify-center gap-2 rounded-xl border-2 border-surface-variant bg-surface-container-low py-3 font-bold text-on-surface"
+            className="tactile-button flex w-full items-center justify-center gap-2 rounded-xl bg-surface-container-low py-3 font-bold text-on-surface"
           >
             <LogOut className="size-5" aria-hidden />
             Exit session

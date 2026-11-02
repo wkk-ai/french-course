@@ -24,11 +24,11 @@ export default async function TenseGoalPage({ params }: { params: Promise<{ slug
   return (
     <article className="space-y-8 pb-10">
       <Link href="/tenses/" className="inline-flex min-h-11 items-center gap-2 text-sm font-bold text-primary">
-        <ArrowLeft className="size-4" /> All tenses
+        <ArrowLeft className="size-4" /> Grammar
       </Link>
 
       <header>
-        <p className="text-label-caps text-primary">{goal.level.toUpperCase()}</p>
+        <p className="text-label-caps text-primary">{goal.level}</p>
         <h1 className="mt-2 text-headline-lg">{goal.title}</h1>
         <p className="mt-1 text-body-ui font-semibold text-on-surface-variant">{goal.subtitle}</p>
         <p className="mt-3 text-body-ui text-on-surface">{goal.summary}</p>
@@ -48,7 +48,7 @@ export default async function TenseGoalPage({ params }: { params: Promise<{ slug
         <ol className="mt-3 space-y-3">
           {goal.steps.map((step, stepIndex) => (
             <li key={step.title} className="tactile-card p-4">
-              <p className="text-label-caps text-primary">STEP {stepIndex + 1}</p>
+              <p className="text-label-caps text-primary">Step {stepIndex + 1}</p>
               <p className="mt-1 font-bold text-on-surface">{step.title}</p>
               <p className="mt-1 text-body-ui text-on-surface-variant">{step.body}</p>
               {step.example && (
@@ -75,7 +75,7 @@ export default async function TenseGoalPage({ params }: { params: Promise<{ slug
             <table className="w-full text-left text-body-ui">
               <tbody>
                 {goal.structure.rows.map(([pronoun, phrase]) => (
-                  <tr key={pronoun} className="border-b border-surface-container-high last:border-0">
+                  <tr key={pronoun} className="border-b last:border-0">
                     <td className="w-1/3 px-4 py-2 text-xs text-on-surface-variant">{pronoun}</td>
                     <td className="px-4 py-2 font-semibold text-ink-dark">{phrase}</td>
                   </tr>
@@ -110,7 +110,7 @@ export default async function TenseGoalPage({ params }: { params: Promise<{ slug
       </section>
 
       {next && (
-        <Link href={`/tenses/${next.slug}/`} className="tactile-button flex items-center justify-between gap-3 rounded-xl border-primary-container bg-primary px-5 py-4 font-bold text-on-primary">
+        <Link href={`/tenses/${next.slug}/`} className="tactile-button flex items-center justify-between gap-3 rounded-xl bg-primary px-5 py-4 font-bold text-on-primary">
           <span>NEXT: {next.title}</span>
           <ChevronRight className="size-5 shrink-0" />
         </Link>

@@ -14,7 +14,7 @@ export default function NotFound() {
       </div>
       <Link
         href="/"
-        className="tactile-button rounded-xl border-primary-container bg-primary px-6 py-3 font-bold text-on-primary"
+        className="tactile-button rounded-xl bg-primary px-6 py-3 font-bold text-on-primary"
       >
         Back to Learn
       </Link>

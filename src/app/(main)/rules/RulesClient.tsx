@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
+import { GrammarTabs } from '@/components/GrammarTabs'
 import { ChevronRight, Search } from 'lucide-react'
 import type { PublicGrammarRule } from '@/lib/rules/public'
 import { isRuleUnlocked, masteryLabel, masteryStage } from '@/lib/rules/unlock'
@@ -68,28 +69,24 @@ export default function RulesClient({ rules }: { rules: PublicGrammarRule[] }) {
 
   return (
     <div className="flex flex-col gap-6">
+      <h1 className="text-headline-lg text-on-surface">Grammar</h1>
+      <GrammarTabs active="rules" />
+
       <div className="relative">
         <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-on-surface-variant" />
         <input
-          type="text"
-          placeholder="Search grammar rules..."
+          type="search"
+          aria-label="Search grammar rules"
+          placeholder="Search rules"
           value={searchQuery}
           onChange={(event) => setSearchQuery(event.target.value)}
-          className="w-full rounded-full border-2 border-surface-variant bg-surface-container-lowest py-3 pl-12 pr-4 text-body-ui text-on-surface outline-none transition-colors focus:border-primary"
+          className="w-full rounded-xl bg-surface-container-low py-3 pl-12 pr-4 text-body-ui text-on-surface outline-none focus:ring-2 focus:ring-primary/40"
         />
       </div>
 
-      <div>
-        <h1 className="text-headline-lg text-on-surface">Grammar Rulebook</h1>
-        <p className="mt-2 text-body-reading text-on-surface-variant">
-          Full pages unlock after you finish the lesson that teaches them. Locked titles stay visible as a roadmap.
-          {!booting && (
-            <span className="mt-1 block text-sm">
-              {unlockedRules.length} unlocked · {lockedRules.length} coming later
-            </span>
-          )}
-        </p>
-      </div>
+      {!booting && (
+        <p className="-mt-2 text-sm text-on-surface-variant">{unlockedRules.length} open · {lockedRules.length} unlock as you finish lessons</p>
+      )}
 
       {!booting && (
         <div className="hide-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 pb-2 md:mx-0 md:px-0">
@@ -131,7 +128,7 @@ export default function RulesClient({ rules }: { rules: PublicGrammarRule[] }) {
                 }`}
               >
                 <div className="mb-2 flex items-start justify-between">
-                  <span className={`rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-on-primary ${colorClass}`}>
+                  <span className={`rounded-full px-2 py-1 text-[10px] font-bold text-on-primary ${colorClass}`}>
                     {rule.category}
                   </span>
                   <ChevronRight className="h-5 w-5 text-on-surface-variant transition-colors group-hover:text-primary" />

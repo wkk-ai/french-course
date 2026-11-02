@@ -64,6 +64,9 @@
 
 ## Domain Behavior Guardrails
 
+0. **[2026-11-02] UI style = minimal, no borders (owner approved mockup)**
+   Do instead: Manrope UI + Source Serif 4 for French reading only. White page, grey #F5F5F7 surfaces (`tactile-card`), one blue accent #2450D6, no borders, no ALL CAPS, short copy, small type (headline 24, body 15). 4-tab floating nav: Learn · Review · Grammar (Tenses+Rules) · Progress (stats + account + offline). Dictionary = bottom sheet. Mockup: Design canvas "French app redesign".
+
 1. **[2026-07-28] Lesson Back / Center stats — no scroll gate**
    Do instead: stage in `?stage=` + `pushState`/`popstate`; **never** block Continue on scroll-to-end (user rejected — unreliable). Center heatmap = `words_read`; Words = reviewed; chart `Mon W1 '26`; articles via `shouldCountDailyArticle`.
 

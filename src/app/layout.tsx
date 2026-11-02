@@ -1,11 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Nunito_Sans, Source_Serif_4 } from "next/font/google";
+import { Manrope, Source_Serif_4 } from "next/font/google";
 import { PwaRegistration } from "@/components/PwaRegistration";
 import { AuthGate } from "@/components/auth/AuthGate";
 import "./globals.css";
 
-const nunitoSans = Nunito_Sans({
-  variable: "--font-nunito-sans",
+const manrope = Manrope({
+  variable: "--font-manrope",
   subsets: ["latin"],
 });
 
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#003e7a",
+  themeColor: "#ffffff",
   width: "device-width",
   initialScale: 1,
 };
@@ -46,7 +46,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${nunitoSans.variable} ${sourceSerif.variable} antialiased h-full`}>
+    <html lang="en" className={`${manrope.variable} ${sourceSerif.variable} antialiased h-full`}>
       <body className="font-ui bg-background text-on-surface h-full flex flex-col">
         <PwaRegistration />
         <AuthGate>{children}</AuthGate>

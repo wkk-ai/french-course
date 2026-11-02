@@ -1,8 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { BookOpen, ChevronRight, Eye, Flame, MessagesSquare, X } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { BookOpen, ChevronRight, Eye, MessagesSquare, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import type { ExerciseAnswer, GrammarRule, LessonContent, VerbConjugation, VocabularyWord, WordToken } from '@/lib/course'
 import { ExerciseCard } from '@/components/lesson/ExerciseCard'
@@ -51,6 +51,8 @@ function siblingRemediationLinks(chapterId: string): Array<{ id: string; label: 
 
 type Stage = 'brief' | 'reading' | 'conversation' | 'exercise'
 
+const STAGE_LABEL: Record<Stage, string> = { brief: 'Learn', reading: 'Read', conversation: 'Conversation', exercise: 'Practice' }
+
 const STAGES: Stage[] = ['brief', 'reading', 'conversation', 'exercise']
 
 function isStage(value: string | null | undefined): value is Stage {
@@ -87,7 +89,6 @@ export default function LessonClient({
   const [activeWordId, setActiveWordId] = useState<string | null>(null)
   const popupRef = useRef<HTMLDivElement | null>(null)
   const dictAnchorRef = useRef<HTMLButtonElement | null>(null)
-  const [dictPopupPos, setDictPopupPos] = useState<{ top: number; left: number } | null>(null)
   const [conjugationWord, setConjugationWord] = useState<VocabularyWord | null>(null)
   const [conjugationTense, setConjugationTense] = useState<string>('Présent')
   const [answers, setAnswers] = useState<Record<string, ExerciseAnswer>>({})
@@ -99,6 +100,8 @@ export default function LessonClient({
   const [gate, setGate] = useState<'loading' | 'ready'>('loading')
   const router = useRouter()
   const hasConversation = Boolean(content.conversation?.lines.length)
+  const stageSteps = STAGES.filter((item) => item !== 'conversation' || hasConversation)
+  const stageIndex = Math.max(0, stageSteps.indexOf(stage))
   const lifeDocuments = useMemo(() => getLessonDocuments(chapterId), [chapterId])
 
   useEffect(() => {
@@ -124,22 +127,6 @@ export default function LessonClient({
     }
   }, [activeWordId])
 
-  useLayoutEffect(() => {
-    if (!activeWordId || !dictAnchorRef.current || !popupRef.current) {
-      setDictPopupPos(null)
-      return
-    }
-    const anchor = dictAnchorRef.current.getBoundingClientRect()
-    const popup = popupRef.current
-    const width = popup.offsetWidth || 288
-    const height = popup.offsetHeight || 160
-    const margin = 8
-    let top = anchor.top - height - 12
-    if (top < margin) top = anchor.bottom + 12
-    let left = anchor.left + anchor.width / 2 - width / 2
-    left = Math.max(margin, Math.min(left, window.innerWidth - width - margin))
-    setDictPopupPos({ top, left })
-  }, [activeWordId])
 
   // Restore draft answers / stage (URL wins over draft when present)
   useEffect(() => {
@@ -388,18 +375,14 @@ export default function LessonClient({
                 role="dialog"
                 aria-label={`${word.word} definition`}
                 onPointerDown={(event) => event.stopPropagation()}
-                className="fixed z-50 w-72 rounded-xl border-2 border-surface-variant bg-surface-container-lowest p-4 text-left shadow-lg"
-                style={
-                  dictPopupPos
-                    ? { top: dictPopupPos.top, left: dictPopupPos.left }
-                    : { top: 0, left: 0, visibility: 'hidden' }
-                }
+                className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-[680px] rounded-t-[28px] bg-white px-5 pb-[calc(24px+env(safe-area-inset-bottom,0px))] pt-5 text-left shadow-[0_-10px_40px_rgba(17,17,20,0.16)]"
               >
+                <span aria-hidden="true" className="mx-auto -mt-2 mb-3 block h-1.5 w-9 rounded-full bg-surface-container-highest" />
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <p className="font-bold">{word.word}</p>
+                    <p className="text-xl font-bold">{word.word}</p>
                     {word.part_of_speech && word.part_of_speech !== 'unknown' && (
-                      <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wide text-on-surface-variant">
+                      <p className="mt-0.5 text-xs text-on-surface-variant">
                         {word.part_of_speech}
                         {showConjugate ? ' · conjugable' : ''}
                       </p>
@@ -438,9 +421,9 @@ export default function LessonClient({
                       setConjugationTense('Présent')
                       setConjugationWord(word)
                     }}
-                    className="tactile-button mt-4 w-full rounded-lg border-primary-container bg-primary py-2 text-label-caps text-on-primary"
+                    className="tactile-button mt-4 min-h-12 w-full bg-primary text-body-ui text-on-primary"
                   >
-                    CONJUGATE
+                    Conjugate
                   </button>
                 )}
               </div>
@@ -521,11 +504,11 @@ export default function LessonClient({
 
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-[680px] flex-col">
-      <header className="sticky top-0 z-40 flex items-center justify-between bg-surface-container-lowest p-4 pt-safe">
+      <header className="sticky top-0 z-40 flex items-center gap-3 bg-white/90 px-5 pb-3 pt-[calc(12px+env(safe-area-inset-top,0px))] backdrop-blur-xl">
         <Link
           href="/"
           aria-label="Leave lesson"
-          className="flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 text-on-surface-variant hover:bg-surface-container-low"
+          className="flex size-11 shrink-0 items-center justify-center rounded-full bg-surface-container-low text-on-surface"
           onClick={(event) => {
             if (Object.keys(answers).length === 0) return
             if (!window.confirm('Leave this lesson? Your answers are saved on this device until you finish or clear them.')) {
@@ -533,26 +516,29 @@ export default function LessonClient({
             }
           }}
         >
-          <X className="size-6" />
+          <X className="size-5" />
         </Link>
-        <div className="mx-4 flex-1"><div className="h-3 overflow-hidden rounded-full bg-surface-container-high"><div className="h-full rounded-full bg-success transition-all" style={{ width: `${progress}%` }} /></div></div>
-        <div className="flex items-center gap-1 rounded-full bg-surface-container px-3 py-1"><Flame className="size-4 fill-warning/20 text-warning" /><span className="text-sm font-bold">In lesson</span></div>
+        <div className="grid flex-1 gap-1" style={{ gridTemplateColumns: `repeat(${stageSteps.length}, minmax(0, 1fr))` }} role="img" aria-label={`Step ${stageIndex + 1} of ${stageSteps.length}: ${STAGE_LABEL[stage]}`}>
+          {stageSteps.map((step, index) => (
+            <span key={step} className={`h-1 rounded-full ${index <= stageIndex ? 'bg-primary' : 'bg-surface-container-high'}`} />
+          ))}
+        </div>
       </header>
 
-      <main className="flex-1 p-4 pb-[calc(7rem+env(safe-area-inset-bottom))]">
-        <p className="text-label-caps text-primary">{isProve ? 'CHECK · NO HINTS' : 'LESSON'}</p>
-        <h1 className="mt-1 text-headline-md">{title}</h1>
+      <main className="flex-1 px-5 pb-[calc(7rem+env(safe-area-inset-bottom))] pt-4">
+        <p className="text-sm text-on-surface-variant">{isProve ? 'Check · no hints' : STAGE_LABEL[stage]}</p>
+        <h1 className="text-headline-lg">{title}</h1>
 
         {stage === 'brief' && content.brief && (
           <section className="mt-8 flex flex-col gap-5">
             <div className="tactile-card p-6">
-              <div className="flex items-center gap-2 text-primary"><BookOpen className="size-5" /><p className="text-label-caps">THEORY FIRST</p></div>
+              <div className="flex items-center gap-2 text-primary"><BookOpen className="size-5" /><p className="text-label-caps">Before you start</p></div>
               <h2 className="mt-3 text-headline-md">{content.brief.title}</h2>
-              <RichText text={content.brief.body} className="mt-4 text-body-reading text-on-surface-variant" />
+              <RichText text={content.brief.body} className="mt-4 text-sm text-on-surface-variant" />
             </div>
             {Boolean(content.brief.ruleSlugs?.length) && (
               <div>
-                <p className="text-label-caps text-on-surface-variant">RELATED RULES</p>
+                <p className="text-label-caps text-on-surface-variant">Related rules</p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {content.brief.ruleSlugs.map((slug) => (
                     <Link key={slug} href={`/rules/${slug}/`} className="rounded-full border-2 border-primary-fixed-dim bg-primary-fixed/30 px-3 py-2 text-sm font-bold text-primary">
@@ -562,8 +548,8 @@ export default function LessonClient({
                 </div>
               </div>
             )}
-            <button type="button" onClick={() => goToStage('reading')} className="tactile-button mt-2 flex items-center justify-center gap-2 rounded-xl border-primary-container bg-primary py-4 font-bold text-on-primary">
-              START READING <ChevronRight className="size-5" />
+            <button type="button" onClick={() => goToStage('reading')} className="tactile-button mt-2 flex items-center justify-center gap-2 rounded-xl bg-primary py-4 font-bold text-on-primary">
+              Start reading <ChevronRight className="size-5" />
             </button>
           </section>
         )}
@@ -574,15 +560,15 @@ export default function LessonClient({
               documents={lifeDocuments}
               renderFrench={(text, prefix) => renderTokens(tokenizeFrench(text, prefix, dictVocabulary))}
             />
-            <div className="relative rounded-xl border-2 border-surface-variant border-b-4 bg-reading-bg p-6">
+            <div className="relative rounded-xl bg-reading-bg p-6">
               <div className="absolute right-4 top-4 flex items-center gap-2">
                 <Eye className="size-4 text-on-surface-variant" />
-                <span className="text-label-caps text-on-surface-variant">X-RAY</span>
+                <span className="text-label-caps text-on-surface-variant">X-Ray</span>
                 <button type="button" aria-pressed={xRayEnabled} aria-label="Toggle X-Ray syntax annotations" onClick={() => setXRayEnabled((value) => !value)} className={`relative h-6 w-11 rounded-full p-1 ${xRayEnabled ? 'bg-success' : 'bg-surface-dim'}`}>
                   <span className={`block size-4 rounded-full bg-white transition-transform ${xRayEnabled ? 'translate-x-5' : ''}`} />
                 </button>
               </div>
-              <p className="mb-4 pr-28 text-sm text-on-surface-variant">Tap any word for meaning. Verbs include a <span className="font-semibold text-primary">Conjugate</span> button. Turn on X-Ray to color nouns/pronouns, verbs, and other words.</p>
+              <p className="mb-4 pr-28 text-sm text-on-surface-variant">Tap a word to see its meaning.</p>
               <div className="mt-2 space-y-6">
                 {(() => {
                   const blocks: ReactNode[] = []
@@ -611,7 +597,7 @@ export default function LessonClient({
                 })()}
               </div>
               {xRayEnabled && (
-                <div className="mt-8 flex flex-wrap gap-4 border-t border-surface-variant pt-4 text-syntax-label text-on-surface-variant">
+                <div className="mt-8 flex flex-wrap gap-4 border-t pt-4 text-syntax-label text-on-surface-variant">
                   <span><i className="mr-1 inline-block size-3 rounded-full bg-syntax-noun" />Noun / pronoun</span>
                   <span><i className="mr-1 inline-block size-3 rounded-full bg-syntax-verb" />Verb</span>
                   <span><i className="mr-1 inline-block size-3 rounded-full bg-syntax-adj" />Adj / other</span>
@@ -619,15 +605,15 @@ export default function LessonClient({
               )}
             </div>
             <div className="mt-6 flex gap-3">
-              <button type="button" onClick={() => goToStage('brief')} className="tactile-button flex-1 rounded-xl border-2 border-surface-variant bg-surface-container-lowest py-4 font-bold text-on-surface">
-                BACK
+              <button type="button" onClick={() => goToStage('brief')} className="tactile-button flex-1 rounded-xl bg-surface-container-low py-4 font-bold text-on-surface">
+                Back
               </button>
               <button
                 type="button"
                 onClick={() => goToStage(hasConversation ? 'conversation' : 'exercise')}
-                className="tactile-button flex-[2] flex items-center justify-center gap-2 rounded-xl border-primary-container bg-primary py-4 font-bold text-on-primary"
+                className="tactile-button flex-[2] flex items-center justify-center gap-2 rounded-xl bg-primary py-4 font-bold text-on-primary"
               >
-                {hasConversation ? 'OPEN CONVERSATION' : 'PRACTICE THE RULES'} <ChevronRight className="size-5" />
+                {hasConversation ? 'Open conversation' : 'Practice'} <ChevronRight className="size-5" />
               </button>
             </div>
           </section>
@@ -636,29 +622,29 @@ export default function LessonClient({
         {stage === 'conversation' && content.conversation && (
           <section className="mt-8 space-y-5">
             <div className="tactile-card p-5">
-              <div className="flex items-center gap-2 text-primary"><MessagesSquare className="size-5" /><p className="text-label-caps">ROUTINE SPEECH</p></div>
+              <div className="flex items-center gap-2 text-primary"><MessagesSquare className="size-5" /><p className="text-label-caps">Conversation</p></div>
               <h2 className="mt-3 text-headline-md">{content.conversation.title}</h2>
               <p className="mt-2 text-sm text-on-surface-variant">{content.conversation.setting}</p>
             </div>
             <div className="space-y-3">
               {conversationLines.map((line, index) => (
-                <article key={`${line.speaker}-${index}`} className={`rounded-xl border-2 border-surface-variant p-4 ${index % 2 === 0 ? 'bg-surface-container-lowest' : 'bg-primary-fixed/20'}`}>
+                <article key={`${line.speaker}-${index}`} className={`rounded-xl p-4 ${index % 2 === 0 ? 'mr-8 bg-surface-container-low' : 'ml-8 bg-primary-fixed/60'}`}>
                   <p className="text-label-caps text-primary">{line.speaker}</p>
                   <div className="mt-2">{renderTokens(line.tokens)}</div>
                 </article>
               ))}
             </div>
-            <p className="text-sm text-on-surface-variant">Dialogue words are tappable too — try a verb for Conjugate.</p>
+            
             <div className="flex gap-3">
-              <button type="button" onClick={() => goToStage('reading')} className="tactile-button flex-1 rounded-xl border-2 border-surface-variant bg-surface-container-lowest py-4 font-bold text-on-surface">
-                BACK
+              <button type="button" onClick={() => goToStage('reading')} className="tactile-button flex-1 rounded-xl bg-surface-container-low py-4 font-bold text-on-surface">
+                Back
               </button>
               <button
                 type="button"
                 onClick={() => goToStage('exercise')}
-                className="tactile-button flex-[2] flex items-center justify-center gap-2 rounded-xl border-primary-container bg-primary py-4 font-bold text-on-primary"
+                className="tactile-button flex-[2] flex items-center justify-center gap-2 rounded-xl bg-primary py-4 font-bold text-on-primary"
               >
-                PRACTICE THE RULES <ChevronRight className="size-5" />
+                Practice <ChevronRight className="size-5" />
               </button>
             </div>
           </section>
@@ -666,13 +652,13 @@ export default function LessonClient({
 
         {stage === 'exercise' && (
           <section ref={exerciseSectionRef} className="mt-8 space-y-5">
-            <p className="text-body-reading text-on-surface-variant">
+            <p className="text-sm text-on-surface-variant">
               {isProve
-                ? `Score at least ${PROVE_PASS_SCORE}% to pass, with no hints. If you miss it, reopen the practice and review chapters in this unit, then try again.`
-                : 'Mixed drills: multiple choice, fill-in, matching, word order, and more. Answer each once — wrong answers feed Review.'}
+                ? `Score ${PROVE_PASS_SCORE}% to pass. No hints.`
+                : 'Wrong answers go to Review.'}
             </p>
             {exercises.length > 0 && (
-              <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border-2 border-surface-variant bg-surface-container-low p-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-surface-container-low p-4">
                 <div>
                   <p className="text-label-caps text-primary">
                     Question {exerciseIndex + 1} of {exercises.length}
@@ -686,7 +672,7 @@ export default function LessonClient({
                     type="button"
                     disabled={exerciseIndex === 0}
                     onClick={() => setExerciseIndex((index) => Math.max(0, index - 1))}
-                    className="tactile-button rounded-lg border-2 border-surface-variant bg-surface-container-lowest px-4 py-2 text-sm font-bold text-on-surface disabled:cursor-not-allowed disabled:opacity-50"
+                    className="tactile-button rounded-lg bg-surface-container-low px-4 py-2 text-sm font-bold text-on-surface disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Prev
                   </button>
@@ -694,7 +680,7 @@ export default function LessonClient({
                     type="button"
                     disabled={exerciseIndex >= exercises.length - 1 || !currentExerciseAnswered}
                     onClick={() => setExerciseIndex((index) => Math.min(exercises.length - 1, index + 1))}
-                    className="tactile-button rounded-lg border-2 border-surface-variant bg-surface-container-lowest px-4 py-2 text-sm font-bold text-on-surface disabled:cursor-not-allowed disabled:opacity-50"
+                    className="tactile-button rounded-lg bg-surface-container-low px-4 py-2 text-sm font-bold text-on-surface disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Next
                   </button>
@@ -743,8 +729,8 @@ export default function LessonClient({
             )}
             {error && <p role="alert" className="rounded-lg bg-error-container p-3 text-sm text-on-error-container">{error}</p>}
             <div className="flex gap-3">
-              <button type="button" onClick={() => goToStage(hasConversation ? 'conversation' : 'reading')} className="tactile-button flex-1 rounded-xl border-2 border-surface-variant bg-surface-container-lowest py-4 font-bold text-on-surface">
-                BACK
+              <button type="button" onClick={() => goToStage(hasConversation ? 'conversation' : 'reading')} className="tactile-button flex-1 rounded-xl bg-surface-container-low py-4 font-bold text-on-surface">
+                Back
               </button>
               <button
                 type="button"
@@ -752,7 +738,7 @@ export default function LessonClient({
                 onClick={completeLesson}
                 className="tactile-button flex-[2] rounded-xl border-[#46a302] bg-success py-4 font-bold text-[#0b3d0b] disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {loading ? 'SAVING…' : isProve ? 'PASS CHECK' : 'COMPLETE LESSON'}
+                {loading ? 'Saving…' : isProve ? 'Pass check' : 'Complete lesson'}
               </button>
             </div>
           </section>
@@ -768,12 +754,12 @@ export default function LessonClient({
           onClick={() => setConjugationWord(null)}
         >
           <section
-            className="flex max-h-[85vh] w-full max-w-md flex-col rounded-xl border-2 border-surface-variant bg-surface-container-lowest p-6"
+            className="flex max-h-[85vh] w-full max-w-md flex-col rounded-xl bg-surface-container-lowest p-6"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-label-caps text-primary">VERB ENGINE</p>
+                <p className="text-label-caps text-primary">Conjugation</p>
                 <h2 className="text-headline-md">{conjugationWord.word}</h2>
                 <p className="mt-1 text-on-surface-variant">{conjugationWord.base_translation}</p>
               </div>

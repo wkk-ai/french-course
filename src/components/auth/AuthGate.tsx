@@ -54,7 +54,7 @@ function LoginScreen() {
     void syncNow()
   }
 
-  const inputClass = 'mt-1 block w-full rounded-xl border-2 border-surface-variant bg-surface-container-lowest px-4 py-3 text-body-ui focus:border-primary focus:outline-none'
+  const inputClass = 'mt-1 block w-full rounded-xl bg-white px-4 py-3 text-body-ui focus:border-primary focus:outline-none'
 
   return (
     <main className="flex min-h-screen items-center justify-center p-4 pt-safe">
@@ -84,8 +84,8 @@ function LoginScreen() {
 
         {error && <p role="alert" className="mt-4 rounded-xl bg-error-container/60 px-3 py-2 text-sm text-on-error-container">{error}</p>}
 
-        <button type="submit" disabled={busy} className="tactile-button mt-6 w-full rounded-xl border-primary-container bg-primary py-4 font-bold text-on-primary disabled:opacity-60">
-          {busy ? 'Please wait…' : mode === 'in' ? 'SIGN IN' : 'CREATE ACCOUNT'}
+        <button type="submit" disabled={busy} className="tactile-button mt-6 w-full rounded-xl bg-primary py-4 font-bold text-on-primary disabled:opacity-60">
+          {busy ? 'Please wait…' : mode === 'in' ? 'Sign in' : 'Create account'}
         </button>
         <button
           type="button"

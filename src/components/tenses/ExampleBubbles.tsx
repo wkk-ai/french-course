@@ -21,16 +21,16 @@ function BubbleGroup({ title, icon, examples }: { title: string; icon: 'life' | 
   return (
     <div>
       <p className="mb-3 flex items-center gap-2 text-label-caps text-on-surface-variant">
-        <Icon className="size-4" /> {title.toUpperCase()}
+        <Icon className="size-4" /> {title}
       </p>
       <ul className="space-y-3">
         {examples.map((example) => (
           <li key={example.fr} className={`flex ${isWork ? 'justify-end' : 'justify-start'}`}>
             <div
-              className={`max-w-[92%] rounded-2xl border-2 px-4 py-3 ${
+              className={`max-w-[92%] rounded-2xl px-4 py-3 ${
                 isWork
-                  ? 'rounded-br-sm border-primary-container bg-primary-fixed/40'
-                  : 'rounded-bl-sm border-surface-variant bg-surface-container-lowest'
+                  ? 'rounded-br-sm bg-primary-fixed/40'
+                  : 'rounded-bl-sm bg-surface-container-low'
               }`}
             >
               <div className="flex items-start gap-1">

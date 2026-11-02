@@ -2,19 +2,19 @@
 
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
-import { Clock, Circle, Play, Star } from 'lucide-react'
+import { Check, ChevronDown, ChevronRight, Play } from 'lucide-react'
 import { hasLessonContent } from '@/lib/course'
 import {
   PATHWAY_BY_CHAPTER_ID,
   PATHWAY_BY_MODULE_ID,
-  pathwayLabel,
   unitsForModule,
   type PathwaySubChapter,
 } from '@/lib/pathway/catalog'
 import { deriveChapterStatus } from '@/lib/progression'
 import { BUNDLED_CHAPTER_IDS } from '@/lib/bundled-chapter-ids'
-import { mergeCompletedChapterIds, readLocalCompletedChapters, readLocalDailyWords, readInProgressPercents, subscribeCompletedChapters } from '@/lib/local-progress'
-import { SaveCourseCard } from '@/components/SaveCourseCard'
+import { mergeCompletedChapterIds, readLocalCompletedChapters, readLocalDailyWords, readLocalStreak, readInProgressPercents, subscribeCompletedChapters } from '@/lib/local-progress'
+import { AccountMenu } from '@/components/auth/AccountMenu'
+import { getCachedUser } from '@/lib/cloud/auth'
 import { TRACKS, chapterIdsForTrack, trackForModuleOrder, type TrackId } from '@/lib/pathway/tracks'
 
 const TRACK_PREF_KEY = 'french-course:home-track'
@@ -38,71 +38,40 @@ type Chapter = {
 
 type Progress = { chapter_id: string; status: 'not-started' | 'in-progress' | 'completed' }
 
-function ChapterCard({
+function LessonRow({
   chapter,
-  moduleOrder,
+  sub,
   status,
   percent,
-  pathway,
+  isNext,
 }: {
   chapter: Chapter
-  moduleOrder: number
+  sub: PathwaySubChapter
   status: ReturnType<typeof deriveChapterStatus>
   percent?: number
-  pathway?: PathwaySubChapter
+  isNext: boolean
 }) {
-  const label = pathway
-    ? pathwayLabel(moduleOrder, pathway)
-    : `${moduleOrder}.${chapter.order_index} ${chapter.title}`
-  const shownPercent = Math.max(0, Math.min(99, percent ?? 0))
-  const statusContent = {
-    completed: { label: 'Completed', icon: <Star className="size-6 fill-success text-success" />, tone: 'text-success' },
-    'in-progress': {
-      label: `In progress · ${shownPercent}%`,
-      icon: <Play className="size-6 fill-primary text-primary" />,
-      tone: 'text-primary',
-    },
-    'not-started': {
-      label: 'Not started',
-      icon: <Circle className="size-6 text-on-surface-variant" />,
-      tone: 'text-on-surface-variant',
-    },
-    'coming-soon': { label: 'Coming soon', icon: <Clock className="size-6 text-on-surface-variant" />, tone: 'text-on-surface-variant' },
-  }[status]
-
-  const card = (
-    <div
-      className={`tactile-card flex items-center gap-4 p-4 ${status === 'in-progress' ? 'border-b-primary' : ''}`}
-    >
-      <div className="flex size-14 shrink-0 items-center justify-center rounded-full border-[5px] border-surface-container-high bg-surface-container-lowest">
-        {statusContent.icon}
-      </div>
+  const shown = Math.max(0, Math.min(99, percent ?? 0))
+  const meta = status === 'in-progress' ? `${sub.roleLabel} · ${shown}%` : status === 'coming-soon' ? 'Coming soon' : sub.roleLabel
+  const icon =
+    status === 'completed' ? (
+      <span className="flex size-7 items-center justify-center rounded-full bg-success text-white"><Check className="size-4" strokeWidth={3} /></span>
+    ) : status === 'in-progress' || isNext ? (
+      <span className="flex size-7 items-center justify-center rounded-full bg-primary text-white"><Play className="size-3 fill-white" /></span>
+    ) : (
+      <span className="m-0.5 size-6 rounded-full shadow-[inset_0_0_0_2px_var(--color-outline-variant)]" />
+    )
+  const row = (
+    <div className="flex min-h-14 items-center gap-3 px-4 py-2">
+      {icon}
       <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-2">
-          <p className={`text-label-caps ${statusContent.tone}`}>{statusContent.label}</p>
-          {pathway && (
-            <span className="rounded-full bg-surface-container-high px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-on-surface-variant">
-              {pathway.roleLabel}
-            </span>
-          )}
-        </div>
-        <h3 className="mt-1 break-words text-body-ui font-bold">{label}</h3>
-        <p className="mt-1 text-sm text-on-surface-variant">{chapter.description}</p>
-        {status === 'in-progress' ? (
-          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-container-high">
-            <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${shownPercent}%` }} />
-          </div>
-        ) : null}
+        <p className={`truncate text-body-ui ${isNext ? 'font-bold' : 'font-semibold'}`}>{sub.title}</p>
+        <p className="text-xs text-on-surface-variant">{meta}</p>
       </div>
     </div>
   )
-
-  return status === 'coming-soon' ? (
-    <div>{card}</div>
-  ) : (
-    <Link href={`/lesson/${chapter.id}/`} className="outline-none transition-opacity hover:opacity-90">
-      {card}
-    </Link>
+  return status === 'coming-soon' ? <div>{row}</div> : (
+    <Link href={`/lesson/${chapter.id}/`} className="rounded-xl hover:bg-surface-container">{row}</Link>
   )
 }
 
@@ -118,6 +87,8 @@ export default function HomeClient({
   const [wordsRead, setWordsRead] = useState(0)
   const [progressReady, setProgressReady] = useState(false)
   const [trackId, setTrackId] = useState<TrackId>('conversation')
+  const [streak, setStreak] = useState(0)
+  const [firstName, setFirstName] = useState('')
 
   useEffect(() => {
     void Promise.resolve().then(() => {
@@ -126,6 +97,8 @@ export default function HomeClient({
       setProgressByChapter(map)
       setInProgressPercents(readInProgressPercents())
       setWordsRead(readLocalDailyWords())
+      setStreak(readLocalStreak())
+      setFirstName((getCachedUser()?.name || '').split(' ')[0] || '')
       try {
         const saved = localStorage.getItem(TRACK_PREF_KEY)
         if (saved === 'conversation' || saved === 'business' || saved === 'advanced') setTrackId(saved)
@@ -189,134 +162,117 @@ export default function HomeClient({
   const authoredTotal = trackChapterIds.length
   const authoredDone = completedPlayable
   const dailyPct = Math.min(100, Math.round((wordsRead / DAILY_GOAL) * 100))
-  const dailyLabel =
-    wordsRead >= DAILY_GOAL
-      ? `${wordsRead} words today · goal ${DAILY_GOAL} met`
-      : `${wordsRead} / ${DAILY_GOAL} words read today`
+  const nextId = trackChapterIds.find((id) => !completedIds.has(id)) ?? null
+  const nextSub = nextId ? PATHWAY_BY_CHAPTER_ID.get(nextId)?.sub : undefined
+  const nextModuleId = nextId ? chaptersById.get(nextId)?.module_id : undefined
+  const ringLength = 2 * Math.PI * 26
+  const today = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })
 
   return (
-    <div className="flex flex-col gap-8 pb-8">
-      <SaveCourseCard />
-
-      <section className="tactile-card p-5">
-        <p className="text-label-caps text-on-surface-variant">TODAY&apos;S READING</p>
-        <div className="mt-2">
-          <h1 className="text-headline-md">Bienvenue</h1>
-          <p className="mt-1 text-body-ui text-on-surface-variant">{dailyLabel}</p>
+    <div className="flex flex-col gap-6">
+      <header className="flex items-center justify-between gap-4">
+        <div>
+          <p className="text-sm text-on-surface-variant">{today}</p>
+          <h1 className="text-headline-lg">Bonjour{firstName ? `, ${firstName}` : ''}</h1>
         </div>
-        <div className="mt-4">
-          <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-on-surface-variant">Daily reading goal</p>
-          <div className="h-2 overflow-hidden rounded-full bg-surface-container-high">
-            <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${dailyPct}%` }} />
+        <AccountMenu />
+      </header>
+
+      <section aria-label="Today" className="flex flex-col gap-4 rounded-3xl bg-primary p-5 text-on-primary">
+        <div className="flex items-center gap-4">
+          <svg width="60" height="60" viewBox="0 0 60 60" role="img" aria-label={`${wordsRead} of ${DAILY_GOAL} words today`}>
+            <circle cx="30" cy="30" r="26" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="6" />
+            <circle cx="30" cy="30" r="26" fill="none" stroke="#fff" strokeWidth="6" strokeLinecap="round" strokeDasharray={ringLength} strokeDashoffset={ringLength * (1 - dailyPct / 100)} transform="rotate(-90 30 30)" />
+          </svg>
+          <div>
+            <p className="text-sm text-white/85">Today{streak > 0 ? ` · ${streak}-day streak` : ''}</p>
+            <p className="text-xl font-bold">{wordsRead} / {DAILY_GOAL} words</p>
           </div>
         </div>
+        {nextId && nextSub ? (
+          <Link href={`/lesson/${nextId}/`} className="flex min-h-11 items-center justify-between gap-3 rounded-2xl bg-white px-4 py-3 text-on-surface">
+            <span className="min-w-0">
+              <span className="block text-xs text-on-surface-variant">{completedPlayable ? 'Continue' : 'Start'} · {nextSub.roleLabel}</span>
+              <span className="block truncate text-body-ui font-semibold">{nextSub.title}</span>
+            </span>
+            <ChevronRight className="size-5 shrink-0 text-primary" />
+          </Link>
+        ) : (
+          <p className="rounded-2xl bg-white/15 px-4 py-3 text-sm">Track complete. Pick another track below.</p>
+        )}
       </section>
 
-      <nav aria-label="Tracks" className="grid grid-cols-3 gap-2">
+      <div role="tablist" aria-label="Tracks" className="grid grid-cols-3 gap-1 rounded-xl bg-surface-container-low p-1">
         {TRACKS.map((item) => {
           const active = item.id === trackId
           return (
             <button
               key={item.id}
               type="button"
-              aria-pressed={active}
+              role="tab"
+              aria-selected={active}
               onClick={() => chooseTrack(item.id)}
-              className={`min-h-16 rounded-xl border-2 px-2 py-2 text-center ${active ? 'border-primary bg-primary text-on-primary' : 'border-surface-variant bg-surface-container-lowest text-on-surface'} ${item.optional && !active ? 'border-dashed' : ''}`}
+              className={`min-h-9 rounded-[9px] text-sm ${active ? 'bg-white font-semibold text-on-surface shadow-sm' : 'font-medium text-on-surface-variant'}`}
             >
-              <span className="block text-sm font-bold leading-tight">{item.title}</span>
-              <span className={`block text-[11px] ${active ? 'text-on-primary/80' : 'text-on-surface-variant'}`}>{item.short}</span>
+              {item.id === 'advanced' ? 'Advanced' : item.title}
             </button>
           )
         })}
-      </nav>
+      </div>
 
-      <section className="tactile-card p-5">
-        <p className="text-label-caps text-on-surface-variant">{track.title.toUpperCase()} TRACK{track.optional ? ' · OPTIONAL' : ''}</p>
-        <p className="mt-1 text-sm text-on-surface-variant">{track.description}</p>
-        <div className="mt-2 flex items-end justify-between gap-4">
-          <div>
-            <p className="text-headline-lg text-success">{mastery}%</p>
-            <p className="text-sm text-on-surface-variant">
-              {authoredDone}/{authoredTotal || 0} chapters done in this track
-            </p>
-          </div>
-        </div>
-        <div className="mt-4">
-          <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-on-surface-variant">Track progress</p>
-          <div className="h-2 overflow-hidden rounded-full bg-surface-container-high">
-            <div className="h-full rounded-full bg-success transition-all" style={{ width: `${mastery}%` }} />
-          </div>
-        </div>
-      </section>
+      <div className="-mt-2 flex items-center justify-between gap-3 text-sm text-on-surface-variant">
+        <p className="min-w-0">{track.optional ? 'Optional · skip freely' : track.short}</p>
+        <p className="shrink-0">{authoredDone} of {authoredTotal} · {mastery}%</p>
+      </div>
 
-      <section className="flex flex-col gap-8">
+      <section className="flex flex-col gap-3">
         {!progressReady ? (
           <p className="py-8 text-center text-on-surface-variant">Loading…</p>
         ) : (
-        visibleModules.map((module) => {
-          const pathwayModule = PATHWAY_BY_MODULE_ID.get(module.id)
-          const units = pathwayModule ? unitsForModule(pathwayModule) : []
-          const playableCount = pathwayModule
-            ? pathwayModule.subchapters.filter((sub) => hasLessonContent(chaptersById.get(sub.id)?.lesson_content)).length
-            : courseChapters.filter((c) => c.module_id === module.id && hasLessonContent(c.lesson_content)).length
-
-          return (
-            <div key={module.id} className="flex flex-col gap-6">
-              <header className="border-b-2 border-surface-container-high pb-3">
-                <p className="text-label-caps text-primary">
-                  MODULE {module.order_index} · {module.cefr_level}
-                  {pathwayModule ? ' · 5 UNITS · 20 SUB-CHAPTERS' : ''}
-                  {playableCount ? ` · ${playableCount} PLAYABLE` : ''}
-                </p>
-                <h2 className="text-headline-md">{module.title}</h2>
-                <p className="mt-1 text-sm text-on-surface-variant">{module.description}</p>
-              </header>
-
-              {units.length > 0 ? (
-                units.map((unit) => (
-                  <div key={unit.unitIndex} className="flex flex-col gap-3">
-                    <div>
-                      <p className="text-label-caps text-on-surface-variant">
-                        UNIT {unit.unitIndex} · {unit.unitTitle}
-                      </p>
-                      <p className="text-sm text-on-surface-variant">{unit.unitGrammar}</p>
+          visibleModules.map((module) => {
+            const pathwayModule = PATHWAY_BY_MODULE_ID.get(module.id)
+            const units = pathwayModule ? unitsForModule(pathwayModule) : []
+            const ids = pathwayModule ? pathwayModule.subchapters.map((sub) => sub.id) : []
+            const done = ids.filter((id) => completedIds.has(id)).length
+            const pct = ids.length ? Math.round((done / ids.length) * 100) : 0
+            const open = module.id === nextModuleId
+            return (
+              <details key={module.id} open={open} className="group rounded-[20px] bg-surface-container-low">
+                <summary className="flex min-h-16 cursor-pointer list-none items-center gap-3 px-4 py-3 [&::-webkit-details-marker]:hidden">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs text-on-surface-variant">Module {module.order_index} · {module.cefr_level}</p>
+                    <h2 className="truncate text-body-ui font-bold">{module.title}</h2>
+                    <div className="mt-2 h-1 rounded-full bg-surface-container-highest">
+                      <div className="h-1 rounded-full bg-primary" style={{ width: `${pct}%` }} />
                     </div>
-                    <div className="flex flex-col gap-3">
+                  </div>
+                  <span className="shrink-0 text-xs text-on-surface-variant">{done}/{ids.length}</span>
+                  <ChevronDown className="size-5 shrink-0 text-on-surface-variant transition-transform group-open:rotate-180" />
+                </summary>
+                <div className="flex flex-col pb-2">
+                  {units.map((unit) => (
+                    <div key={unit.unitIndex} className="flex flex-col">
+                      <p className="px-4 pb-1 pt-3 text-xs font-semibold text-on-surface-variant">Unit {unit.unitIndex} · {unit.unitTitle}</p>
                       {unit.chapters.map((sub) => {
                         const chapter = chaptersById.get(sub.id)
                         if (!chapter) return null
                         return (
-                          <ChapterCard
+                          <LessonRow
                             key={sub.id}
                             chapter={chapter}
-                            moduleOrder={module.order_index}
+                            sub={sub}
                             status={deriveChapterStatus(chapter.id, authoredIds, completedIds, inProgressPercents)}
                             percent={inProgressPercents[chapter.id]}
-                            pathway={PATHWAY_BY_CHAPTER_ID.get(chapter.id)?.sub}
+                            isNext={chapter.id === nextId}
                           />
                         )
                       })}
                     </div>
-                  </div>
-                ))
-              ) : (
-                courseChapters
-                  .filter((chapter) => chapter.module_id === module.id)
-                  .sort((a, b) => a.order_index - b.order_index)
-                  .map((chapter) => (
-                    <ChapterCard
-                      key={chapter.id}
-                      chapter={chapter}
-                      moduleOrder={module.order_index}
-                      status={deriveChapterStatus(chapter.id, authoredIds, completedIds, inProgressPercents)}
-                      percent={inProgressPercents[chapter.id]}
-                      pathway={PATHWAY_BY_CHAPTER_ID.get(chapter.id)?.sub}
-                    />
-                  ))
-              )}
-            </div>
-          )
-        })
+                  ))}
+                </div>
+              </details>
+            )
+          })
         )}
       </section>
     </div>

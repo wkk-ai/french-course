@@ -5,7 +5,9 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis
 } from 'recharts';
-import { mergeCompletedChapterIds, readLocalCompletedChapters, readLocalDailyReadingHistory, subscribeCompletedChapters } from '@/lib/local-progress'
+import { mergeCompletedChapterIds, readLocalCompletedChapters, readLocalDailyReadingHistory, readLocalStreak, subscribeCompletedChapters } from '@/lib/local-progress'
+import { AccountMenu } from '@/components/auth/AccountMenu'
+import { SaveCourseCard } from '@/components/SaveCourseCard'
 import { getAllLocalVocabulary } from '@/lib/local-vocab-vault'
 
 type VocabProgress = { vocab_id?: string; created_at: string; last_reviewed_at: string | null }
@@ -31,10 +33,12 @@ export default function CenterClient() {
   const [localCompleted, setLocalCompleted] = useState(0)
   const [localReviewed, setLocalReviewed] = useState(0)
   const [booting, setBooting] = useState(true)
+  const [streakDays, setStreakDays] = useState(0)
 
   useEffect(() => {
     const refreshLocal = () => {
       setLocalCompleted(readLocalCompletedChapters().length)
+      setStreakDays(readLocalStreak())
       setLocalReviewed(getAllLocalVocabulary().filter((item) => item.last_reviewed_at).length)
     }
     refreshLocal()
@@ -140,35 +144,39 @@ export default function CenterClient() {
 
   if (booting) {
     return (
-      <div className="flex flex-col gap-8">
-        <div>
-          <h1 className="text-headline-lg text-on-surface">Command Center</h1>
-          <p className="text-body-reading text-on-surface-variant mt-2">Loading your stats…</p>
-        </div>
+      <div className="flex flex-col gap-6">
+        <h1 className="text-headline-lg text-on-surface">Progress</h1>
+        <p className="text-sm text-on-surface-variant">Loading…</p>
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col gap-8">
-      <div>
-        <h1 className="text-headline-lg text-on-surface">Command Center</h1>
-        <p className="text-body-reading text-on-surface-variant mt-2">Track your linguistic growth.</p>
+    <div className="flex flex-col gap-6">
+      <h1 className="text-headline-lg text-on-surface">Progress</h1>
+
+      <div className="grid grid-cols-3 gap-3">
+        <div className="tactile-card p-4">
+          <p className="text-2xl font-bold text-on-surface">{streakDays}</p>
+          <p className="text-xs text-on-surface-variant">Day streak</p>
+        </div>
+        <div className="tactile-card p-4">
+          <p className="text-2xl font-bold text-on-surface">{completedChapters}</p>
+          <p className="text-xs text-on-surface-variant">Lessons done</p>
+        </div>
+        <div className="tactile-card p-4">
+          <p className="text-2xl font-bold text-on-surface">{wordsLearned}</p>
+          <p className="text-xs text-on-surface-variant">Words reviewed</p>
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="tactile-card p-4 text-center">
-          <p className="text-headline-lg text-primary font-bold">{wordsLearned}</p>
-          <p className="text-label-caps text-on-surface-variant">WORDS REVIEWED</p>
-        </div>
-        <div className="tactile-card p-4 text-center">
-          <p className="text-headline-lg text-success font-bold">{completedChapters}</p>
-          <p className="text-label-caps text-on-surface-variant">CHAPTERS DONE</p>
-        </div>
-      </div>
+      <section aria-label="Account and offline" className="tactile-card divide-y divide-surface-variant overflow-hidden">
+        <AccountMenu variant="row" />
+        <SaveCourseCard />
+      </section>
 
-      <section className="tactile-card p-6">
-        <h2 className="text-body-ui font-bold text-on-surface mb-6">Words added to Review (queue)</h2>
+      <section className="tactile-card p-5">
+        <h2 className="text-body-ui font-bold text-on-surface mb-6">Words in your review queue</h2>
         <div className="h-[250px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={vocabChartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
@@ -182,17 +190,17 @@ export default function CenterClient() {
               <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--color-on-surface-variant)', fontSize: 12 }} />
               <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--color-on-surface-variant)', fontSize: 12 }} />
               <Tooltip 
-                contentStyle={{ backgroundColor: 'var(--color-surface-container-lowest)', borderRadius: '8px', border: '2px solid var(--color-surface-variant)' }}
+                contentStyle={{ backgroundColor: 'var(--color-surface-container-lowest)', borderRadius: '8px', border: 'none', boxShadow: '0 6px 24px rgba(17,17,20,0.12)' }}
                 itemStyle={{ color: 'var(--color-primary)' }}
               />
-              <Area type="monotone" dataKey="words" stroke="var(--color-primary)" strokeWidth={3} fillOpacity={1} fill="url(#colorWords)" />
+              <Area type="monotone" dataKey="words" stroke="var(--color-primary)" strokeWidth={2} fillOpacity={1} fill="url(#colorWords)" />
             </AreaChart>
           </ResponsiveContainer>
         </div>
       </section>
 
-      <section className="tactile-card p-6">
-        <h2 className="text-body-ui font-bold text-on-surface mb-4">Reading Activity (30 Days)</h2>
+      <section className="tactile-card p-5">
+        <h2 className="text-body-ui font-bold text-on-surface mb-4">Reading, last 30 days</h2>
         <p className="mb-3 text-sm text-on-surface-variant">Darker = more words read that day.</p>
         <div className="flex flex-wrap gap-2">
           {heatmapData.map((day, i) => (
@@ -206,8 +214,8 @@ export default function CenterClient() {
       </section>
 
       {grammarMastery.length > 0 && (
-        <section className="tactile-card p-6">
-          <h2 className="text-body-ui font-bold text-on-surface mb-6">Grammar Accuracy</h2>
+        <section className="tactile-card p-5">
+          <h2 className="text-body-ui font-bold text-on-surface mb-6">Grammar accuracy</h2>
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <RadarChart cx="50%" cy="50%" outerRadius="70%" data={grammarChartData}>
@@ -216,7 +224,7 @@ export default function CenterClient() {
                 <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
                 <Radar name="Accuracy" dataKey="A" stroke="var(--color-success)" strokeWidth={2} fill="var(--color-success)" fillOpacity={0.5} />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: 'var(--color-surface-container-lowest)', borderRadius: '8px', border: '2px solid var(--color-surface-variant)' }}
+                  contentStyle={{ backgroundColor: 'var(--color-surface-container-lowest)', borderRadius: '8px', border: 'none', boxShadow: '0 6px 24px rgba(17,17,20,0.12)' }}
                 />
               </RadarChart>
             </ResponsiveContainer>

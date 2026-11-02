@@ -1,9 +1,9 @@
 import type { TimelinePosition } from '@/lib/tenses/guide'
 
 const SEGMENTS: Array<{ key: TimelinePosition | 'now'; label: string }> = [
-  { key: 'past', label: 'BEFORE' },
-  { key: 'now', label: 'NOW' },
-  { key: 'future', label: 'LATER' },
+  { key: 'past', label: 'Before' },
+  { key: 'now', label: 'Now' },
+  { key: 'future', label: 'Later' },
 ]
 
 /** Three-block picture: where on the time line does this tense live? */
@@ -11,7 +11,7 @@ export function Timeline({ position, label }: { position: TimelinePosition; labe
   const active = position === 'wish' ? 'now' : position
   return (
     <figure aria-label={`${label} sits ${position === 'wish' ? 'outside real time (wishes, politeness, what-ifs)' : position === 'now' ? 'at the present' : position === 'past' ? 'in the past' : 'in the future'}`}>
-      <div className="flex overflow-hidden rounded-xl border-2 border-surface-variant">
+      <div className="flex overflow-hidden rounded-xl">
         {SEGMENTS.map((segment) => {
           const on = segment.key === active
           return (

@@ -15,20 +15,16 @@ export function LifeDocuments({ documents, renderFrench }: { documents: LifeDocu
   return (
     <section aria-labelledby="in-real-life" className="mb-8">
       <div className="flex items-center justify-between gap-3">
-        <div>
-          <p className="text-label-caps text-primary">IN REAL LIFE</p>
-          <h2 id="in-real-life" className="text-headline-md">What you would really see</h2>
-        </div>
+        <h2 id="in-real-life" className="text-headline-md">In real life</h2>
         <button
           type="button"
           aria-pressed={showEnglish}
           onClick={() => setShowEnglish((value) => !value)}
-          className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl border-2 border-surface-variant bg-surface-container-lowest px-3 text-sm font-bold text-on-surface"
+          className="inline-flex min-h-9 shrink-0 items-center gap-2 rounded-full bg-surface-container-low px-3 text-sm font-semibold text-on-surface"
         >
           {showEnglish ? <EyeOff className="size-4" /> : <Eye className="size-4" />} {showEnglish ? 'Hide English' : 'Show English'}
         </button>
       </div>
-      <p className="mt-1 text-sm text-on-surface-variant">Try to read first. Tap any word for its meaning.</p>
       <div className="mt-4 space-y-6">
         {documents.map((doc, index) => (
           <DocumentView key={`${doc.kind}-${index}`} doc={doc} docIndex={index} showEnglish={showEnglish} renderFrench={renderFrench} />
@@ -50,8 +46,8 @@ function DocumentView({ doc, docIndex, showEnglish, renderFrench }: { doc: LifeD
   switch (doc.kind) {
     case 'chat':
       return (
-        <figure aria-label={doc.title} className="overflow-hidden rounded-2xl border-2 border-surface-variant bg-surface-container-low">
-          <figcaption className="flex items-center gap-2 border-b-2 border-surface-variant bg-surface-container-lowest px-4 py-3">
+        <figure aria-label={doc.title} className="overflow-hidden rounded-2xl bg-surface-container-low">
+          <figcaption className="flex items-center gap-2 border-b bg-surface-container-lowest px-4 py-3">
             <Smartphone className="size-4 text-primary" />
             <span className="text-sm font-bold">{doc.app}</span>
             <span className="text-sm text-on-surface-variant">· {doc.contact}</span>
@@ -59,7 +55,7 @@ function DocumentView({ doc, docIndex, showEnglish, renderFrench }: { doc: LifeD
           <ul className="space-y-3 p-4">
             {doc.messages.map((message, i) => (
               <li key={i} className={`flex ${message.from === 'me' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[88%] rounded-2xl px-4 py-2 ${message.from === 'me' ? 'rounded-br-sm bg-primary-fixed' : 'rounded-bl-sm border-2 border-surface-variant bg-surface-container-lowest'}`}>
+                <div className={`max-w-[88%] rounded-2xl px-4 py-2 ${message.from === 'me' ? 'rounded-br-sm bg-primary-fixed' : 'rounded-bl-sm bg-surface-container-lowest'}`}>
                   {message.name && <p className="text-xs font-bold text-primary">{message.name}</p>}
                   <div className="flex items-start gap-1">
                     <div>{fr(message, `m${i}`)}</div>
@@ -75,7 +71,7 @@ function DocumentView({ doc, docIndex, showEnglish, renderFrench }: { doc: LifeD
 
     case 'menu':
       return (
-        <figure aria-label={doc.title} className="rounded-2xl border-2 border-dashed border-ink-medium bg-reading-bg p-5">
+        <figure aria-label={doc.title} className="rounded-[20px] bg-[#FBF7F0] p-5">
           <figcaption className="text-center">
             <UtensilsCrossed className="mx-auto size-5 text-secondary" />
             <div className="mt-1 text-headline-md">{fr(doc.place, 'place')}</div>
@@ -83,7 +79,7 @@ function DocumentView({ doc, docIndex, showEnglish, renderFrench }: { doc: LifeD
           </figcaption>
           {doc.sections.map((section, s) => (
             <div key={s} className="mt-5">
-              <div className="border-b-2 border-ink-dark pb-1 text-label-caps text-secondary">{fr(section.heading, `h${s}`)}</div>
+              <div className="border-b border-[#E8DFD0] pb-1 text-label-caps text-secondary">{fr(section.heading, `h${s}`)}</div>
               <English show={showEnglish}>{section.heading.en}</English>
               <ul className="mt-2 space-y-2">
                 {section.items.map((item, i) => (
@@ -103,13 +99,13 @@ function DocumentView({ doc, docIndex, showEnglish, renderFrench }: { doc: LifeD
 
     case 'receipt':
       return (
-        <figure aria-label={doc.title} className="mx-auto max-w-sm rounded-sm border-2 border-dashed border-ink-medium bg-reading-bg p-5 font-mono">
+        <figure aria-label={doc.title} className="mx-auto max-w-sm rounded-[20px] bg-[#FBF7F0] p-5">
           <figcaption className="text-center">
             <Receipt className="mx-auto size-5 text-ink-medium" />
             <div className="mt-1 text-lg font-bold">{fr(doc.place, 'place')}</div>
             <English show={showEnglish}>{doc.place.en}</English>
           </figcaption>
-          <ul className="mt-4 space-y-2 border-y-2 border-dashed border-ink-medium py-3">
+          <ul className="mt-4 space-y-2 border-y border-[#E8DFD0] py-3">
             {doc.lines.map((line, i) => (
               <li key={i} className="flex items-baseline justify-between gap-3">
                 <div>
@@ -136,7 +132,7 @@ function DocumentView({ doc, docIndex, showEnglish, renderFrench }: { doc: LifeD
 
     case 'idcard':
       return (
-        <figure aria-label={doc.title} className="rounded-2xl border-2 border-primary-container bg-primary-fixed/40 p-5">
+        <figure aria-label={doc.title} className="rounded-2xl bg-primary-fixed/40 p-5">
           <figcaption className="flex items-center gap-2 text-label-caps text-primary"><UserRound className="size-4" />{fr(doc.header, 'header')}</figcaption>
           <English show={showEnglish}>{doc.header.en}</English>
           <dl className="mt-3 grid grid-cols-2 gap-3">
@@ -153,8 +149,8 @@ function DocumentView({ doc, docIndex, showEnglish, renderFrench }: { doc: LifeD
 
     case 'agenda':
       return (
-        <figure aria-label={doc.title} className="rounded-2xl border-2 border-surface-variant bg-surface-container-lowest">
-          <figcaption className="flex items-center gap-2 border-b-2 border-surface-variant px-4 py-3 text-sm font-bold"><CalendarDays className="size-4 text-primary" /> {doc.title}</figcaption>
+        <figure aria-label={doc.title} className="rounded-2xl bg-surface-container-low">
+          <figcaption className="flex items-center gap-2 border-b px-4 py-3 text-sm font-bold"><CalendarDays className="size-4 text-primary" /> {doc.title}</figcaption>
           <ul className="divide-y divide-surface-variant">
             {doc.days.map((day, d) => (
               <li key={d} className="flex gap-4 px-4 py-3">
@@ -179,7 +175,7 @@ function DocumentView({ doc, docIndex, showEnglish, renderFrench }: { doc: LifeD
 
     case 'family':
       return (
-        <figure aria-label={doc.title} className="rounded-2xl border-2 border-surface-variant bg-surface-container-lowest p-5">
+        <figure aria-label={doc.title} className="rounded-2xl bg-surface-container-low p-5">
           <figcaption className="flex items-center gap-2 text-sm font-bold"><Users className="size-4 text-primary" /> {doc.title}</figcaption>
           <div className="mt-4 flex flex-col items-center gap-3">
             <div className="flex flex-wrap justify-center gap-3">

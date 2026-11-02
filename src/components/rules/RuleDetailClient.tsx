@@ -26,11 +26,11 @@ async function recordRuleMistake(category: string, context: string) {
 
 function RuleTableView({ table }: { table: RuleTable }) {
   return (
-    <div className="mt-3 overflow-x-auto rounded-lg border-2 border-surface-variant">
-      {table.caption && <p className="bg-surface-container-low px-3 py-2 text-xs font-bold uppercase tracking-wide text-on-surface-variant">{table.caption}</p>}
+    <div className="mt-3 overflow-x-auto rounded-lg">
+      {table.caption && <p className="bg-surface-container-low px-3 py-2 text-xs font-bold text-on-surface-variant">{table.caption}</p>}
       <table className="w-full min-w-[280px] text-left text-sm">
         <thead>
-          <tr className="border-b border-surface-variant bg-surface-container-low">
+          <tr className="border-b bg-surface-container-low">
             {table.headers.map((header) => (
               <th key={header} className="px-3 py-2 font-bold text-on-surface">{header}</th>
             ))}
@@ -38,7 +38,7 @@ function RuleTableView({ table }: { table: RuleTable }) {
         </thead>
         <tbody>
           {table.rows.map((row, index) => (
-            <tr key={index} className="border-b border-surface-container-high last:border-0">
+            <tr key={index} className="border-b last:border-0">
               {row.map((cell, cellIndex) => (
                 <td key={cellIndex} className="px-3 py-2 text-on-surface-variant">{cell}</td>
               ))}
@@ -114,13 +114,13 @@ export function RuleDetailClient({ teaser }: { teaser: PublicGrammarRule }) {
     return (
       <div className="tactile-card mt-6 space-y-4 p-6">
         <h1 className="text-headline-lg">{loadError ? teaser.title : 'Not available yet'}</h1>
-        <p className="text-body-reading text-on-surface-variant">
+        <p className="text-sm text-on-surface-variant">
           {loadError
             ? 'Could not load this grammar page. Try again after refreshing.'
             : 'This grammar page unlocks after you finish the lesson that teaches it. Keep learning — it will appear in your rulebook when ready.'}
         </p>
         <p className="text-sm text-on-surface-variant">{teaser.summary}</p>
-        <Link href="/rules/" className="tactile-button inline-flex rounded-lg border-2 border-surface-variant bg-surface-container-low px-4 py-2 text-sm font-bold text-on-surface">
+        <Link href="/rules/" className="tactile-button inline-flex rounded-lg bg-surface-container-low px-4 py-2 text-sm font-bold text-on-surface">
           Back to rulebook
         </Link>
       </div>
@@ -160,7 +160,7 @@ export function RuleDetailClient({ teaser }: { teaser: PublicGrammarRule }) {
       {tab === 'quick' && (
         <section className="tactile-card space-y-4 p-6">
           <h2 className="text-headline-md">Quick reference</h2>
-          <ul className="list-disc space-y-2 pl-5 text-body-reading text-on-surface-variant">
+          <ul className="list-disc space-y-2 pl-5 text-sm text-on-surface-variant">
             {rule.quickReference.bullets.map((bullet) => (
               <li key={bullet}>
                 <RichText text={bullet} />
@@ -178,12 +178,12 @@ export function RuleDetailClient({ teaser }: { teaser: PublicGrammarRule }) {
         <section className="space-y-4">
           <article className="tactile-card space-y-3 p-6">
             <h2 className="text-headline-md">Why this matters</h2>
-            <RichText text={rule.deepDive.whyItMatters} className="text-body-reading text-on-surface-variant" />
+            <RichText text={rule.deepDive.whyItMatters} className="text-sm text-on-surface-variant" />
           </article>
           {rule.deepDive.sections.map((section) => (
             <article key={section.heading} className="tactile-card space-y-3 p-6">
               <h3 className="text-lg font-bold">{section.heading}</h3>
-              <RichText text={section.body} className="text-body-reading text-on-surface-variant" />
+              <RichText text={section.body} className="text-sm text-on-surface-variant" />
               {section.table && <RuleTableView table={section.table} />}
             </article>
           ))}
@@ -232,7 +232,7 @@ export function RuleDetailClient({ teaser }: { teaser: PublicGrammarRule }) {
                   <blockquote key={example.french} className="rounded-lg border-l-4 border-primary bg-surface-container-low p-4">
                     <p className="font-reading text-lg">{example.french}</p>
                     <p className="mt-1 text-sm text-on-surface-variant">{example.english}</p>
-                    {example.focus && <p className="mt-2 text-[10px] font-bold uppercase tracking-wide text-primary">Focus: {example.focus}</p>}
+                    {example.focus && <p className="mt-2 text-[10px] font-bold text-primary">Focus: {example.focus}</p>}
                   </blockquote>
                 ))}
               </div>
@@ -260,7 +260,7 @@ export function RuleDetailClient({ teaser }: { teaser: PublicGrammarRule }) {
         <section className="space-y-4">
           {rule.drills.map((drill, index) => (
             <article key={drill.id} className="space-y-2">
-              <h2 className="px-1 text-sm font-bold uppercase tracking-wide text-on-surface-variant">{drill.title}</h2>
+              <h2 className="px-1 text-sm font-bold text-on-surface-variant">{drill.title}</h2>
               <ExerciseCard
                 exercise={drill.exercise}
                 index={index}
