@@ -172,4 +172,4 @@ Last updated: **2026-07-27** (dictionary tap miss driven to 0% across 720 lesson
 | R3-15 | fixed | No listen-only audio | `SpeakButton` (needs iPhone test, voice may need download) |
 | R3-16 | open | Business track has no hand-written lessons (email, meetings, phone, negotiation); it reuses generated modules 14, 21, 29, 31 | `tracks.ts` |
 | R3-17 | fixed | iPhone Safari blocks cross-site login cookies | Login relay; verified end to end with all cookies off from wkk-ai.github.io (sign-up, sign-in, wrong password, token, upload, download, sign-out revokes). Still to try on the real iPhone |
-| R3-18 | open | Neon Auth still allows new sign-ups; turn off after owner account exists | Neon Console |
+| R3-18 | open | Sign-up closed in app + relay (2026-11-02); Neon Auth itself still accepts direct sign-ups until the Console switch is turned off | Neon Console |

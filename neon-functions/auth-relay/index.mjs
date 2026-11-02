@@ -13,6 +13,7 @@ const AUTH_BASE = 'https://ep-shiny-frog-b6jsw3dy.neonauth.c-2.sa-east-1.aws.neo
 const APP_ORIGIN = 'https://wkk-ai.github.io'
 const ALLOWED_ORIGINS = new Set([APP_ORIGIN, 'http://localhost:3000'])
 const MAX_BODY = 4096
+const SIGNUP_OPEN = false
 
 function cors(origin) {
   const allowed = ALLOWED_ORIGINS.has(origin) ? origin : APP_ORIGIN
@@ -67,6 +68,9 @@ export default {
     }
 
     try {
+      // New accounts are closed: the owner's account exists. Set SIGNUP_OPEN = true to reopen.
+      if (path === '/sign-up' && !SIGNUP_OPEN) return json(403, { message: 'New accounts are closed', code: 'SIGNUP_CLOSED' }, origin)
+
       if (path === '/sign-in' || path === '/sign-up') {
         const body =
           path === '/sign-in'

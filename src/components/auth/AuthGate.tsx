@@ -5,6 +5,9 @@ import { Lock } from 'lucide-react'
 import { getCachedUser, signIn, signUp, subscribeAuth, type CloudUser } from '@/lib/cloud/auth'
 import { startAutoSync, syncNow } from '@/lib/cloud/sync'
 
+/** New accounts are closed (the owner's account exists). Also closed in the login relay. */
+const SIGNUP_OPEN = false
+
 /**
  * Asks for email + password once per phone. After that the app opens offline too
  * (the signed-in person is remembered on the phone) and progress syncs when online.
@@ -87,13 +90,15 @@ function LoginScreen() {
         <button type="submit" disabled={busy} className="tactile-button mt-6 w-full rounded-xl bg-primary py-4 font-bold text-on-primary disabled:opacity-60">
           {busy ? 'Please wait…' : mode === 'in' ? 'Sign in' : 'Create account'}
         </button>
-        <button
-          type="button"
-          onClick={() => { setMode(mode === 'in' ? 'up' : 'in'); setError(null) }}
-          className="mt-3 min-h-11 w-full text-sm font-bold text-primary"
-        >
-          {mode === 'in' ? 'First time? Create an account' : 'I already have an account'}
-        </button>
+        {SIGNUP_OPEN && (
+          <button
+            type="button"
+            onClick={() => { setMode(mode === 'in' ? 'up' : 'in'); setError(null) }}
+            className="mt-3 min-h-11 w-full text-sm font-bold text-primary"
+          >
+            {mode === 'in' ? 'First time? Create an account' : 'I already have an account'}
+          </button>
+        )}
       </form>
     </main>
   )
