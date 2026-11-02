@@ -127,21 +127,21 @@ export function ex(key: string) {
 function briefBody(spec: UnitSpec): string {
   const out: string[] = [`What you will be able to do: ${spec.goal}`, '']
   let n = 1
-  out.push(`**${n++}. Words to learn first (meanings)**`, 'Read each word and its meaning before the grammar. Tap any French word later in the lesson to see it again.', '')
+  out.push(`**${n++}. Words to learn first (meanings)**`, '', 'Read each word and its meaning before the grammar. Tap any French word later in the lesson to see it again.', '')
   for (const group of spec.words) {
     out.push(`${group.group}:`)
     for (const word of group.items) out.push(`- *${word.fr}* = ${word.en}${word.note ? ` (${word.note})` : ''}`)
     out.push('')
   }
-  out.push(`**${n++}. Useful phrases (learn them whole)**`)
+  out.push(`**${n++}. Useful phrases (learn them whole)**`, '')
   for (const [fr, en] of spec.chunks) out.push(`- *${fr}* = ${en}`)
   out.push('')
   for (const section of spec.sections) {
-    out.push(`**${n++}. ${section.title}**`, ...section.lines, '')
+    out.push(`**${n++}. ${section.title}**`, '', ...section.lines, '')
   }
-  out.push(`**${n++}. Traps to avoid**`)
+  out.push(`**${n++}. Traps to avoid**`, '')
   for (const trap of spec.traps) out.push(`- ${trap}`)
-  out.push('', `**${n}. How to do this lesson**`, 'Read the story slowly and tap every word you are not sure about. Then listen to the conversation, and finish the practice. Wrong answers come back in Review.')
+  out.push('', `**${n}. How to do this lesson**`, '', 'Read the story slowly and tap every word you are not sure about. Then listen to the conversation, and finish the practice. Wrong answers come back in Review.')
   return out.join('\n')
 }
 

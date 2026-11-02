@@ -52,7 +52,7 @@ function GoalRow({ goal }: { goal: TenseGoal }) {
         <span aria-hidden="true" className="flex h-10 w-14 shrink-0 items-center justify-center rounded-xl text-[11px] font-bold" style={{ background: tag.tint, color: tag.ink }}>{tag.tag}</span>
         <span className="min-w-0 flex-1">
           <span className="block text-body-ui font-semibold">{goal.title}</span>
-          <span className="block truncate font-reading text-[15px] text-on-surface-variant">{goal.life[0]?.fr}</span>
+          <span className="block truncate text-[15px] text-on-surface-variant">{goal.life[0]?.fr}</span>
         </span>
         <ChevronRight className="size-5 shrink-0 text-outline" />
       </Link>

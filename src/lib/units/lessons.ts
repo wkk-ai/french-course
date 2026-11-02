@@ -59,5 +59,5 @@ export function resolveUnitLesson(unitId: string): LessonContent | null {
   // Pull practice from the old B/C/D chapters of this unit so nothing good is lost.
   const more = unit.legacyIds.slice(1).flatMap((id) => resolveLessonContent(id, null)?.exercises ?? [])
   const exercises = dedupe([...(base.exercises ?? []), ...more]).filter((exercise) => !isJunkExercise(exercise))
-  return { ...base, exercises: exercises.slice(0, 40) }
+  return { ...base, exercises: exercises.slice(0, 30) }
 }

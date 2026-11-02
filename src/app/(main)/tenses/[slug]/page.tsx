@@ -48,7 +48,7 @@ export default async function TenseGoalPage({ params }: { params: Promise<{ slug
             return (
               <li key={line}>
                 {line.slice(0, cut + 2)}
-                <FrenchText className="font-reading" text={line.slice(cut + 2)} />
+                <FrenchText className="" text={line.slice(cut + 2)} />
               </li>
             )
           })}

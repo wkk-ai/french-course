@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { UNIT_BY_LEGACY_ID } from '@/lib/pathway/units'
 import { useEffect, useMemo, useState } from 'react'
 import { ExerciseCard } from '@/components/lesson/ExerciseCard'
 import { RichText } from '@/components/RichText'
@@ -227,7 +228,7 @@ export function RuleDetailClient({ teaser }: { teaser: PublicGrammarRule }) {
               <div className="grid gap-3">
                 {group.items.map((example) => (
                   <blockquote key={example.french} className="rounded-2xl bg-surface-container-low p-4">
-                    <p className="font-reading text-lg"><FrenchText text={example.french} /></p>
+                    <p className="text-lg"><FrenchText text={example.french} /></p>
                     <p className="mt-1 text-sm text-on-surface-variant">{example.english}</p>
                     {example.focus && <p className="mt-2 text-[10px] font-bold text-primary">Focus: {example.focus}</p>}
                   </blockquote>
@@ -286,16 +287,18 @@ export function RuleDetailClient({ teaser }: { teaser: PublicGrammarRule }) {
       <section className="tactile-card space-y-3 p-6">
         <h2 className="text-headline-md">Practice in the app</h2>
         <div className="space-y-2">
-          {rule.linkedLessons.map((lesson) => (
+          {[...new Map(rule.linkedLessons.flatMap((lesson) => {
+            // Old A/B/C/D chapters now live inside one lesson per unit.
+            const unit = UNIT_BY_LEGACY_ID.get(lesson.chapterId)
+            return unit ? [[unit.id, unit] as const] : []
+          })).values()].map((unit) => (
             <Link
-              key={lesson.chapterId}
-              href={`/lesson/${lesson.chapterId}/`}
-              className="flex items-center justify-between rounded-lg bg-surface-container-low px-3 py-3 text-sm font-semibold text-primary hover:bg-surface-container-high"
+              key={unit.id}
+              href={`/lesson/${unit.id}/`}
+              className="flex min-h-12 items-center justify-between gap-3 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-on-surface"
             >
-              <span>
-                {lesson.lessonLabel} · {lesson.title}
-              </span>
-              <span className="text-xs text-on-surface-variant">{lesson.note ?? 'Open lesson'}</span>
+              <span>Module {unit.moduleOrder} · {unit.title}</span>
+              <span className="shrink-0 text-xs text-primary">Open</span>
             </Link>
           ))}
         </div>

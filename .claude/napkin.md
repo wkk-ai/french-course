@@ -47,6 +47,9 @@
 2. **[2026-07-24] Always commit + push when finished (this chat / this product)**
    Do instead: end every completed change set with commit → push → Pages deploy so the user can check live.
 
+3a. **[2026-11-02] Lesson UX rules (owner feedback)**
+   Do instead: every step change scrolls to top; one question at a time with Continue; the Finish button appears only at the end; body must be min-h-full (h-full made the bottom of long pages hide under the menu); punctuation clings to words (thin space before ! ? : ;); no filler stamp on hand dialogues; screenshot the whole journey on 390px before shipping.
+
 3. **[2026-11-02] One lesson per unit; hand-write every unit (supersedes the 720 craft rule below)**
    Do instead: user rejected generated filler ("Ils disent bonjour" x336, all-correct MCQs, FR=EN questions). Write each unit by hand with `src/lib/units/kit.ts`, same length, real scenes with a running cast (Lucas from Brazil in Lyon). Run `emit-unit-index` + `tests/unit-lessons.test.ts`. Mark untouched modules Draft. User keeps lesson length: "I complete them quickly" — do not shorten.
 

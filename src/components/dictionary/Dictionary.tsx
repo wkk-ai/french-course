@@ -78,7 +78,7 @@ export function DictionaryProvider({ children }: { children: ReactNode }) {
             </ul>
             {word.example && (
               <div className="mt-3 rounded-2xl bg-surface-container-low p-3">
-                <p className="font-reading text-[17px]">{word.example.french}</p>
+                <p className="text-[17px]">{word.example.french}</p>
                 <p className="text-sm text-on-surface-variant">{word.example.english}</p>
               </div>
             )}

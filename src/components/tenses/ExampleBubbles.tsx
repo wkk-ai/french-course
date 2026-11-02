@@ -35,7 +35,7 @@ function BubbleGroup({ title, icon, examples }: { title: string; icon: 'life' | 
               }`}
             >
               <div className="flex items-start gap-1">
-                <p className="font-reading text-body-reading text-ink-dark"><FrenchText text={example.fr} /></p>
+                <p className="text-body-reading text-ink-dark"><FrenchText text={example.fr} /></p>
                 <SpeakButton text={example.fr} />
               </div>
               <p className="text-sm text-on-surface-variant">{example.en}</p>

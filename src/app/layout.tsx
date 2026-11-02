@@ -47,7 +47,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${manrope.variable} ${sourceSerif.variable} antialiased h-full`}>
-      <body className="font-ui bg-background text-on-surface h-full flex flex-col">
+      <body className="font-ui bg-background text-on-surface min-h-full flex flex-col">
         <PwaRegistration />
         <AuthGate>{children}</AuthGate>
       </body>

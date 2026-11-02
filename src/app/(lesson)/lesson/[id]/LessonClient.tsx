@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { BookOpen, ChevronRight, Eye, MessagesSquare, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { createPortal } from 'react-dom'
 import type { ExerciseAnswer, GrammarRule, LessonContent, VerbConjugation, VocabularyWord, WordToken } from '@/lib/course'
 import { ExerciseCard } from '@/components/lesson/ExerciseCard'
 import { buildRemediationExercises } from '@/lib/exercises/remediation'
@@ -249,7 +250,9 @@ export default function LessonClient({
   const currentExerciseAnswered = currentExercise
     ? isExerciseAnswered(currentExercise, answers[currentExercise.id])
     : false
-  const answeredExerciseCount = exercises.filter((exercise) => isExerciseAnswered(exercise, answers[exercise.id])).length
+  const correctCount = exercises.filter((exercise) => isExerciseCorrect(exercise, answers[exercise.id])).length
+  const isLastExercise = exerciseIndex >= exercises.length - 1
+  const firstUnanswered = Math.max(0, exercises.findIndex((exercise) => !isExerciseAnswered(exercise, answers[exercise.id])))
   const scoringExercises = baseExercises
   const answeredAll =
     scoringExercises.length > 0 &&
@@ -278,9 +281,9 @@ export default function LessonClient({
     if (exerciseIndex >= exercises.length) setExerciseIndex(exercises.length - 1)
   }, [exerciseIndex, exercises.length])
 
+  // Every new step (stage or question) starts at the top of the screen.
   useEffect(() => {
-    if (stage !== 'exercise') return
-    exerciseSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior })
   }, [exerciseIndex, stage])
 
   const syntaxClass = (token: WordToken) => {
@@ -301,7 +304,8 @@ export default function LessonClient({
     const previous = tokens[index - 1].text
     // French guillemets take a space on the outside/inside: « bonjour »
     if (current === '«' || current === '»') return true
-    // Other closing punctuation clings to the previous word.
+    // French puts a thin space before ! ? : ; (Bonjour !). Other punctuation clings to the word.
+    if (/^[!?:;]/.test(current)) return 'thin'
     if (isPunctuationToken(current)) return false
     // After opening guillemet: space before the quoted word.
     if (previous === '«') return true
@@ -342,13 +346,13 @@ export default function LessonClient({
         const showConjugate = word && word.part_of_speech !== 'unknown' ? isConjugableVerb(word) : false
         const known = Boolean(token.lemmaId && vocabularyById.get(token.lemmaId))
         const clickableClass = showConjugate
-          ? 'cursor-pointer rounded px-0.5 text-left hover:bg-syntax-verb/10'
+          ? 'cursor-pointer rounded -mx-0.5 px-0.5 text-left hover:bg-syntax-verb/10'
           : known
-            ? 'cursor-pointer rounded px-0.5 text-left hover:bg-surface-container-high'
-            : 'cursor-pointer rounded px-0.5 text-left underline decoration-dotted decoration-on-surface-variant/40 hover:bg-surface-container-high'
+            ? 'cursor-pointer rounded -mx-0.5 px-0.5 text-left hover:bg-surface-container-high'
+            : 'cursor-pointer rounded -mx-0.5 px-0.5 text-left underline decoration-dotted decoration-on-surface-variant/40 hover:bg-surface-container-high'
         return (
           <span key={token.id} className="relative inline">
-            {spaceBefore ? ' ' : null}
+            {spaceBefore === 'thin' ? '\u202F' : spaceBefore ? ' ' : null}
             {word ? (
               <button
                 type="button"
@@ -367,7 +371,7 @@ export default function LessonClient({
             ) : (
               <span className={syntaxClass(token)}>{token.text}</span>
             )}
-            {active && word && (
+            {active && word && typeof document !== 'undefined' && createPortal(
               <div
                 ref={popupRef}
                 role="dialog"
@@ -430,7 +434,8 @@ export default function LessonClient({
                     Conjugate
                   </button>
                 )}
-              </div>
+              </div>,
+              document.body,
             )}
           </span>
         )
@@ -683,28 +688,9 @@ export default function LessonClient({
                 : 'Wrong answers go to Review.'}
             </p>
             {exercises.length > 0 && (
-              <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-surface-container-low p-4">
-                <p className="text-sm text-on-surface-variant">
-                  <span className="font-semibold text-on-surface">{answeredExerciseCount} of {exercises.length}</span> answered
-                </p>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    disabled={exerciseIndex === 0}
-                    onClick={() => setExerciseIndex((index) => Math.max(0, index - 1))}
-                    className="tactile-button rounded-lg bg-surface-container-low px-4 py-2 text-sm font-bold text-on-surface disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    Prev
-                  </button>
-                  <button
-                    type="button"
-                    disabled={exerciseIndex >= exercises.length - 1 || !currentExerciseAnswered}
-                    onClick={() => setExerciseIndex((index) => Math.min(exercises.length - 1, index + 1))}
-                    className="tactile-button rounded-lg bg-surface-container-low px-4 py-2 text-sm font-bold text-on-surface disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    Next
-                  </button>
-                </div>
+              <div className="flex items-center justify-between text-sm text-on-surface-variant">
+                <span>Question <span className="font-semibold text-on-surface">{exerciseIndex + 1}</span> of {exercises.length}</span>
+                <span>{correctCount} correct</span>
               </div>
             )}
             {isProve && answeredAll && (
@@ -749,17 +735,39 @@ export default function LessonClient({
             )}
             {error && <p role="alert" className="rounded-lg bg-error-container p-3 text-sm text-on-error-container">{error}</p>}
             <div className="flex gap-3">
-              <button type="button" onClick={() => goToStage(hasConversation ? 'conversation' : 'reading')} className="tactile-button flex-1 rounded-xl bg-surface-container-low py-4 font-bold text-on-surface">
-                Back
-              </button>
               <button
                 type="button"
-                disabled={!answeredAll || loading || (isProve && !provePassed)}
-                onClick={completeLesson}
-                className="tactile-button flex-[2] rounded-xl border-[#46a302] bg-success py-4 font-bold text-[#0b3d0b] disabled:cursor-not-allowed disabled:opacity-50"
+                onClick={() => (exerciseIndex > 0 ? setExerciseIndex(exerciseIndex - 1) : goToStage(hasConversation ? 'conversation' : 'reading'))}
+                className="tactile-button min-h-14 flex-1 bg-surface-container-low text-body-ui text-on-surface"
               >
-                {loading ? 'Saving…' : isProve ? 'Pass check' : 'Complete lesson'}
+                Back
               </button>
+              {isLastExercise && answeredAll ? (
+                <button
+                  type="button"
+                  disabled={loading || (isProve && !provePassed)}
+                  onClick={completeLesson}
+                  className="tactile-button min-h-14 flex-[2] bg-success text-body-ui text-white disabled:opacity-50"
+                >
+                  {loading ? 'Saving…' : isProve ? 'Pass check' : 'Finish lesson'}
+                </button>
+              ) : isLastExercise && currentExerciseAnswered ? (
+                <button
+                  type="button"
+                  onClick={() => setExerciseIndex(firstUnanswered)}
+                  className="tactile-button min-h-14 flex-[2] bg-primary text-body-ui text-on-primary"
+                >
+                  Answer the skipped ones
+                </button>
+              ) : currentExerciseAnswered ? (
+                <button
+                  type="button"
+                  onClick={() => setExerciseIndex(exerciseIndex + 1)}
+                  className="tactile-button min-h-14 flex-[2] bg-primary text-body-ui text-on-primary"
+                >
+                  Continue
+                </button>
+              ) : null}
             </div>
           </section>
         )}

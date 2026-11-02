@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import type { ExerciseAnswer, LessonExercise } from '@/lib/exercises/types'
 import { exerciseType } from '@/lib/exercises/types'
 import { correctAnswerLabel, isExerciseCorrect } from '@/lib/exercises/grading'
+import { InlineText } from '@/components/RichText'
 
 function shuffle<T>(items: T[]): T[] {
   const copy = [...items]
@@ -35,10 +36,10 @@ function seededOrder(length: number, seed: string): number[] {
 }
 
 function optionClasses(locked: boolean, isSelected: boolean, isCorrectOption: boolean, userCorrect: boolean) {
-  if (locked && isCorrectOption) return 'border-success bg-success/10 text-tertiary'
-  if (locked && isSelected && !userCorrect) return 'border-error bg-error-container/40 text-on-error-container'
-  if (!locked) return 'border-surface-variant hover:bg-surface-container-low'
-  return 'border-surface-variant'
+  if (locked && isCorrectOption) return 'bg-success/15 text-tertiary'
+  if (locked && isSelected && !userCorrect) return 'bg-error-container/70 text-on-error-container'
+  if (!locked) return 'bg-white active:bg-primary-fixed/40'
+  return 'bg-white text-on-surface-variant'
 }
 
 export function ExerciseCard({
@@ -229,7 +230,7 @@ export function ExerciseCard({
       <p className="text-label-caps text-primary">
         {exerciseType(exercise)} · {index + 1} of {total}{sourceLabel}
       </p>
-      <h2 className="mt-2 text-body-ui font-bold">{exercise.prompt}</h2>
+      <h2 className="mt-2 text-body-ui font-bold"><InlineText text={exercise.prompt} /></h2>
 
       {exercise.type === 'cloze' && (
         <div className="mt-4">
@@ -239,7 +240,7 @@ export function ExerciseCard({
             value={draftText}
             disabled={locked}
             placeholder="Type your answer…"
-            className="mt-3 w-full rounded-lg bg-surface-container-lowest px-3 py-2 text-sm disabled:opacity-70"
+            className="mt-3 w-full rounded-xl bg-white px-3.5 py-3 text-base disabled:opacity-70"
             onChange={(event) => setDraftText(event.target.value)}
             onKeyDown={(event) => {
               if (event.key === 'Enter') confirmDraftText()
@@ -250,9 +251,9 @@ export function ExerciseCard({
               type="button"
               onClick={confirmDraftText}
               disabled={!draftText.trim()}
-              className="tactile-button mt-3 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-on-primary disabled:opacity-50"
+              className="tactile-button mt-3 min-h-12 w-full bg-primary text-body-ui text-on-primary disabled:opacity-40"
             >
-              Confirm
+              Check
             </button>
           )}
         </div>
@@ -266,7 +267,7 @@ export function ExerciseCard({
             value={draftText}
             disabled={locked}
             placeholder="Type your translation…"
-            className="mt-3 w-full rounded-lg bg-surface-container-lowest px-3 py-2 text-sm disabled:opacity-70"
+            className="mt-3 w-full rounded-xl bg-white px-3.5 py-3 text-base disabled:opacity-70"
             onChange={(event) => setDraftText(event.target.value)}
             onKeyDown={(event) => {
               if (event.key === 'Enter') confirmDraftText()
@@ -277,9 +278,9 @@ export function ExerciseCard({
               type="button"
               onClick={confirmDraftText}
               disabled={!draftText.trim()}
-              className="tactile-button mt-3 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-on-primary disabled:opacity-50"
+              className="tactile-button mt-3 min-h-12 w-full bg-primary text-body-ui text-on-primary disabled:opacity-40"
             >
-              Confirm
+              Check
             </button>
           )}
         </div>
@@ -295,7 +296,7 @@ export function ExerciseCard({
             value={draftText}
             disabled={locked}
             placeholder="Type the conjugated form…"
-            className="mt-3 w-full rounded-lg bg-surface-container-lowest px-3 py-2 text-sm disabled:opacity-70"
+            className="mt-3 w-full rounded-xl bg-white px-3.5 py-3 text-base disabled:opacity-70"
             onChange={(event) => setDraftText(event.target.value)}
             onKeyDown={(event) => {
               if (event.key === 'Enter') confirmDraftText()
@@ -306,9 +307,9 @@ export function ExerciseCard({
               type="button"
               onClick={confirmDraftText}
               disabled={!draftText.trim()}
-              className="tactile-button mt-3 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-on-primary disabled:opacity-50"
+              className="tactile-button mt-3 min-h-12 w-full bg-primary text-body-ui text-on-primary disabled:opacity-40"
             >
-              Confirm
+              Check
             </button>
           )}
         </div>
@@ -316,7 +317,7 @@ export function ExerciseCard({
 
       {exercise.type === 'true-false' && (
         <div className="mt-4 grid grid-cols-2 gap-2">
-          <p className="col-span-2 rounded-lg bg-surface-container-low p-3 text-sm">{exercise.statement}</p>
+          <p className="col-span-2 rounded-xl bg-white/60 p-3 text-body-ui"><InlineText text={exercise.statement} /></p>
           {([true, false] as const).map((value) => {
             const isSelected = answer?.kind === 'boolean' && answer.value === value
             const isCorrectOption = value === exercise.answer
@@ -326,7 +327,7 @@ export function ExerciseCard({
                 type="button"
                 disabled={locked}
                 onClick={() => submitBoolean(value)}
-                className={`rounded-lg border-2 p-3 text-sm font-semibold disabled:cursor-default ${optionClasses(locked, isSelected, isCorrectOption, correct)}`}
+                className={`rounded-xl p-3.5 text-sm font-semibold disabled:cursor-default ${optionClasses(locked, isSelected, isCorrectOption, correct)}`}
               >
                 {value ? 'True' : 'False'}
               </button>
@@ -348,7 +349,7 @@ export function ExerciseCard({
                   type="button"
                   disabled={locked}
                   onClick={() => submitIndex(wordIndex)}
-                  className={`rounded-lg border-2 px-3 py-2 text-sm font-semibold disabled:cursor-default ${optionClasses(locked, isSelected, isCorrectOption, correct)}`}
+                  className={`rounded-xl px-3 py-2 text-sm font-semibold disabled:cursor-default ${optionClasses(locked, isSelected, isCorrectOption, correct)}`}
                 >
                   {word}
                 </button>
@@ -392,10 +393,10 @@ export function ExerciseCard({
                 <button
                   type="button"
                   onClick={confirmOrder}
-                  className="tactile-button rounded-lg bg-primary px-4 py-2 text-sm font-bold text-on-primary"
+                  className="tactile-button min-h-12 w-full bg-primary text-body-ui text-on-primary"
                 >
-                  Confirm
-                </button>
+              Check
+            </button>
               )}
             </div>
           )}
@@ -403,7 +404,7 @@ export function ExerciseCard({
       )}
 
       {exercise.type === 'match' && (
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <div className="mt-4 grid grid-cols-2 gap-2.5">
           <div className="space-y-2">
             {matchLeftOrder.map((leftIndex) => {
               const item = exercise.left[leftIndex]
@@ -415,10 +416,10 @@ export function ExerciseCard({
                   type="button"
                   disabled={locked || pairedRight !== undefined}
                   onClick={() => handleMatchClick('left', leftIndex)}
-                  className={`w-full rounded-lg border-2 p-2 text-left text-sm font-semibold disabled:cursor-default ${isSelected ? 'border-primary bg-primary-fixed/30' : pairedRight !== undefined ? 'border-success/50 bg-success/5' : 'border-surface-variant hover:bg-surface-container-low'}`}
+                  className={`min-h-12 w-full rounded-xl px-3 py-2.5 text-left text-sm font-semibold disabled:cursor-default ${isSelected ? 'bg-primary text-on-primary' : locked && pairedRight !== undefined ? (exercise.pairs.some(([l, r]) => l === leftIndex && r === pairedRight) ? 'bg-success/15 text-tertiary' : 'bg-error-container/70 text-on-error-container') : pairedRight !== undefined ? 'bg-primary-fixed/50 text-on-surface' : 'bg-white'}`}
                 >
                   {item}
-                  {pairedRight !== undefined ? ` → ${exercise.right[pairedRight]}` : ''}
+                  {pairedRight !== undefined && <span className="block text-xs font-normal text-on-surface-variant">= {exercise.right[pairedRight]}</span>}
                 </button>
               )
             })}
@@ -434,7 +435,7 @@ export function ExerciseCard({
                   type="button"
                   disabled={locked || isUsed}
                   onClick={() => handleMatchClick('right', rightIndex)}
-                  className={`w-full rounded-lg border-2 p-2 text-left text-sm font-semibold disabled:cursor-default ${isSelected ? 'border-primary bg-primary-fixed/30' : isUsed ? 'opacity-40' : 'border-surface-variant hover:bg-surface-container-low'}`}
+                  className={`min-h-12 w-full rounded-xl px-3 py-2.5 text-left text-sm font-semibold disabled:cursor-default ${isSelected ? 'bg-primary text-on-primary' : isUsed ? 'bg-white opacity-35' : 'bg-white'}`}
                 >
                   {item}
                 </button>
@@ -452,9 +453,9 @@ export function ExerciseCard({
                 <button
                   type="button"
                   onClick={confirmMatch}
-                  className="tactile-button rounded-lg bg-primary px-4 py-2 text-sm font-bold text-on-primary"
+                  className="tactile-button min-h-12 w-full bg-primary text-body-ui text-on-primary"
                 >
-                  Confirm match
+                  Check
                 </button>
               )}
             </div>
@@ -464,8 +465,8 @@ export function ExerciseCard({
 
       {(exercise.type === 'register' || exercise.type === 'dialogue') && (
         <div className="mt-4 space-y-3">
-          {'situation' in exercise && <p className="rounded-lg bg-surface-container-low p-3 text-sm text-on-surface-variant">{exercise.situation}</p>}
-          {'context' in exercise && <p className="rounded-lg bg-surface-container-low p-3 text-sm text-on-surface-variant">{exercise.context}</p>}
+          {'situation' in exercise && <p className="rounded-xl bg-white/60 p-3 text-sm text-on-surface-variant"><InlineText text={exercise.situation} /></p>}
+          {'context' in exercise && <p className="rounded-xl bg-white/60 p-3 text-sm text-on-surface-variant"><InlineText text={exercise.context} /></p>}
           <div className="grid gap-2">
             {exercise.options.map((option, optionIndex) => {
               const isSelected = answer?.kind === 'choice' && answer.value === optionIndex
@@ -476,7 +477,7 @@ export function ExerciseCard({
                   type="button"
                   disabled={locked}
                   onClick={() => submitChoice(optionIndex)}
-                  className={`rounded-lg border-2 p-3 text-left text-sm font-semibold disabled:cursor-default ${optionClasses(locked, isSelected, isCorrectOption, correct)}`}
+                  className={`rounded-xl p-3.5 text-left text-sm font-semibold disabled:cursor-default ${optionClasses(locked, isSelected, isCorrectOption, correct)}`}
                 >
                   {option}
                 </button>
@@ -497,7 +498,7 @@ export function ExerciseCard({
                 type="button"
                 disabled={locked}
                 onClick={() => submitChoice(optionIndex)}
-                className={`rounded-lg border-2 p-3 text-left text-sm font-semibold disabled:cursor-default ${optionClasses(locked, isSelected, isCorrectOption, correct)}`}
+                className={`rounded-xl p-3.5 text-left text-sm font-semibold disabled:cursor-default ${optionClasses(locked, isSelected, isCorrectOption, correct)}`}
               >
                 {option}
                 {locked && isCorrectOption ? ' ✓' : ''}
@@ -514,15 +515,16 @@ export function ExerciseCard({
         </button>
       )}
       {!locked && allowHints && hintShown && exercise.hint && (
-        <p className="mt-3 rounded-lg bg-primary-fixed/20 p-3 text-sm text-on-surface-variant">{exercise.hint}</p>
+        <p className="mt-3 rounded-lg bg-primary-fixed/20 p-3 text-sm text-on-surface-variant"><InlineText text={exercise.hint} /></p>
       )}
 
       {locked && (
         <div className="mt-4 space-y-3">
-          <p className={`text-sm ${correct ? 'text-tertiary' : 'text-secondary'}`}>
-            {correct ? 'Correct. ' : `Not quite — the answer is “${correctAnswerLabel(exercise)}”. `}
-            {exercise.explanation}
-          </p>
+          <div role="status" className={`rounded-xl p-3.5 text-sm ${correct ? 'bg-success/15 text-tertiary' : 'bg-error-container/60 text-on-error-container'}`}>
+            <p className="font-bold">{correct ? 'Correct!' : 'Not quite'}</p>
+            {!correct && <p className="mt-1">Answer: <span className="font-semibold">{correctAnswerLabel(exercise)}</span></p>}
+            <p className="mt-1 text-on-surface"><InlineText text={exercise.explanation} /></p>
+          </div>
           {!correct && isMcqExercise && onRetry && (
             <button
               type="button"

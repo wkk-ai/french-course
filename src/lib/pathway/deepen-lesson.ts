@@ -232,14 +232,7 @@ export function deepenLessonToModule1Bar(
     const text = raw.replace(/\bCheckpoint\b/gi, 'Contrôle').replace(/\bProve gate\b/gi, 'épreuve')
     return readingParagraphs(`scrub-${(chapterId ?? 'x').slice(-4)}-${index}`, [text], BUNDLED_VOCABULARY)[0] ?? paragraph
   })
-  let conversation = withBrief.conversation
-  if (isHand && chapterId && conversation?.lines?.length) {
-    const stamp = uniqueSpeech(chapterId)
-    const lines = conversation.lines.map((line, index, all) => {
-      if (index !== all.length - 1) return line
-      return conversationLine(line.speaker, `${line.text} ${stamp}`, `hand-stamp-${chapterId.slice(-4)}`, BUNDLED_VOCABULARY)
-    })
-    conversation = { ...conversation, lines }
-  }
+  // Hand-written dialogues stay exactly as written (no filler stamp on the last line).
+  const conversation = withBrief.conversation
   return { ...withBrief, reading, conversation }
 }

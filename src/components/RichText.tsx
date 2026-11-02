@@ -68,6 +68,14 @@ function splitBlocks(text: string): Block[] {
 
   for (const raw of lines) {
     const line = raw.trimEnd()
+    // A line that is only **bold text** is a section title.
+    const boldTitle = line.match(/^\s*\*\*(.+)\*\*\s*$/)
+    if (boldTitle && !boldTitle[1].includes("**")) {
+      flushList()
+      flushParagraph()
+      blocks.push({ type: 'heading', level: 3, text: boldTitle[1].trim() })
+      continue
+    }
     const heading = line.match(/^\s*(#{1,3})\s+(.*)$/)
     if (heading) {
       flushList()
@@ -106,6 +114,11 @@ function splitBlocks(text: string): Block[] {
   flushList()
   flushParagraph()
   return blocks
+}
+
+/** One line of light markdown (*italic*, **bold**) without block wrappers. */
+export function InlineText({ text }: { text: string }) {
+  return <>{renderInline(text)}</>
 }
 
 function renderInline(input: string): ReactNode[] {
