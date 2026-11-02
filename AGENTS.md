@@ -29,6 +29,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Hand-written units live in `src/lib/units/mNN-uN.ts` (kit: `src/lib/units/kit.ts`), registered in `src/lib/units/specs.ts`. After any edit run `npx tsx scripts/emit-unit-index.ts` (test checks it).
 - Unit bar (tested in `tests/unit-lessons.test.ts`): brief opens with meanings, 220+ reading words, 12+ dialogue lines, 24+ exercises of 7+ types, every reading/dialogue word tappable, verbs as infinitives.
 - Units not yet hand-written fall back to the old generated A lesson with junk questions filtered (`isJunkExercise`). Home shows their module as "Draft, being rewritten". Never call a draft module finished.
+- Speech in a story: write « … » after "X dit :" (or starting a sentence). `splitSpeech` shows each spoken line on its own line with a dash (—). Never run several speakers together in one paragraph (owner feedback).
 - Reading questions quote the French sentence (« … ») and ask what it means. No plot-memory quizzes (`validateLessonExercise`).
 - Lesson complete must enqueue lemmas for Review (remote and/or local vault); wrong answers → `user_mistakes`.
 - Legacy 720-chapter checks (`validateChapterContent`, measure pads) still run on the old generated content; they are not the quality bar any more.

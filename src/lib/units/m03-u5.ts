@@ -31,7 +31,7 @@ export const M3U5: UnitSpec = {
       items: [
         { fr: 'déjeuner', en: 'to have lunch (le déjeuner = lunch)', pos: 'verb' },
         { fr: 'dîner', en: 'to have dinner (le dîner = dinner)', pos: 'verb' },
-        { fr: 'goûter', en: 'afternoon snack (also: to taste)', pos: 'noun', gender: 'masculine' },
+        { fr: 'goûter', en: 'to taste; afternoon snack (le goûter)', pos: 'verb' },
         { fr: 'pause', en: 'break', pos: 'noun', gender: 'feminine' },
         { fr: 'cantine', en: 'canteen', pos: 'noun', gender: 'feminine' },
         { fr: 'courses', en: 'grocery shopping (faire les courses)', pos: 'noun', gender: 'feminine' },

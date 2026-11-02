@@ -59,9 +59,16 @@ function jaccard(left: Set<string>, right: Set<string>): number {
 }
 
 function hasNearDupParagraphs(lesson: LessonContent): boolean {
-  const paras = (lesson.reading ?? []).map((paragraph) =>
-    normalizePara(paragraph.tokens.map((token) => token.text).join(' ')),
-  )
+  // Lines split out of one story paragraph (narration + "— …" speech) count as one paragraph.
+  const joined: string[] = []
+  let lastStory: number | undefined
+  for (const paragraph of lesson.reading ?? []) {
+    const text = paragraph.tokens.map((token) => token.text).join(' ')
+    if (paragraph.story !== undefined && paragraph.story === lastStory && joined.length) joined[joined.length - 1] += ` ${text}`
+    else joined.push(text)
+    lastStory = paragraph.story
+  }
+  const paras = joined.map(normalizePara)
   const seen = new Set<string>()
   const skeletons = new Set<string>()
   const sets: Array<{ text: string; tokens: Set<string> }> = []

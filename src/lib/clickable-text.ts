@@ -144,6 +144,10 @@ const PRIORITY_FORMS: [string, string[]][] = [
   ['faire', ['fais', 'fait', 'faisons', 'faites', 'font']],
   ['présenter', ['présente', 'présentes', 'présentent']],
   ['partir', ['pars', 'part', 'partons', 'partez', 'partent']],
+  ['monter', ['monte', 'montes', 'montons', 'montez', 'montent']],
+  ['y', ['y', "n'y", "j'y"]],
+  ['repartir', ['repars', 'repart', 'repartons', 'repartez', 'repartent']],
+  ['se promener', ['promène', 'promènes', 'promènent']],
   ['sortir', ['sors', 'sort', 'sortons', 'sortez', 'sortent']],
   ['dormir', ['dors', 'dort', 'dormons', 'dormez', 'dorment']],
   ['préparer', ['prépare', 'prépares', 'préparons', 'préparez', 'préparent']],
@@ -799,7 +803,8 @@ export function enrichTokens(tokens: WordToken[], vocabulary: VocabularyWord[]):
           lookup.get(normalizeLookup(phrase)) ??
           lookup.get(normalizeLookup(display)) ??
           lookup.get(normalizeLookup(wordBits.map((token) => token.text).join(' '))) ??
-          wordBits.find((token) => token.lemmaId)?.lemmaId
+          wordBits.find((token) => token.lemmaId)?.lemmaId ??
+          lookupLemma(lookup, display)
         merged.push({
           id: consumed[0].id,
           text: display,

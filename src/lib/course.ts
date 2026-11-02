@@ -13,6 +13,12 @@ export type ReadingParagraph = {
   tokens: WordToken[]
   /** When true, render as a bullet list item (grouped with neighbors). */
   listItem?: boolean
+  /** A spoken line in a story ("— Bonjour !"), shown on its own line, close to its neighbours. */
+  speech?: boolean
+  /** Narration that introduces speech ("Marie dit :"); kept close to the lines that follow. */
+  leadsSpeech?: boolean
+  /** Lines split out of one story paragraph share this number (used by content checks). */
+  story?: number
 }
 
 import type { LessonExercise } from '@/lib/exercises/types'

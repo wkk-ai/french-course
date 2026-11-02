@@ -588,14 +588,35 @@ export default function LessonClient({
                     )
                     listBuffer = []
                   }
+                  // A conversation inside the story: the "X says:" line and each "— …" line sit close together.
+                  let talk: { tokens: WordToken[]; key: number; speech: boolean }[] = []
+                  const flushTalk = () => {
+                    if (!talk.length) return
+                    blocks.push(
+                      <div key={`talk-${talk[0].key}`} className="space-y-1.5">
+                        {talk.map((line) => (
+                          <p key={line.key} className={line.speech ? 'pl-4 -indent-4' : ''}>{renderTokens(line.tokens)}</p>
+                        ))}
+                      </div>,
+                    )
+                    talk = []
+                  }
                   readingParagraphs.forEach((paragraph, index) => {
                     if (paragraph.listItem) {
+                      flushTalk()
                       listBuffer.push({ tokens: paragraph.tokens, key: index })
                       return
                     }
                     flushList()
+                    const next = readingParagraphs[index + 1]
+                    if (paragraph.speech || (paragraph.leadsSpeech && next?.speech)) {
+                      talk.push({ tokens: paragraph.tokens, key: index, speech: Boolean(paragraph.speech) })
+                      return
+                    }
+                    flushTalk()
                     blocks.push(<div key={index}>{renderTokens(paragraph.tokens)}</div>)
                   })
+                  flushTalk()
                   flushList()
                   return blocks
                 })()}

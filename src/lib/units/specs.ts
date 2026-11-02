@@ -1,5 +1,6 @@
 import type { VocabularyWord } from '@/lib/course'
 import type { UnitSpec } from '@/lib/units/kit'
+import { M1U5 } from '@/lib/units/m01-u5'
 import { M2U1 } from '@/lib/units/m02-u1'
 import { M2U2 } from '@/lib/units/m02-u2'
 import { M2U3 } from '@/lib/units/m02-u3'
@@ -10,10 +11,16 @@ import { M3U2 } from '@/lib/units/m03-u2'
 import { M3U3 } from '@/lib/units/m03-u3'
 import { M3U4 } from '@/lib/units/m03-u4'
 import { M3U5 } from '@/lib/units/m03-u5'
+import { M4U1 } from '@/lib/units/m04-u1'
+import { M4U2 } from '@/lib/units/m04-u2'
+import { M4U3 } from '@/lib/units/m04-u3'
+import { M4U4 } from '@/lib/units/m04-u4'
+import { M4U5 } from '@/lib/units/m04-u5'
 
 /** Hand-written unit lessons, in course order. Add each new unit here. */
-export const UNIT_SPECS: UnitSpec[] = [M2U1, M2U2, M2U3, M2U4, M2U5,
+export const UNIT_SPECS: UnitSpec[] = [M1U5, M2U1, M2U2, M2U3, M2U4, M2U5,
   M3U1, M3U2, M3U3, M3U4, M3U5,
+  M4U1, M4U2, M4U3, M4U4, M4U5,
 ]
 
 
