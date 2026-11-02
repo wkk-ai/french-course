@@ -58,8 +58,8 @@ function jaccard(left: Set<string>, right: Set<string>): number {
   return union ? inter / union : 0
 }
 
-function hasNearDupParagraphs(lesson: LessonContent): boolean {
-  // Lines split out of one story paragraph (narration + "— …" speech) count as one paragraph.
+/** Reading as written: lines split out of one story paragraph (narration + "— …" speech) are joined back. */
+export function storyParagraphs(lesson: LessonContent): string[] {
   const joined: string[] = []
   let lastStory: number | undefined
   for (const paragraph of lesson.reading ?? []) {
@@ -68,7 +68,11 @@ function hasNearDupParagraphs(lesson: LessonContent): boolean {
     else joined.push(text)
     lastStory = paragraph.story
   }
-  const paras = joined.map(normalizePara)
+  return joined
+}
+
+function hasNearDupParagraphs(lesson: LessonContent): boolean {
+  const paras = storyParagraphs(lesson).map(normalizePara)
   const seen = new Set<string>()
   const skeletons = new Set<string>()
   const sets: Array<{ text: string; tokens: Set<string> }> = []
@@ -219,9 +223,6 @@ export function dialogueFingerprint(lesson: LessonContent): string {
 }
 
 export function readingFingerprint(lesson: LessonContent): string {
-  const firstTwo = (lesson.reading ?? [])
-    .slice(0, 2)
-    .map((paragraph) => paragraph.tokens.map((token) => token.text).join(' '))
-    .join(' ')
+  const firstTwo = storyParagraphs(lesson).slice(0, 2).join(' ')
   return paragraphSkeleton(firstTwo)
 }
