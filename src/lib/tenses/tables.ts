@@ -1,6 +1,7 @@
 import { BUNDLED_VOCABULARY } from '@/lib/bundled-vocabulary'
 import { conjugateVerb } from '@/lib/french-conjugations'
 import { buildTable, type GuideTable } from '@/lib/tenses/format'
+import { extraForms } from '@/lib/tenses/extra-forms'
 import {
   CORE_IRREGULAR_VERBS,
   MORE_IRREGULAR_VERBS,
@@ -25,7 +26,8 @@ export function tablesForGoal(goal: TenseGoal): TableGroup[] {
     for (const verb of group.verbs) {
       const word = byWord.get(verb)
       if (!word) continue
-      const rows = conjugateVerb(word)
+      const base = conjugateVerb(word)
+      const rows = [...base, ...extraForms(verb, base)]
       for (const tense of goal.tenses) {
         const table = buildTable(verb, word.base_translation, tense, rows)
         if (table) tables.push(table)

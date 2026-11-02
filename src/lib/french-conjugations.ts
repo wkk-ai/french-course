@@ -428,11 +428,12 @@ function regularEr(infinitive: string): IrregularBundle {
     const base = stem.slice(0, -1).replace(/é$/, 'è').replace(/e$/, 'è')
     const sg = `${base}${cons}e`
     const pl = `${base}${cons}ent`
+    const fut = /éter$/.test(lower) ? infinitive : `${base}${cons}er`
     return {
       present: [sg, `${sg}s`, sg, `${softStem}ons`, `${stem}ez`, pl],
       imparfait: [`${softStem}ais`, `${softStem}ais`, `${softStem}ait`, `${stem}ions`, `${stem}iez`, `${softStem}aient`],
-      futur: [`${infinitive}ai`, `${infinitive}as`, `${infinitive}a`, `${infinitive}ons`, `${infinitive}ez`, `${infinitive}ont`],
-      conditionnel: [`${infinitive}ais`, `${infinitive}ais`, `${infinitive}ait`, `${infinitive}ions`, `${infinitive}iez`, `${infinitive}aient`],
+      futur: [`${fut}ai`, `${fut}as`, `${fut}a`, `${fut}ons`, `${fut}ez`, `${fut}ont`],
+      conditionnel: [`${fut}ais`, `${fut}ais`, `${fut}ait`, `${fut}ions`, `${fut}iez`, `${fut}aient`],
       subjonctif: [sg, `${sg}s`, sg, `${stem}ions`, `${stem}iez`, pl],
       participePasse: `${stem}é`,
       auxiliaire: 'avoir',
@@ -443,11 +444,12 @@ function regularEr(infinitive: string): IrregularBundle {
   // lever / promener family: lève, lèves, lève, levons…
   if (/^(lever|soulever|relever|enlever|mener|amener|emmener|promener|semer|peser)$/.test(lower)) {
     const sgStem = stem.replace(/e([^e]*)$/, 'è$1')
+    const fut = `${sgStem}er`
     return {
       present: [`${sgStem}e`, `${sgStem}es`, `${sgStem}e`, `${softStem}ons`, `${stem}ez`, `${sgStem}ent`],
       imparfait: [`${softStem}ais`, `${softStem}ais`, `${softStem}ait`, `${stem}ions`, `${stem}iez`, `${softStem}aient`],
-      futur: [`${infinitive}ai`, `${infinitive}as`, `${infinitive}a`, `${infinitive}ons`, `${infinitive}ez`, `${infinitive}ont`],
-      conditionnel: [`${infinitive}ais`, `${infinitive}ais`, `${infinitive}ait`, `${infinitive}ions`, `${infinitive}iez`, `${infinitive}aient`],
+      futur: [`${fut}ai`, `${fut}as`, `${fut}a`, `${fut}ons`, `${fut}ez`, `${fut}ont`],
+      conditionnel: [`${fut}ais`, `${fut}ais`, `${fut}ait`, `${fut}ions`, `${fut}iez`, `${fut}aient`],
       subjonctif: [`${sgStem}e`, `${sgStem}es`, `${sgStem}e`, `${stem}ions`, `${stem}iez`, `${sgStem}ent`],
       participePasse: `${stem}é`,
       auxiliaire: 'avoir',
@@ -457,12 +459,13 @@ function regularEr(infinitive: string): IrregularBundle {
 
   // appeler / épeler: -eler → èll before silent e (appelle, épelle)
   if (/^(appeler|épeler|epeler|rappeler|renouveler)$/.test(lower) || /[^g]eler$/.test(lower)) {
-    const sgStem = `${stem.slice(0, -2)}èll`
+    const sgStem = `${stem}l`
+    const fut = `${sgStem}er`
     return {
       present: [`${sgStem}e`, `${sgStem}es`, `${sgStem}e`, `${softStem}ons`, `${stem}ez`, `${sgStem}ent`],
       imparfait: [`${softStem}ais`, `${softStem}ais`, `${softStem}ait`, `${stem}ions`, `${stem}iez`, `${softStem}aient`],
-      futur: [`${infinitive}ai`, `${infinitive}as`, `${infinitive}a`, `${infinitive}ons`, `${infinitive}ez`, `${infinitive}ont`],
-      conditionnel: [`${infinitive}ais`, `${infinitive}ais`, `${infinitive}ait`, `${infinitive}ions`, `${infinitive}iez`, `${infinitive}aient`],
+      futur: [`${fut}ai`, `${fut}as`, `${fut}a`, `${fut}ons`, `${fut}ez`, `${fut}ont`],
+      conditionnel: [`${fut}ais`, `${fut}ais`, `${fut}ait`, `${fut}ions`, `${fut}iez`, `${fut}aient`],
       subjonctif: [`${sgStem}e`, `${sgStem}es`, `${sgStem}e`, `${stem}ions`, `${stem}iez`, `${sgStem}ent`],
       participePasse: `${stem}é`,
       auxiliaire: 'avoir',
@@ -502,11 +505,12 @@ function regularEr(infinitive: string): IrregularBundle {
 
   if (isYer) {
     const sgStem = `${stem.slice(0, -1)}i`
+    const fut = lower === 'envoyer' ? 'enverr' : lower === 'renvoyer' ? 'renverr' : `${sgStem}er`
     return {
       present: [`${sgStem}e`, `${sgStem}es`, `${sgStem}e`, `${softStem}ons`, `${stem}ez`, `${sgStem}ent`],
       imparfait: [`${softStem}ais`, `${softStem}ais`, `${softStem}ait`, `${stem}ions`, `${stem}iez`, `${softStem}aient`],
-      futur: [`${infinitive}ai`, `${infinitive}as`, `${infinitive}a`, `${infinitive}ons`, `${infinitive}ez`, `${infinitive}ont`],
-      conditionnel: [`${infinitive}ais`, `${infinitive}ais`, `${infinitive}ait`, `${infinitive}ions`, `${infinitive}iez`, `${infinitive}aient`],
+      futur: [`${fut}ai`, `${fut}as`, `${fut}a`, `${fut}ons`, `${fut}ez`, `${fut}ont`],
+      conditionnel: [`${fut}ais`, `${fut}ais`, `${fut}ait`, `${fut}ions`, `${fut}iez`, `${fut}aient`],
       subjonctif: [`${sgStem}e`, `${sgStem}es`, `${sgStem}e`, `${stem}ions`, `${stem}iez`, `${sgStem}ent`],
       participePasse: `${stem}é`,
       auxiliaire: 'avoir',
@@ -555,9 +559,138 @@ function regularRe(infinitive: string): IrregularBundle {
   }
 }
 
+
+/** Build a bundle from a model verb by swapping the start of every form (devenir from venir). */
+function fromModel(model: IrregularBundle, from: string, to: string, overrides: Partial<IrregularBundle> = {}): IrregularBundle {
+  const swap = (form: string) => (form.startsWith(from) ? to + form.slice(from.length) : form)
+  return {
+    present: model.present.map(swap),
+    imparfait: model.imparfait.map(swap),
+    futur: model.futur.map(swap),
+    conditionnel: model.conditionnel.map(swap),
+    subjonctif: model.subjonctif.map(swap),
+    participePasse: swap(model.participePasse),
+    auxiliaire: model.auxiliaire,
+    imperatif: model.imperatif.map(swap),
+    ...overrides,
+  }
+}
+
+function sixFrom(stem: string, endings: string[]) {
+  return endings.map((ending) => stem + ending)
+}
+
+/** conduire, produire, construire, traduire, réduire, détruire… */
+function uireVerb(infinitive: string): IrregularBundle {
+  const s = infinitive.slice(0, -2) // condui
+  return {
+    present: [`${s}s`, `${s}s`, `${s}t`, `${s}sons`, `${s}sez`, `${s}sent`],
+    imparfait: sixFrom(`${s}s`, ['ais', 'ais', 'ait', 'ions', 'iez', 'aient']),
+    futur: sixFrom(`${s}r`, ['ai', 'as', 'a', 'ons', 'ez', 'ont']),
+    conditionnel: sixFrom(`${s}r`, ['ais', 'ais', 'ait', 'ions', 'iez', 'aient']),
+    subjonctif: sixFrom(`${s}s`, ['e', 'es', 'e', 'ions', 'iez', 'ent']),
+    participePasse: `${s}t`,
+    auxiliaire: 'avoir',
+    imperatif: [`${s}s`, `${s}sons`, `${s}sez`],
+  }
+}
+
+/** joindre, atteindre, craindre, peindre, éteindre, plaindre… */
+function indreVerb(infinitive: string): IrregularBundle {
+  const base = infinitive.slice(0, -3) // join
+  const gn = `${base.slice(0, -1)}gn` // joign
+  return {
+    present: [`${base}s`, `${base}s`, `${base}t`, `${gn}ons`, `${gn}ez`, `${gn}ent`],
+    imparfait: sixFrom(gn, ['ais', 'ais', 'ait', 'ions', 'iez', 'aient']),
+    futur: sixFrom(`${base}dr`, ['ai', 'as', 'a', 'ons', 'ez', 'ont']),
+    conditionnel: sixFrom(`${base}dr`, ['ais', 'ais', 'ait', 'ions', 'iez', 'aient']),
+    subjonctif: sixFrom(gn, ['e', 'es', 'e', 'ions', 'iez', 'ent']),
+    participePasse: `${base}t`,
+    auxiliaire: 'avoir',
+    imperatif: [`${base}s`, `${gn}ons`, `${gn}ez`],
+  }
+}
+
+const EXTRA_IRREGULAR: Record<string, () => IrregularBundle> = {
+  devenir: () => fromModel(IRREGULAR.venir, 'v', 'dev'),
+  prévenir: () => fromModel(IRREGULAR.venir, 'v', 'prév', { auxiliaire: 'avoir' }),
+  tenir: () => fromModel(IRREGULAR.venir, 'v', 't', { auxiliaire: 'avoir' }),
+  retenir: () => fromModel(IRREGULAR.venir, 'v', 'ret', { auxiliaire: 'avoir' }),
+  obtenir: () => fromModel(IRREGULAR.venir, 'v', 'obt', { auxiliaire: 'avoir' }),
+  maintenir: () => fromModel(IRREGULAR.venir, 'v', 'maint', { auxiliaire: 'avoir' }),
+  soutenir: () => fromModel(IRREGULAR.venir, 'v', 'sout', { auxiliaire: 'avoir' }),
+  promettre: () => fromModel(IRREGULAR.mettre, 'm', 'prom'),
+  permettre: () => fromModel(IRREGULAR.mettre, 'm', 'perm'),
+  remettre: () => fromModel(IRREGULAR.mettre, 'm', 'rem'),
+  décrire: () => fromModel(IRREGULAR['écrire'], 'é', 'dé'),
+  inscrire: () => fromModel(IRREGULAR['écrire'], 'écr', 'inscr'),
+  offrir: () => fromModel(IRREGULAR.ouvrir, 'ouv', 'off'),
+  souffrir: () => fromModel(IRREGULAR.ouvrir, 'ouv', 'souff'),
+  découvrir: () => fromModel(IRREGULAR.ouvrir, 'ouv', 'découv'),
+  couvrir: () => fromModel(IRREGULAR.ouvrir, 'ouv', 'couv'),
+  prévoir: () => fromModel(IRREGULAR.voir, 'v', 'prév', {
+    futur: sixFrom('prévoir', ['ai', 'as', 'a', 'ons', 'ez', 'ont']),
+    conditionnel: sixFrom('prévoir', ['ais', 'ais', 'ait', 'ions', 'iez', 'aient']),
+  }),
+  recevoir: () => ({
+    present: ['reçois', 'reçois', 'reçoit', 'recevons', 'recevez', 'reçoivent'],
+    imparfait: sixFrom('recev', ['ais', 'ais', 'ait', 'ions', 'iez', 'aient']),
+    futur: sixFrom('recevr', ['ai', 'as', 'a', 'ons', 'ez', 'ont']),
+    conditionnel: sixFrom('recevr', ['ais', 'ais', 'ait', 'ions', 'iez', 'aient']),
+    subjonctif: ['reçoive', 'reçoives', 'reçoive', 'recevions', 'receviez', 'reçoivent'],
+    participePasse: 'reçu',
+    auxiliaire: 'avoir',
+    imperatif: ['reçois', 'recevons', 'recevez'],
+  }),
+  mourir: () => ({
+    present: ['meurs', 'meurs', 'meurt', 'mourons', 'mourez', 'meurent'],
+    imparfait: sixFrom('mour', ['ais', 'ais', 'ait', 'ions', 'iez', 'aient']),
+    futur: sixFrom('mourr', ['ai', 'as', 'a', 'ons', 'ez', 'ont']),
+    conditionnel: sixFrom('mourr', ['ais', 'ais', 'ait', 'ions', 'iez', 'aient']),
+    subjonctif: ['meure', 'meures', 'meure', 'mourions', 'mouriez', 'meurent'],
+    participePasse: 'mort',
+    auxiliaire: 'être',
+    imperatif: ['meurs', 'mourons', 'mourez'],
+  }),
+  rire: () => ({
+    present: ['ris', 'ris', 'rit', 'rions', 'riez', 'rient'],
+    imparfait: ['riais', 'riais', 'riait', 'riions', 'riiez', 'riaient'],
+    futur: sixFrom('rir', ['ai', 'as', 'a', 'ons', 'ez', 'ont']),
+    conditionnel: sixFrom('rir', ['ais', 'ais', 'ait', 'ions', 'iez', 'aient']),
+    subjonctif: ['rie', 'ries', 'rie', 'riions', 'riiez', 'rient'],
+    participePasse: 'ri',
+    auxiliaire: 'avoir',
+    imperatif: ['ris', 'rions', 'riez'],
+  }),
+  sourire: () => fromModel(EXTRA_IRREGULAR.rire(), 'r', 'sour'),
+  falloir: () => ({
+    present: ['—', '—', 'faut', '—', '—', '—'],
+    imparfait: ['—', '—', 'fallait', '—', '—', '—'],
+    futur: ['—', '—', 'faudra', '—', '—', '—'],
+    conditionnel: ['—', '—', 'faudrait', '—', '—', '—'],
+    subjonctif: ['—', '—', 'faille', '—', '—', '—'],
+    participePasse: 'fallu',
+    auxiliaire: 'avoir',
+    imperatif: ['—', '—', '—'],
+  }),
+  pleuvoir: () => ({
+    present: ['—', '—', 'pleut', '—', '—', '—'],
+    imparfait: ['—', '—', 'pleuvait', '—', '—', '—'],
+    futur: ['—', '—', 'pleuvra', '—', '—', '—'],
+    conditionnel: ['—', '—', 'pleuvrait', '—', '—', '—'],
+    subjonctif: ['—', '—', 'pleuve', '—', '—', '—'],
+    participePasse: 'plu',
+    auxiliaire: 'avoir',
+    imperatif: ['—', '—', '—'],
+  }),
+}
+
 function resolveBundle(infinitive: string): IrregularBundle | null {
   const key = infinitive.normalize('NFC').toLowerCase()
   if (IRREGULAR[key]) return IRREGULAR[key]
+  if (EXTRA_IRREGULAR[key]) return EXTRA_IRREGULAR[key]()
+  if (/uire$/.test(key)) return uireVerb(key)
+  if (/[aeo]indre$/.test(key)) return indreVerb(key)
   if (key.endsWith('er') || key.endsWith('é')) return regularEr(key.endsWith('é') ? key.slice(0, -1) + 'er' : key)
   if (key.endsWith('ir')) return regularIr(key)
   if (key.endsWith('re')) return regularRe(key)

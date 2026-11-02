@@ -1,3 +1,4 @@
+import { FrenchText } from '@/components/dictionary/Dictionary'
 import type { TableGroup } from '@/lib/tenses/tables'
 
 /** Full tables, grouped. Plain HTML details so it works offline with no scripts. */
@@ -25,7 +26,7 @@ export function ConjugationGroups({ groups }: { groups: TableGroup[] }) {
                     {table.rows.map((row) => (
                       <tr key={row.pronoun} className="border-b last:border-0">
                         <td className="w-1/3 px-3 py-1.5 text-xs text-on-surface-variant">{row.pronoun}</td>
-                        <td className="px-3 py-1.5 font-semibold text-ink-dark">{row.phrase}</td>
+                        <td className="px-3 py-1.5 font-semibold text-ink-dark"><FrenchText text={row.phrase} /></td>
                       </tr>
                     ))}
                   </tbody>

@@ -6,13 +6,14 @@ import type { VerbConjugation } from '@/lib/course'
  * the guide needs finished phrases: elision (j'ai, j'étais) and participle agreement (allé(e)).
  */
 
-const COMPOUND_TENSES = new Set(['Passé composé', 'Plus-que-parfait', 'Futur antérieur', 'Conditionnel passé'])
+const COMPOUND_TENSES = new Set(['Passé composé', 'Plus-que-parfait', 'Futur antérieur', 'Conditionnel passé', 'Subjonctif passé'])
 
 const ETRE_AUX = new Set([
   'suis', 'es', 'est', 'sommes', 'êtes', 'sont',
   'étais', 'était', 'étions', 'étiez', 'étaient',
   'serai', 'seras', 'sera', 'serons', 'serez', 'seront',
   'serais', 'serait', 'serions', 'seriez', 'seraient',
+  'sois', 'soit', 'soyons', 'soyez', 'soient',
 ])
 
 const VOWEL_START = /^[aeiouyàâäéèêëîïôöùûüœh]/i
@@ -25,6 +26,7 @@ function agreementSuffix(pronoun: string) {
 
 export function conjugationPhrase(row: Pick<VerbConjugation, 'tense' | 'pronoun' | 'form'>): string {
   if (row.tense === 'Impératif') return row.form === '—' ? '—' : `${row.form} !`
+  if (row.tense === 'Gérondif') return `en ${row.form}`
 
   let form = row.form
   if (COMPOUND_TENSES.has(row.tense)) {

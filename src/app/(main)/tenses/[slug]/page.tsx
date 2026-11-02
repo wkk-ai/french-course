@@ -7,6 +7,7 @@ import { MiniQuiz } from '@/components/tenses/MiniQuiz'
 import { Timeline } from '@/components/tenses/Timeline'
 import { GOAL_BY_SLUG, TENSE_GOALS } from '@/lib/tenses/guide'
 import { tablesForGoal } from '@/lib/tenses/tables'
+import { DictionaryProvider, FrenchText } from '@/components/dictionary/Dictionary'
 
 export function generateStaticParams() {
   return TENSE_GOALS.map((goal) => ({ slug: goal.slug }))
@@ -22,6 +23,7 @@ export default async function TenseGoalPage({ params }: { params: Promise<{ slug
   const groups = tablesForGoal(goal).filter((group) => group.tables.length > 0)
 
   return (
+    <DictionaryProvider>
     <article className="space-y-8 pb-10">
       <Link href="/tenses/" className="inline-flex min-h-11 items-center gap-2 text-sm font-bold text-primary">
         <ArrowLeft className="size-4" /> Grammar
@@ -39,7 +41,17 @@ export default async function TenseGoalPage({ params }: { params: Promise<{ slug
       <section aria-labelledby="when">
         <h2 id="when" className="text-headline-md">When to use it</h2>
         <ul className="mt-3 list-disc space-y-2 pl-6 text-body-ui marker:text-primary">
-          {goal.whenToUse.map((line) => <li key={line}>{line}</li>)}
+          {goal.whenToUse.map((line) => {
+            // "English label: French example." — make the French half tappable.
+            const cut = line.indexOf(': ')
+            if (cut < 0) return <li key={line}>{line}</li>
+            return (
+              <li key={line}>
+                {line.slice(0, cut + 2)}
+                <FrenchText className="font-reading" text={line.slice(cut + 2)} />
+              </li>
+            )
+          })}
         </ul>
       </section>
 
@@ -53,7 +65,7 @@ export default async function TenseGoalPage({ params }: { params: Promise<{ slug
               <p className="mt-1 text-body-ui text-on-surface-variant">{step.body}</p>
               {step.example && (
                 <p className="mt-2 rounded-lg bg-primary-fixed/40 px-3 py-2 text-body-ui">
-                  <span className="font-semibold text-ink-dark">{step.example.fr}</span>
+                  <FrenchText className="font-semibold text-ink-dark" text={step.example.fr} />
                   <span className="block text-sm text-on-surface-variant">{step.example.en}</span>
                 </p>
               )}
@@ -77,7 +89,7 @@ export default async function TenseGoalPage({ params }: { params: Promise<{ slug
                 {goal.structure.rows.map(([pronoun, phrase]) => (
                   <tr key={pronoun} className="border-b last:border-0">
                     <td className="w-1/3 px-4 py-2 text-xs text-on-surface-variant">{pronoun}</td>
-                    <td className="px-4 py-2 font-semibold text-ink-dark">{phrase}</td>
+                    <td className="px-4 py-2 font-semibold text-ink-dark"><FrenchText text={phrase} /></td>
                   </tr>
                 ))}
               </tbody>
@@ -116,5 +128,6 @@ export default async function TenseGoalPage({ params }: { params: Promise<{ slug
         </Link>
       )}
     </article>
+    </DictionaryProvider>
   )
 }

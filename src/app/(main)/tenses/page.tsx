@@ -17,21 +17,39 @@ const TAGS: Record<string, { tag: string; tint: string; ink: string }> = {
   commands: { tag: 'Do!', tint: '#F1E6FB', ink: '#6B2BA3' },
   if: { tag: 'If', tint: '#F1E6FB', ink: '#6B2BA3' },
   'must-want': { tag: 'Must', tint: '#F1E6FB', ink: '#6B2BA3' },
-  advanced: { tag: 'More', tint: '#EBEBEF', ink: '#3F3F48' },
+  'past-before': { tag: 'Had', tint: '#FCEBDD', ink: '#9A3A0A' },
+  'as-if': { tag: 'As if', tint: '#F1E6FB', ink: '#6B2BA3' },
+  'would-have': { tag: 'Regret', tint: '#FCEBDD', ink: '#9A3A0A' },
+  'will-have': { tag: 'By then', tint: '#E3F4EC', ink: '#13693A' },
+  'must-past': { tag: 'Glad', tint: '#F1E6FB', ink: '#6B2BA3' },
+  'while-doing': { tag: 'While', tint: '#E4EBFF', ink: '#1A3BA8' },
+  'books-only': { tag: 'Books', tint: '#EBEBEF', ink: '#3F3F48' },
+  default: { tag: '•', tint: '#EBEBEF', ink: '#3F3F48' },
 }
 
 const TIMELINE: Array<{ label: string; align: string; text: string; items: Array<{ slug: string; name: string }> }> = [
-  { label: 'Before', align: 'items-start', text: 'text-left', items: [{ slug: 'past-done', name: 'Passé composé' }, { slug: 'past-background', name: 'Imparfait' }] },
-  { label: 'Now', align: 'items-center', text: 'text-center', items: [{ slug: 'now', name: 'Présent' }, { slug: 'recent', name: 'Venir de' }] },
-  { label: 'Later', align: 'items-end', text: 'text-right', items: [{ slug: 'plans', name: 'Futur proche' }, { slug: 'future', name: 'Futur simple' }] },
+  { label: 'Before', align: 'items-start', text: 'text-left', items: [{ slug: 'past-before', name: 'Plus-que-parfait' }, { slug: 'past-done', name: 'Passé composé' }, { slug: 'past-background', name: 'Imparfait' }] },
+  { label: 'Now', align: 'items-center', text: 'text-center', items: [{ slug: 'now', name: 'Présent' }, { slug: 'recent', name: 'Venir de' }, { slug: 'while-doing', name: 'Gérondif' }] },
+  { label: 'Later', align: 'items-end', text: 'text-right', items: [{ slug: 'plans', name: 'Futur proche' }, { slug: 'future', name: 'Futur simple' }, { slug: 'will-have', name: 'Futur antérieur' }] },
+]
+
+/** Not about time: politeness, wishes, conditions, feelings. */
+const MOODS: Array<{ slug: string; name: string }> = [
+  { slug: 'polite', name: 'Conditionnel' },
+  { slug: 'would-have', name: 'Conditionnel passé' },
+  { slug: 'if', name: 'Si (if)' },
+  { slug: 'as-if', name: 'Comme si' },
+  { slug: 'must-want', name: 'Subjonctif' },
+  { slug: 'must-past', name: 'Subjonctif passé' },
+  { slug: 'commands', name: 'Impératif' },
 ]
 
 function GoalRow({ goal }: { goal: TenseGoal }) {
-  const tag = TAGS[goal.slug] ?? TAGS.advanced
+  const tag = TAGS[goal.slug] ?? TAGS.default
   return (
     <li>
       <Link href={`/tenses/${goal.slug}/`} className="flex min-h-14 items-center gap-3 rounded-xl py-2 hover:bg-surface-container-low">
-        <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-xl text-xs font-bold" style={{ background: tag.tint, color: tag.ink }}>{tag.tag}</span>
+        <span aria-hidden="true" className="flex h-10 w-14 shrink-0 items-center justify-center rounded-xl text-[11px] font-bold" style={{ background: tag.tint, color: tag.ink }}>{tag.tag}</span>
         <span className="min-w-0 flex-1">
           <span className="block text-body-ui font-semibold">{goal.title}</span>
           <span className="block truncate font-reading text-[15px] text-on-surface-variant">{goal.life[0]?.fr}</span>
@@ -42,10 +60,15 @@ function GoalRow({ goal }: { goal: TenseGoal }) {
   )
 }
 
-export default function TensesHub() {
-  const core = TENSE_GOALS.filter((goal) => goal.level !== 'Optional')
-  const optional = TENSE_GOALS.filter((goal) => goal.level === 'Optional')
+const GROUPS: Array<{ title: string; hint?: string; slugs: string[] }> = [
+  { title: 'Now', slugs: ['now', 'recent', 'while-doing'] },
+  { title: 'The past', slugs: ['past-done', 'past-background', 'past-before'] },
+  { title: 'The future', slugs: ['plans', 'future', 'will-have'] },
+  { title: 'Polite, wishes and “if”', slugs: ['polite', 'if', 'would-have', 'as-if', 'must-want', 'must-past', 'commands'] },
+  { title: 'Optional', hint: 'Only for reading books.', slugs: ['books-only'] },
+]
 
+export default function TensesHub() {
   return (
     <div className="flex flex-col gap-6">
       <h1 className="text-headline-lg">Grammar</h1>
@@ -74,24 +97,28 @@ export default function TensesHub() {
             </div>
           ))}
         </div>
+        <p className="mt-1 text-xs font-semibold text-on-surface-variant">Not about time</p>
+        <div className="flex flex-wrap gap-1.5">
+          {MOODS.map((item) => (
+            <Link key={item.slug} href={`/tenses/${item.slug}/`} className="rounded-[10px] bg-white px-2.5 py-2 text-[13px] font-semibold text-on-surface">
+              {item.name}
+            </Link>
+          ))}
+        </div>
       </section>
 
-      <section aria-labelledby="goals">
-        <h2 id="goals" className="text-headline-md">I want to…</h2>
-        <ul className="mt-2">
-          {core.map((goal) => <GoalRow key={goal.slug} goal={goal} />)}
-        </ul>
-      </section>
-
-      {optional.length > 0 && (
-        <section aria-labelledby="optional">
-          <h2 id="optional" className="text-headline-md">Optional</h2>
-          <p className="text-sm text-on-surface-variant">Not needed for normal conversation.</p>
-          <ul className="mt-2">
-            {optional.map((goal) => <GoalRow key={goal.slug} goal={goal} />)}
-          </ul>
-        </section>
-      )}
+      {GROUPS.map((group) => {
+        const goals = group.slugs.map((slug) => TENSE_GOALS.find((goal) => goal.slug === slug)).filter((goal): goal is TenseGoal => Boolean(goal))
+        return (
+          <section key={group.title} aria-label={group.title}>
+            <h2 className="text-headline-md">{group.title}</h2>
+            {group.hint && <p className="text-sm text-on-surface-variant">{group.hint}</p>}
+            <ul className="mt-1">
+              {goals.map((goal) => <GoalRow key={goal.slug} goal={goal} />)}
+            </ul>
+          </section>
+        )
+      })}
     </div>
   )
 }

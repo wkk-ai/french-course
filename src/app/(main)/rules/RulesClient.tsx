@@ -5,7 +5,10 @@ import Link from 'next/link'
 import { GrammarTabs } from '@/components/GrammarTabs'
 import { ChevronRight, Search } from 'lucide-react'
 import type { PublicGrammarRule } from '@/lib/rules/public'
-import { isRuleUnlocked, masteryLabel, masteryStage } from '@/lib/rules/unlock'
+import { masteryLabel, masteryStage } from '@/lib/rules/unlock'
+
+/** All rules are open at any time (owner request). */
+const isRuleUnlocked = (...args: unknown[]) => args.length >= 0
 import { mergeCompletedChapterIds } from '@/lib/local-progress'
 
 const categoryColorMap: Record<string, string> = {
@@ -37,10 +40,6 @@ export default function RulesClient({ rules }: { rules: PublicGrammarRule[] }) {
 
   const unlockedRules = useMemo(
     () => (booting ? [] : rules.filter((rule) => isRuleUnlocked(rule, completed))),
-    [booting, rules, completed],
-  )
-  const lockedRules = useMemo(
-    () => (booting ? [] : rules.filter((rule) => !isRuleUnlocked(rule, completed))),
     [booting, rules, completed],
   )
 
@@ -85,7 +84,7 @@ export default function RulesClient({ rules }: { rules: PublicGrammarRule[] }) {
       </div>
 
       {!booting && (
-        <p className="-mt-2 text-sm text-on-surface-variant">{unlockedRules.length} open · {lockedRules.length} unlock as you finish lessons</p>
+        <p className="-mt-2 text-sm text-on-surface-variant">{unlockedRules.length} rules</p>
       )}
 
       {!booting && (

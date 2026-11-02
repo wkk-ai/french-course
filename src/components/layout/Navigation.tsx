@@ -25,10 +25,10 @@ export function Navigation() {
 
   return (
     <>
-      {/* Phone: floating translucent tab bar */}
+      {/* Phone: solid tab bar docked to the bottom. The page reserves its height, so nothing hides behind it. */}
       <nav
         aria-label="Main"
-        className="fixed inset-x-4 bottom-[calc(12px+env(safe-area-inset-bottom,0px))] z-50 grid h-16 grid-cols-4 items-center rounded-full bg-white/85 shadow-[0_8px_30px_rgba(17,17,20,0.12)] backdrop-blur-xl md:hidden"
+        className="fixed inset-x-0 bottom-0 z-50 grid grid-cols-4 bg-white pb-[env(safe-area-inset-bottom,0px)] shadow-[0_-1px_12px_rgba(17,17,20,0.06)] md:hidden"
       >
         {navItems.map((item) => {
           const isActive = isItemActive(item.match);
@@ -38,7 +38,7 @@ export function Navigation() {
               key={item.name}
               href={item.href}
               aria-current={isActive ? 'page' : undefined}
-              className={`flex min-h-11 flex-col items-center justify-center gap-0.5 text-[11px] ${isActive ? 'font-semibold text-primary' : 'font-medium text-on-surface-variant'}`}
+              className={`flex h-[60px] flex-col items-center justify-center gap-0.5 text-[11px] ${isActive ? 'font-semibold text-primary' : 'font-medium text-on-surface-variant'}`}
             >
               <Icon className="size-[22px]" strokeWidth={isActive ? 2.3 : 1.8} />
               {item.name}

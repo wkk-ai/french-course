@@ -9,6 +9,7 @@ import { ExerciseCard } from '@/components/lesson/ExerciseCard'
 import { buildRemediationExercises } from '@/lib/exercises/remediation'
 import { isExerciseAnswered, isExerciseCorrect } from '@/lib/exercises/grading'
 import { RichText } from '@/components/RichText'
+import { SpeakButton } from '@/components/SpeakButton'
 import { LifeDocuments } from '@/components/visual/LifeDocuments'
 import { getLessonDocuments } from '@/lib/visual/module1-documents'
 import { joinFrenchTokens, isPunctuationToken, tokenizeFrench } from '@/lib/clickable-text'
@@ -389,14 +390,20 @@ export default function LessonClient({
                     )}
                     {word.ipa_pronunciation && <p className="mt-1 text-xs text-ink-medium">/{word.ipa_pronunciation}/</p>}
                   </div>
-                  {word.part_of_speech !== 'unknown' && (
-                    <span
-                      title={`Register: ${word.register} — how formal the word sounds`}
-                      className="rounded-full bg-primary px-2 py-1 text-[10px] font-bold text-on-primary"
-                    >
-                      {registerDisplay(word.register)}
-                    </span>
-                  )}
+                  <div className="flex shrink-0 items-center gap-2">
+                    {word.part_of_speech !== 'unknown' && (
+                      <span
+                        title={`Register: ${word.register} — how formal the word sounds`}
+                        className="rounded-full bg-primary-fixed px-2.5 py-1 text-xs font-semibold text-on-primary-fixed"
+                      >
+                        {registerDisplay(word.register)}
+                      </span>
+                    )}
+                    <SpeakButton text={word.word} />
+                    <button type="button" onClick={() => setActiveWordId(null)} aria-label="Close" className="flex size-11 items-center justify-center rounded-full bg-surface-container-low">
+                      <X className="size-5" />
+                    </button>
+                  </div>
                 </div>
                 {meanings.length > 1 ? (
                   <ul className="mt-3 list-disc space-y-1 pl-4 text-sm text-on-surface-variant">
@@ -564,7 +571,7 @@ export default function LessonClient({
               <div className="absolute right-4 top-4 flex items-center gap-2">
                 <Eye className="size-4 text-on-surface-variant" />
                 <span className="text-label-caps text-on-surface-variant">X-Ray</span>
-                <button type="button" aria-pressed={xRayEnabled} aria-label="Toggle X-Ray syntax annotations" onClick={() => setXRayEnabled((value) => !value)} className={`relative h-6 w-11 rounded-full p-1 ${xRayEnabled ? 'bg-success' : 'bg-surface-dim'}`}>
+                <button type="button" aria-pressed={xRayEnabled} aria-label="Toggle X-Ray syntax annotations" onClick={() => setXRayEnabled((value) => !value)} className={`relative h-6 w-11 rounded-full p-1 before:absolute before:-inset-3 before:content-[''] ${xRayEnabled ? 'bg-primary' : 'bg-surface-dim'}`}>
                   <span className={`block size-4 rounded-full bg-white transition-transform ${xRayEnabled ? 'translate-x-5' : ''}`} />
                 </button>
               </div>
@@ -659,14 +666,9 @@ export default function LessonClient({
             </p>
             {exercises.length > 0 && (
               <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-surface-container-low p-4">
-                <div>
-                  <p className="text-label-caps text-primary">
-                    Question {exerciseIndex + 1} of {exercises.length}
-                  </p>
-                  <p className="mt-1 text-sm text-on-surface-variant">
-                    {answeredExerciseCount} of {exercises.length} answered
-                  </p>
-                </div>
+                <p className="text-sm text-on-surface-variant">
+                  <span className="font-semibold text-on-surface">{answeredExerciseCount} of {exercises.length}</span> answered
+                </p>
                 <div className="flex gap-2">
                   <button
                     type="button"

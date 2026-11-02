@@ -4,16 +4,16 @@ import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { ExerciseCard } from '@/components/lesson/ExerciseCard'
 import { RichText } from '@/components/RichText'
+import { FrenchText } from '@/components/dictionary/Dictionary'
+import { cleanRuleDocument } from '@/lib/rules/clean'
 import type { ExerciseAnswer } from '@/lib/exercises/types'
 import type { PublicGrammarRule } from '@/lib/rules/public'
 import type { GrammarRuleDocument, RuleTable } from '@/lib/rules/types'
 import {
-  isRuleUnlocked,
   masteryLabel,
   masteryStage,
   type RuleMasteryStage,
 } from '@/lib/rules/unlock'
-import { mergeCompletedChapterIds } from '@/lib/local-progress'
 
 type TabId = 'quick' | 'deep' | 'examples' | 'try'
 
@@ -63,17 +63,14 @@ export function RuleDetailClient({ teaser }: { teaser: PublicGrammarRule }) {
     let cancelled = false
     ;(async () => {
       try {
-        const completed = mergeCompletedChapterIds([])
-        const isOpen = isRuleUnlocked(
-          { slug: teaser.slug, unlockChapterIds: teaser.unlockChapterIds },
-          completed,
-        )
+        // Every rule is open: the owner wants grammar available any time, not after lessons.
+        const isOpen = true
         setUnlocked(isOpen)
         setStage(masteryStage(isOpen, 0, 0))
         if (isOpen) {
           const res = await fetch(`${basePath}/rules-data/${teaser.slug}.json`)
           if (!res.ok) throw new Error('missing rule payload')
-          const full = (await res.json()) as GrammarRuleDocument
+          const full = cleanRuleDocument((await res.json()) as GrammarRuleDocument)
           if (!cancelled) setRule(full)
         }
       } catch {
@@ -229,8 +226,8 @@ export function RuleDetailClient({ teaser }: { teaser: PublicGrammarRule }) {
               <h2 className="text-headline-md">{group.heading}</h2>
               <div className="grid gap-3">
                 {group.items.map((example) => (
-                  <blockquote key={example.french} className="rounded-lg border-l-4 border-primary bg-surface-container-low p-4">
-                    <p className="font-reading text-lg">{example.french}</p>
+                  <blockquote key={example.french} className="rounded-2xl bg-surface-container-low p-4">
+                    <p className="font-reading text-lg"><FrenchText text={example.french} /></p>
                     <p className="mt-1 text-sm text-on-surface-variant">{example.english}</p>
                     {example.focus && <p className="mt-2 text-[10px] font-bold text-primary">Focus: {example.focus}</p>}
                   </blockquote>

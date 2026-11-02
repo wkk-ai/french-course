@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { CheckCircle2, ChevronRight, Infinity as InfinityIcon, Layers, LogOut, Play } from 'lucide-react'
 import { ExerciseCard } from '@/components/lesson/ExerciseCard'
@@ -322,7 +323,15 @@ export default function ReviewClient() {
         <h1 className="text-headline-lg">Review</h1>
       </header>
 
-      {showHub && (
+      {showHub && pool.length === 0 && (
+        <section className="tactile-card flex flex-col items-start gap-3 p-5">
+          <h2 className="text-headline-md">Nothing to review yet</h2>
+          <p className="text-sm text-on-surface-variant">Words from the lessons you finish appear here, so you never forget them.</p>
+          <Link href="/" className="tactile-button inline-flex min-h-11 items-center bg-primary px-5 text-on-primary">Go to my next lesson</Link>
+        </section>
+      )}
+
+      {showHub && pool.length > 0 && (
         <section className="tactile-card space-y-4 p-5">
           <div className="flex items-start justify-between gap-3">
             <div>
@@ -440,7 +449,7 @@ export default function ReviewClient() {
         />
       )}
 
-      {showHub && (
+      {showHub && pool.length > 0 && (
         <section>
           <div className="flex items-center justify-between gap-3">
             <div>

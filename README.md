@@ -8,7 +8,7 @@ Goal: hold a normal conversation and a business conversation. Rare, literary voc
 
 - **Learn**, in three tracks: **Conversation** (main path), **Business** (work French), **Advanced reading** (optional, skippable). 36 modules x 5 units x A/B/C/D (720 chapters). Module 1 is hand-written; later modules are generated and still being audited. Track list: `src/lib/pathway/tracks.ts`.
 - **Real-life documents** inside lessons: chat, menu, bill, family tree, agenda (Module 1 so far). Words are tappable. English can be hidden.
-- **Tenses** tab: "How do I say it?" Pick a goal (talk about the future, say what happened, be polite, say "if"...). Each page has when to use it, how to build it, everyday and work sentences, full conjugation tables and a quiz. Always open, no order.
+- **Grammar** tab: every tense and mood has its own page (17), grouped Now / Past / Future / Polite, wishes and "if" / Optional: présent, venir de, gérondif, passé composé, imparfait, plus-que-parfait, futur proche, futur simple, futur antérieur, conditionnel, conditionnel passé, si, comme si, subjonctif, subjonctif passé, impératif, passé simple (reading only). Full conjugation tables, real sentences, quiz. Every French word is tappable. All rules are open (no locks).
 - **Listen button**: the phone reads French aloud. Listen only. No voice recording or grading.
 - **Review**: spaced repetition on words you met.
 - **Rules**: grammar rulebook.

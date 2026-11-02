@@ -1,5 +1,6 @@
 import type { SyntaxClass, VocabularyWord, WordToken } from '@/lib/course'
 import { conjugateVerb, isConjugableVerb } from '@/lib/french-conjugations'
+import { gerondif, passeSimple } from '@/lib/tenses/extra-forms'
 
 const PUNCT = new Set(['.', ',', '!', '?', ':', ';', '…', '—', '-', '«', '»', '(', ')', '"', "'"])
 
@@ -575,11 +576,19 @@ export function buildLemmaLookup(vocabulary: VocabularyWord[]) {
     if (word.word === 'il') {
       map.set(normalizeLookup("qu'il"), word.id)
     }
+    if (word.word === 'elle') {
+      map.set(normalizeLookup("qu'elle"), word.id)
+    }
   }
 
   for (const word of vocabulary) {
     if (!isConjugableVerb(word)) continue
-    for (const row of conjugateVerb(word)) {
+    const rows = conjugateVerb(word)
+    // Gérondif (parlant) and passé simple (parla) taps resolve to the infinitive too.
+    for (const row of [...gerondif(word.word, rows), ...passeSimple(word.word)]) {
+      if (!map.has(normalizeLookup(row.form))) registerSurface(map, row.form, word.id)
+    }
+    for (const row of rows) {
       registerSurface(map, row.form, word.id)
       // Compound forms ("ai vu", "suis allé") — also map the bare participle + agreements.
       const bare = row.form.replace(/^j'/i, '').trim().split(/\s+/).pop()
