@@ -761,14 +761,16 @@ test('subscribeLocalVault is exported for cross-tab Review sync', async () => {
   assert.equal(typeof vault.subscribeLocalVault(() => {}), 'function')
 })
 
-test('HomeClient uses lightweight bundled-chapter-ids only', async () => {
+test('HomeClient uses the lightweight unit index only', async () => {
   const fs = await import('node:fs')
   const path = await import('node:path')
   const source = fs.readFileSync(path.join(process.cwd(), 'src/app/(main)/HomeClient.tsx'), 'utf8')
   assert.equal(source.includes('bundled-lessons'), false)
   assert.equal(source.includes('BUNDLED_LESSONS'), false)
   assert.equal(source.includes('resolveLessonContent'), false)
-  assert.ok(source.includes('bundled-chapter-ids'))
+  assert.ok(source.includes('pathway/units'))
+  assert.equal(source.includes('units/specs'), false)
+  assert.equal(source.includes('units/lessons'), false)
   const lesson = fs.readFileSync(path.join(process.cwd(), 'src/app/(lesson)/lesson/[id]/LessonClient.tsx'), 'utf8')
   const shell = fs.readFileSync(path.join(process.cwd(), 'src/app/(lesson)/lesson/[id]/LessonShell.tsx'), 'utf8')
   assert.equal(lesson.includes('BUNDLED_LESSONS'), false)

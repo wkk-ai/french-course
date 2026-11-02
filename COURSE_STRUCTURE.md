@@ -1,5 +1,8 @@
 # French Course Structure
 
+> **2026-11 change:** the app now plays **one lesson per unit (180 lessons)**, not A/B/C/D sub-chapters. Hand-written units: Module 1 and Module 2 (`src/lib/units/`). Other modules are drafts being rewritten. The A/B/C/D sections below describe the old design and the generated content that drafts still fall back on.
+
+
 > **2026-11-01 reshape: this section overrides the older plan below.**
 >
 > **Goal:** hold a normal conversation and a business conversation in French. Not literary or academic French.

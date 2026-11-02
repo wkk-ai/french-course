@@ -25,10 +25,13 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Keep `œ` inside words (*sœur*); split glued punct (`Moi,`); prefer `tokenizeFrench` / `readingParagraphs` over hand tokens.
 
 ## Content + Review
-- Bundled `BUNDLED_LESSONS` (all 36 modules × A/B/C/D = 720) **wins** over thin DB stubs in `resolveLessonContent`.
-- Pathway UI: `src/lib/pathway/catalog.ts`. Every module playable at **Module-1 Learn A craft** (`validateChapterContent` + measure pads). Prove (D) is mandatory per unit.
+- **One lesson per unit** (36 modules × 5 units = 180). Unit id = the unit's old A chapter id (`src/lib/pathway/units.ts`). Old B/C/D ids only count toward progress (`completedUnitIds`).
+- Hand-written units live in `src/lib/units/mNN-uN.ts` (kit: `src/lib/units/kit.ts`), registered in `src/lib/units/specs.ts`. After any edit run `npx tsx scripts/emit-unit-index.ts` (test checks it).
+- Unit bar (tested in `tests/unit-lessons.test.ts`): brief opens with meanings, 220+ reading words, 12+ dialogue lines, 24+ exercises of 7+ types, every reading/dialogue word tappable, verbs as infinitives.
+- Units not yet hand-written fall back to the old generated A lesson with junk questions filtered (`isJunkExercise`). Home shows their module as "Draft, being rewritten". Never call a draft module finished.
+- Reading questions quote the French sentence (« … ») and ask what it means. No plot-memory quizzes (`validateLessonExercise`).
 - Lesson complete must enqueue lemmas for Review (remote and/or local vault); wrong answers → `user_mistakes`.
-- Before done: check missing lemmas after enrich, conjugate on infinitives, spacing, Review queue after complete, depth CI on all bundled lessons.
+- Legacy 720-chapter checks (`validateChapterContent`, measure pads) still run on the old generated content; they are not the quality bar any more.
 
 ## Theory First (meanings before grammar)
 - Never use a French content word in a grammar example until its **English meaning** is taught in the brief.

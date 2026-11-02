@@ -6,10 +6,10 @@ Goal: hold a normal conversation and a business conversation. Rare, literary voc
 
 ## What is in the app
 
-- **Learn**, in three tracks: **Conversation** (main path), **Business** (work French), **Advanced reading** (optional, skippable). 36 modules x 5 units x A/B/C/D (720 chapters). Module 1 is hand-written; later modules are generated and still being audited. Track list: `src/lib/pathway/tracks.ts`.
+- **Learn**, in three tracks: **Conversation** (main path), **Business** (work French), **Advanced reading** (optional, skippable). 36 modules x 5 units = 180 lessons, one per unit. Modules 1 and 2 are hand-written; the other modules are older generated drafts, marked "Draft, being rewritten" on Home, and are being rewritten by hand one module at a time (`src/lib/units/`). Track list: `src/lib/pathway/tracks.ts`.
 - **Real-life documents** inside lessons: chat, menu, bill, family tree, agenda (Module 1 so far). Words are tappable. English can be hidden.
 - **Grammar** tab: every tense and mood has its own page (17), grouped Now / Past / Future / Polite, wishes and "if" / Optional: présent, venir de, gérondif, passé composé, imparfait, plus-que-parfait, futur proche, futur simple, futur antérieur, conditionnel, conditionnel passé, si, comme si, subjonctif, subjonctif passé, impératif, passé simple (reading only). Full conjugation tables, real sentences, quiz. Every French word is tappable. All rules are open (no locks).
-- **Listen button**: the phone reads French aloud. Listen only. No voice recording or grading.
+- **Listen button**: the phone reads French aloud. Listen only. No voice recording or grading. On iPhone, sound needs silent mode off (the switch on the side); the button shows that hint if nothing plays.
 - **Review**: spaced repetition on words you met.
 - **Rules**: grammar rulebook.
 - **Center**: progress stats.
@@ -38,7 +38,8 @@ npm run dev
 
 ```bash
 npm test                              # logic, content and tenses tests
-npx tsx scripts/measure-content-pads.ts   # must say failing: 0 / 720
+npx tsx scripts/emit-unit-index.ts        # after editing a hand-written unit
+npx tsx scripts/measure-content-pads.ts   # old generated content: failing: 0 / 720
 npm run lint
 npm run build:pages                   # same build as the deploy; needs internet (Google Fonts)
 ```

@@ -367,7 +367,7 @@ export const TAP_FILL_VOCABULARY: VocabularyWord[] = [
   v(294, "salle", "room / hall", "noun", 'feminine'),
   v(295, "classe", "class", "noun", 'feminine'),
   v(296, "midi", "noon", "noun", 'masculine'),
-  v(297, "déjeuner", "lunch", "noun", 'masculine'),
+  v(297, "déjeuner", "to have lunch; lunch (le déjeuner)", "verb", null),
   v(298, "cours", "class / course", "noun", 'masculine'),
   v(299, "d'accord", "okay / agreed", "phrase"),
   v(300, "fin", "end", "noun", 'feminine'),

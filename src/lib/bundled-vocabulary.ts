@@ -6,6 +6,7 @@ import { CORE_EXTRA_VOCABULARY } from '@/lib/pathway/vocabulary-core-extra'
 import { TAP_FILL_VOCABULARY } from '@/lib/pathway/vocabulary-tap-fill'
 import { PROPER_NAME_VOCABULARY } from '@/lib/pathway/vocabulary-proper-names'
 import { TENSES_VOCABULARY } from '@/lib/tenses/vocabulary-tenses'
+import { UNIT_VOCABULARY } from '@/lib/units/index.generated'
 
 /** Collapse duplicate lemma surfaces; keep first (earlier bank wins). Letters keep case. */
 export function dedupeVocabularySurfaces(words: VocabularyWord[]): VocabularyWord[] {
@@ -32,4 +33,5 @@ export const BUNDLED_VOCABULARY: VocabularyWord[] = dedupeVocabularySurfaces([
   ...TAP_FILL_VOCABULARY,
   ...PROPER_NAME_VOCABULARY,
   ...TENSES_VOCABULARY,
+  ...UNIT_VOCABULARY,
 ])

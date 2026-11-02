@@ -3,19 +3,13 @@
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { Check, ChevronDown, ChevronRight, Play } from 'lucide-react'
-import { hasLessonContent } from '@/lib/course'
-import {
-  PATHWAY_BY_CHAPTER_ID,
-  PATHWAY_BY_MODULE_ID,
-  unitsForModule,
-  type PathwaySubChapter,
-} from '@/lib/pathway/catalog'
-import { deriveChapterStatus } from '@/lib/progression'
-import { BUNDLED_CHAPTER_IDS } from '@/lib/bundled-chapter-ids'
+import { PATHWAY_BY_MODULE_ID } from '@/lib/pathway/catalog'
+import { completedUnitIds, unitLessonsForModule, type UnitLesson } from '@/lib/pathway/units'
+import { HAND_WRITTEN_UNIT_IDS, REWRITTEN_MODULE_ORDERS } from '@/lib/units/index.generated'
 import { mergeCompletedChapterIds, readLocalCompletedChapters, readLocalDailyWords, readLocalStreak, readInProgressPercents, subscribeCompletedChapters } from '@/lib/local-progress'
 import { AccountMenu } from '@/components/auth/AccountMenu'
 import { getCachedUser } from '@/lib/cloud/auth'
-import { TRACKS, chapterIdsForTrack, trackForModuleOrder, type TrackId } from '@/lib/pathway/tracks'
+import { TRACKS, trackForModuleOrder, unitsForTrack, type TrackId } from '@/lib/pathway/tracks'
 
 const TRACK_PREF_KEY = 'french-course:home-track'
 
@@ -38,46 +32,48 @@ type Chapter = {
 
 type Progress = { chapter_id: string; status: 'not-started' | 'in-progress' | 'completed' }
 
+const HAND_WRITTEN = new Set(HAND_WRITTEN_UNIT_IDS)
+
+function isRewritten(moduleOrder: number, units: UnitLesson[]) {
+  return REWRITTEN_MODULE_ORDERS.has(moduleOrder) || units.every((unit) => HAND_WRITTEN.has(unit.id))
+}
+
 function LessonRow({
-  chapter,
-  sub,
-  status,
+  unit,
+  done,
   percent,
   isNext,
 }: {
-  chapter: Chapter
-  sub: PathwaySubChapter
-  status: ReturnType<typeof deriveChapterStatus>
+  unit: UnitLesson
+  done: boolean
   percent?: number
   isNext: boolean
 }) {
   const shown = Math.max(0, Math.min(99, percent ?? 0))
-  const meta = status === 'in-progress' ? `${sub.roleLabel} · ${shown}%` : status === 'coming-soon' ? 'Coming soon' : sub.roleLabel
-  const icon =
-    status === 'completed' ? (
-      <span className="flex size-7 items-center justify-center rounded-full bg-success text-white"><Check className="size-4" strokeWidth={3} /></span>
-    ) : status === 'in-progress' || isNext ? (
-      <span className="flex size-7 items-center justify-center rounded-full bg-primary text-white"><Play className="size-3 fill-white" /></span>
-    ) : (
-      <span className="m-0.5 size-6 rounded-full shadow-[inset_0_0_0_2px_var(--color-outline-variant)]" />
-    )
-  const row = (
-    <div className="flex min-h-14 items-center gap-3 px-4 py-2">
-      {icon}
-      <div className="min-w-0 flex-1">
-        <p className={`truncate text-body-ui ${isNext ? 'font-bold' : 'font-semibold'}`}>{sub.title}</p>
-        <p className="text-xs text-on-surface-variant">{meta}</p>
-      </div>
-    </div>
+  const started = !done && shown > 0
+  const meta = done ? 'Done' : started ? `${shown}% done` : unit.focus
+  const icon = done ? (
+    <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-success text-white"><Check className="size-4" strokeWidth={3} /></span>
+  ) : started || isNext ? (
+    <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-white"><Play className="size-3 fill-white" /></span>
+  ) : (
+    <span className="m-0.5 size-6 shrink-0 rounded-full shadow-[inset_0_0_0_2px_var(--color-outline-variant)]" />
   )
-  return status === 'coming-soon' ? <div>{row}</div> : (
-    <Link href={`/lesson/${chapter.id}/`} className="rounded-xl hover:bg-surface-container">{row}</Link>
+  return (
+    <Link href={`/lesson/${unit.id}/`} className="rounded-xl hover:bg-surface-container">
+      <div className="flex min-h-14 items-center gap-3 px-4 py-2">
+        {icon}
+        <div className="min-w-0 flex-1">
+          <p className={`truncate text-body-ui ${isNext ? 'font-bold' : 'font-semibold'}`}>{unit.unitIndex}. {unit.title}</p>
+          <p className="truncate text-xs text-on-surface-variant">{meta}</p>
+        </div>
+      </div>
+    </Link>
   )
 }
 
 export default function HomeClient({
   modules: courseModules,
-  chapters: courseChapters,
 }: {
   modules: Module[]
   chapters: Chapter[]
@@ -122,32 +118,15 @@ export default function HomeClient({
     })
   }, [])
 
-  const authoredChapters = useMemo(() => {
-    const authored = courseChapters.filter((chapter) => hasLessonContent(chapter.lesson_content))
-    return [...authored].sort((left, right) => {
-      const leftModule = courseModules.find((module) => module.id === left.module_id)?.order_index ?? 0
-      const rightModule = courseModules.find((module) => module.id === right.module_id)?.order_index ?? 0
-      return leftModule - rightModule || left.order_index - right.order_index
-    })
-  }, [courseChapters, courseModules])
-
   const DAILY_GOAL = 300
-  const authoredIds = useMemo(() => {
-    // Prefer bundled pathway order so Home status matches every playable lesson.
-    const fromBundle = BUNDLED_CHAPTER_IDS.filter((id) => courseChapters.some((c) => c.id === id && hasLessonContent(c.lesson_content)))
-    return fromBundle.length ? fromBundle : authoredChapters.map((item) => item.id)
-  }, [authoredChapters, courseChapters])
   const completedIds = useMemo(
-    () => new Set([...progressByChapter].filter(([, status]) => status === 'completed').map(([id]) => id)),
+    () => completedUnitIds([...progressByChapter].filter(([, status]) => status === 'completed').map(([id]) => id)),
     [progressByChapter],
   )
   const track = TRACKS.find((item) => item.id === trackId) ?? TRACKS[0]
-  const trackChapterIds = useMemo(() => {
-    const playable = new Set(authoredIds)
-    return chapterIdsForTrack(trackId).filter((id) => playable.has(id))
-  }, [authoredIds, trackId])
-  const completedPlayable = trackChapterIds.filter((id) => completedIds.has(id)).length
-  const mastery = trackChapterIds.length ? Math.round((completedPlayable / trackChapterIds.length) * 100) : 0
+  const trackUnits = useMemo(() => unitsForTrack(trackId), [trackId])
+  const completedPlayable = trackUnits.filter((unit) => completedIds.has(unit.id)).length
+  const mastery = trackUnits.length ? Math.round((completedPlayable / trackUnits.length) * 100) : 0
   const chooseTrack = (next: TrackId) => {
     setTrackId(next)
     try {
@@ -158,13 +137,12 @@ export default function HomeClient({
   }
   const visibleModules = courseModules.filter((module) => trackForModuleOrder(module.order_index) === trackId)
     .sort((a, b) => track.moduleOrders.indexOf(a.order_index) - track.moduleOrders.indexOf(b.order_index))
-  const chaptersById = useMemo(() => new Map(courseChapters.map((chapter) => [chapter.id, chapter])), [courseChapters])
-  const authoredTotal = trackChapterIds.length
+  const authoredTotal = trackUnits.length
   const authoredDone = completedPlayable
   const dailyPct = Math.min(100, Math.round((wordsRead / DAILY_GOAL) * 100))
-  const nextId = trackChapterIds.find((id) => !completedIds.has(id)) ?? null
-  const nextSub = nextId ? PATHWAY_BY_CHAPTER_ID.get(nextId)?.sub : undefined
-  const nextModuleId = nextId ? chaptersById.get(nextId)?.module_id : undefined
+  const nextUnit = trackUnits.find((unit) => !completedIds.has(unit.id)) ?? null
+  const nextId = nextUnit?.id ?? null
+  const nextModuleId = nextUnit?.moduleId
   const ringLength = 2 * Math.PI * 26
   const today = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })
 
@@ -189,11 +167,11 @@ export default function HomeClient({
             <p className="text-xl font-bold">{wordsRead} / {DAILY_GOAL} words</p>
           </div>
         </div>
-        {nextId && nextSub ? (
+        {nextId && nextUnit ? (
           <Link href={`/lesson/${nextId}/`} className="flex min-h-11 items-center justify-between gap-3 rounded-2xl bg-white px-4 py-3 text-on-surface">
             <span className="min-w-0">
-              <span className="block text-xs text-on-surface-variant">{completedPlayable ? 'Continue' : 'Start'} · {nextSub.roleLabel}</span>
-              <span className="block truncate text-body-ui font-semibold">{nextSub.title}</span>
+              <span className="block text-xs text-on-surface-variant">{completedPlayable ? 'Continue' : 'Start'} · Module {nextUnit.moduleOrder}, unit {nextUnit.unitIndex}</span>
+              <span className="block truncate text-body-ui font-semibold">{nextUnit.title}</span>
             </span>
             <ChevronRight className="size-5 shrink-0 text-primary" />
           </Link>
@@ -231,43 +209,33 @@ export default function HomeClient({
         ) : (
           visibleModules.map((module) => {
             const pathwayModule = PATHWAY_BY_MODULE_ID.get(module.id)
-            const units = pathwayModule ? unitsForModule(pathwayModule) : []
-            const ids = pathwayModule ? pathwayModule.subchapters.map((sub) => sub.id) : []
-            const done = ids.filter((id) => completedIds.has(id)).length
-            const pct = ids.length ? Math.round((done / ids.length) * 100) : 0
+            const units = pathwayModule ? unitLessonsForModule(pathwayModule) : []
+            const done = units.filter((unit) => completedIds.has(unit.id)).length
+            const pct = units.length ? Math.round((done / units.length) * 100) : 0
             const open = module.id === nextModuleId
+            const draft = !isRewritten(module.order_index, units)
             return (
               <details key={module.id} open={open} className="group rounded-[20px] bg-surface-container-low">
                 <summary className="flex min-h-16 cursor-pointer list-none items-center gap-3 px-4 py-3 [&::-webkit-details-marker]:hidden">
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs text-on-surface-variant">Module {module.order_index} · {module.cefr_level}</p>
+                    <p className="text-xs text-on-surface-variant">Module {module.order_index} · {module.cefr_level}{draft ? ' · Draft, being rewritten' : ''}</p>
                     <h2 className="truncate text-body-ui font-bold">{module.title}</h2>
                     <div className="mt-2 h-1 rounded-full bg-surface-container-highest">
                       <div className="h-1 rounded-full bg-primary" style={{ width: `${pct}%` }} />
                     </div>
                   </div>
-                  <span className="shrink-0 text-xs text-on-surface-variant">{done}/{ids.length}</span>
+                  <span className="shrink-0 text-xs text-on-surface-variant">{done}/{units.length}</span>
                   <ChevronDown className="size-5 shrink-0 text-on-surface-variant transition-transform group-open:rotate-180" />
                 </summary>
                 <div className="flex flex-col pb-2">
                   {units.map((unit) => (
-                    <div key={unit.unitIndex} className="flex flex-col">
-                      <p className="px-4 pb-1 pt-3 text-xs font-semibold text-on-surface-variant">Unit {unit.unitIndex} · {unit.unitTitle}</p>
-                      {unit.chapters.map((sub) => {
-                        const chapter = chaptersById.get(sub.id)
-                        if (!chapter) return null
-                        return (
-                          <LessonRow
-                            key={sub.id}
-                            chapter={chapter}
-                            sub={sub}
-                            status={deriveChapterStatus(chapter.id, authoredIds, completedIds, inProgressPercents)}
-                            percent={inProgressPercents[chapter.id]}
-                            isNext={chapter.id === nextId}
-                          />
-                        )
-                      })}
-                    </div>
+                    <LessonRow
+                      key={unit.id}
+                      unit={unit}
+                      done={completedIds.has(unit.id)}
+                      percent={inProgressPercents[unit.id]}
+                      isNext={unit.id === nextId}
+                    />
                   ))}
                 </div>
               </details>

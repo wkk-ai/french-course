@@ -1,4 +1,5 @@
 import { PATHWAY_MODULES, type PathwayModule } from '@/lib/pathway/catalog'
+import { unitLessonsForModule, type UnitLesson } from '@/lib/pathway/units'
 
 /**
  * Three tracks, built for the goal: hold a normal conversation and a business conversation.
@@ -63,4 +64,9 @@ export function modulesForTrack(trackId: TrackId): PathwayModule[] {
 
 export function chapterIdsForTrack(trackId: TrackId): string[] {
   return modulesForTrack(trackId).flatMap((module) => module.subchapters.map((sub) => sub.id))
+}
+
+/** One lesson per unit, in track order. */
+export function unitsForTrack(trackId: TrackId): UnitLesson[] {
+  return modulesForTrack(trackId).flatMap(unitLessonsForModule)
 }

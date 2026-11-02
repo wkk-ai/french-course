@@ -47,7 +47,10 @@
 2. **[2026-07-24] Always commit + push when finished (this chat / this product)**
    Do instead: end every completed change set with commit → push → Pages deploy so the user can check live.
 
-3. **[2026-07-25] All modules must match Module-1 Learn A craft (not length theater)**
+3. **[2026-11-02] One lesson per unit; hand-write every unit (supersedes the 720 craft rule below)**
+   Do instead: user rejected generated filler ("Ils disent bonjour" x336, all-correct MCQs, FR=EN questions). Write each unit by hand with `src/lib/units/kit.ts`, same length, real scenes with a running cast (Lucas from Brazil in Lyon). Run `emit-unit-index` + `tests/unit-lessons.test.ts`. Mark untouched modules Draft. User keeps lesson length: "I complete them quickly" — do not shorten.
+
+3b. **[2026-07-25] (old) All modules must match Module-1 Learn A craft (not length theater)**
    Do instead: every sub-chapter passes craft `validateChapterContent` + `measure-content-pads` = 0/720. Factory builds via `craft-from-theme` (no Practice order / lemma-loop pads). Never mark fixed from char count alone. M01 Learn A (`…0101`) is the craft rubric for all 720.
 
 4. **[2026-07-25] Review = vocab + grammar only**

@@ -4,8 +4,8 @@
  */
 import { mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { BUNDLED_CHAPTER_IDS } from '../src/lib/bundled-chapter-ids'
-import { resolveLessonContent } from '../src/lib/lesson-content'
+import { UNIT_LESSON_IDS } from '../src/lib/pathway/units'
+import { resolveUnitLesson } from '../src/lib/units/lessons'
 
 const root = join(process.cwd(), 'public/course-data')
 const lessonsDir = join(root, 'lessons')
@@ -17,8 +17,8 @@ const urls: string[] = ['/course-data/manifest.json']
 let bytes = 0
 let missing = 0
 
-for (const id of BUNDLED_CHAPTER_IDS) {
-  const content = resolveLessonContent(id, null)
+for (const id of UNIT_LESSON_IDS) {
+  const content = resolveUnitLesson(id)
   if (!content) {
     missing += 1
     console.error(`missing lesson ${id}`)
@@ -42,7 +42,7 @@ if (missing) {
 
 const manifest = {
   version: new Date().toISOString().slice(0, 10),
-  lessonCount: BUNDLED_CHAPTER_IDS.length,
+  lessonCount: UNIT_LESSON_IDS.length,
   bytes,
   urls,
 }

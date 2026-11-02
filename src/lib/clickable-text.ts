@@ -56,7 +56,7 @@ function normalizeLookup(text: string) {
 /** Strip leading French elision (l', d', j', …) for lookup. */
 export function stripElisionBase(text: string): string | null {
   const norm = normalizeLookup(text)
-  const match = norm.match(/^(l'|d'|j'|n'|m'|t'|s'|c')(.+)$/i)
+  const match = norm.match(/^(qu'|l'|d'|j'|n'|m'|t'|s'|c')(.+)$/i)
   return match?.[2] ?? null
 }
 
@@ -136,6 +136,14 @@ function registerFrenchInflections(map: Map<string, string>, word: VocabularyWor
     }
   }
 }
+
+const PRIORITY_FORMS: [string, string[]][] = [
+  ['être', ['suis', 'es', 'est', 'sommes', 'êtes', 'sont', "n'est"]],
+  ['avoir', ['ai', 'as', 'a', 'avons', 'avez', 'ont', "j'ai"]],
+  ['aller', ['vais', 'vas', 'va', 'allons', 'allez', 'vont']],
+  ['faire', ['fais', 'fait', 'faisons', 'faites', 'font']],
+  ['présenter', ['présente', 'présentes', 'présentent']],
+]
 
 /** Resolve lemma id: full surface, then elision-stripped base, then hyphen clitic. */
 export function lookupLemma(lookup: Map<string, string>, text: string): string | undefined {
@@ -571,7 +579,8 @@ export function buildLemmaLookup(vocabulary: VocabularyWord[]) {
       for (const form of ["l'après", "l’après"]) map.set(normalizeLookup(form), word.id)
     }
     if (word.word === 'petit-déjeuner') {
-      for (const form of ['déjeuner', 'petit']) map.set(normalizeLookup(form), word.id)
+      // Only a fallback: 'déjeuner' (to have lunch) and 'petit' (small) are real words of their own.
+      for (const form of ['déjeuner', 'petit']) if (!map.has(normalizeLookup(form))) map.set(normalizeLookup(form), word.id)
     }
     if (word.word === 'il') {
       map.set(normalizeLookup("qu'il"), word.id)
@@ -600,6 +609,17 @@ export function buildLemmaLookup(vocabulary: VocabularyWord[]) {
 
   for (const word of vocabulary) {
     registerFrenchInflections(map, word)
+  }
+
+  // A real dictionary entry beats a guessed form of another word (marché = market, not marcher).
+  for (const word of vocabulary) {
+    if ([...word.word].length > 1) map.set(normalizeLookup(word.word), word.id)
+  }
+  // Very common forms that collide with rarer verbs or letters (suis: être not suivre; as: avoir not the letter A).
+  const byWord = new Map(vocabulary.map((word) => [word.word, word.id]))
+  for (const [lemma, forms] of PRIORITY_FORMS) {
+    const id = byWord.get(lemma)
+    if (id) for (const form of forms) map.set(normalizeLookup(form), id)
   }
 
   const phraseLemmas: Record<string, string> = {
@@ -719,9 +739,25 @@ const MULTIWORD = [
   "d'abord",
 ]
 
+let cachedPhraseVocab: VocabularyWord[] | null = null
+let cachedPhrases: string[] = MULTIWORD
+
+/** Fixed list plus every dictionary entry written with a space (près de, en bas, São Paulo). Longest first. */
+function multiwordPhrases(vocabulary: VocabularyWord[]): string[] {
+  if (cachedPhraseVocab === vocabulary) return cachedPhrases
+  const extra = vocabulary
+    .map((word) => word.word.replace(/’/g, "'").replace(/-/g, ' ').trim())
+    .filter((word) => / /.test(word) && word.split(' ').length <= 4 && !/[…().,;:!?]/.test(word))
+  const all = [...new Set([...MULTIWORD, ...extra])]
+  cachedPhrases = all.sort((a, b) => b.split(' ').length - a.split(' ').length)
+  cachedPhraseVocab = vocabulary
+  return cachedPhrases
+}
+
 /** Merge multi-word idioms and attach missing lemmaIds from vocabulary. */
 export function enrichTokens(tokens: WordToken[], vocabulary: VocabularyWord[]): WordToken[] {
   const lookup = buildLemmaLookup(vocabulary)
+  const phrases = multiwordPhrases(vocabulary)
   const vocabularyById = new Map(vocabulary.map((word) => [word.id, word]))
   const expanded = tokens.flatMap(splitGluedPunctuation)
   const merged: WordToken[] = []
@@ -729,7 +765,7 @@ export function enrichTokens(tokens: WordToken[], vocabulary: VocabularyWord[]):
 
   while (i < expanded.length) {
     let matched = false
-    for (const phrase of MULTIWORD) {
+    for (const phrase of phrases) {
       const parts = phrase.split(' ')
       // Allow optional hyphen tokens between phrase parts (qu'est-ce, rendez-vous, allez-vous).
       const consumed: WordToken[] = []

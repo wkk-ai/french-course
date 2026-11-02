@@ -42,12 +42,9 @@ function lemmaIdFromExercise(exercise: LessonExercise): string | null {
 }
 
 function siblingRemediationLinks(chapterId: string): Array<{ id: string; label: string }> {
-  const hit = PATHWAY_BY_CHAPTER_ID.get(chapterId)
-  if (!hit) return []
-  const unit = hit.module.subchapters.filter((sub) => sub.unitIndex === hit.sub.unitIndex)
-  return unit
-    .filter((sub) => sub.role === 'B' || sub.role === 'C')
-    .map((sub) => ({ id: sub.id, label: `${sub.roleLabel}: ${sub.title}` }))
+  // One lesson per unit now: no separate practice pages to send the learner to.
+  void chapterId
+  return []
 }
 
 type Stage = 'brief' | 'reading' | 'conversation' | 'exercise'
