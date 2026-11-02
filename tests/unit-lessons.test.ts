@@ -83,4 +83,6 @@ test('common forms point to the right word in the dictionary', async () => {
   assert.equal(word('marché'), 'marché')
   assert.equal(word('déjeune'), 'déjeuner')
   assert.equal(word("qu'ils"), 'ils')
+  assert.equal(word('pars'), 'partir')
+  assert.equal(word('dors'), 'dormir')
 })

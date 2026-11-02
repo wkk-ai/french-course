@@ -1,4 +1,5 @@
 import { PATHWAY_MODULES, type PathwayModule, type PathwaySubChapter } from '@/lib/pathway/catalog'
+import { HAND_WRITTEN_UNIT_TITLES } from '@/lib/units/index.generated'
 
 /**
  * One lesson per unit (36 modules x 5 units = 180 lessons).
@@ -44,8 +45,8 @@ export function unitLessonsForModule(module: PathwayModule): UnitLesson[] {
         moduleId: module.id,
         moduleOrder: module.orderIndex,
         unitIndex,
-        title: cleanTitle(first.unitTitle, first),
-        focus: cleanFocus(first.unitGrammar),
+        title: HAND_WRITTEN_UNIT_TITLES[first.id]?.title ?? cleanTitle(first.unitTitle, first),
+        focus: HAND_WRITTEN_UNIT_TITLES[first.id]?.focus ?? cleanFocus(first.unitGrammar),
         legacyIds: ordered.map((sub) => sub.id),
       }
     })

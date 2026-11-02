@@ -5,9 +5,16 @@ import { M2U2 } from '@/lib/units/m02-u2'
 import { M2U3 } from '@/lib/units/m02-u3'
 import { M2U4 } from '@/lib/units/m02-u4'
 import { M2U5 } from '@/lib/units/m02-u5'
+import { M3U1 } from '@/lib/units/m03-u1'
+import { M3U2 } from '@/lib/units/m03-u2'
+import { M3U3 } from '@/lib/units/m03-u3'
+import { M3U4 } from '@/lib/units/m03-u4'
+import { M3U5 } from '@/lib/units/m03-u5'
 
 /** Hand-written unit lessons, in course order. Add each new unit here. */
-export const UNIT_SPECS: UnitSpec[] = [M2U1, M2U2, M2U3, M2U4, M2U5]
+export const UNIT_SPECS: UnitSpec[] = [M2U1, M2U2, M2U3, M2U4, M2U5,
+  M3U1, M3U2, M3U3, M3U4, M3U5,
+]
 
 
 function wordId(key: string, index: number): string {

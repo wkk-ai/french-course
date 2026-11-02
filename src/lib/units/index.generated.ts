@@ -7,8 +7,37 @@ export const HAND_WRITTEN_UNIT_IDS: string[] = [
   "22222222-0000-0000-0000-000000000202",
   "22222222-0000-0000-0000-000000000203",
   "22222222-0000-0000-0000-000000000204",
-  "22222222-0000-0000-0000-000000000205"
+  "22222222-0000-0000-0000-000000000205",
+  "22222222-0000-0000-0000-000000000301",
+  "22222222-0000-0000-0000-000000000302",
+  "22222222-0000-0000-0000-000000000303",
+  "22222222-0000-0000-0000-000000000304",
+  "22222222-0000-0000-0000-000000000305"
 ]
+
+/** Home titles for hand-written units. */
+export const HAND_WRITTEN_UNIT_TITLES: Record<string, { title?: string; focus?: string }> = {
+  "22222222-0000-0000-0000-000000000301": {
+    "title": "Ma routine du matin",
+    "focus": "Present of -er verbs; reflexive verbs (se lever)"
+  },
+  "22222222-0000-0000-0000-000000000302": {
+    "title": "Qu’est-ce que tu fais dans la vie ?",
+    "focus": "Jobs; present of -ir and -re verbs"
+  },
+  "22222222-0000-0000-0000-000000000303": {
+    "title": "Quelle heure est-il ?",
+    "focus": "Telling the time; appointments; being late"
+  },
+  "22222222-0000-0000-0000-000000000304": {
+    "title": "Le week-end et les loisirs",
+    "focus": "Hobbies; aimer + verb; how often (souvent, jamais)"
+  },
+  "22222222-0000-0000-0000-000000000305": {
+    "title": "Une journée type",
+    "focus": "Irregular verbs: aller, partir, dormir, prendre, faire"
+  }
+}
 
 /** Modules that are fully hand-written (no "Draft" label). Module 1 was written by hand before the unit kit. */
 export const REWRITTEN_MODULE_ORDERS = new Set<number>([1])
@@ -3616,6 +3645,3951 @@ export const UNIT_VOCABULARY: VocabularyWord[] = [
   ],
   "part_of_speech": "noun",
   "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001000",
+  "word": "matin",
+  "base_translation": "morning",
+  "meanings": [
+   "morning"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001001",
+  "word": "réveil",
+  "base_translation": "alarm clock",
+  "meanings": [
+   "alarm clock"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001002",
+  "word": "se réveiller",
+  "base_translation": "to wake up",
+  "meanings": [
+   "to wake up"
+  ],
+  "example": {
+   "french": "Je me réveille à sept heures.",
+   "english": "I wake up at seven."
+  },
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001003",
+  "word": "se lever",
+  "base_translation": "to get up",
+  "meanings": [
+   "to get up"
+  ],
+  "example": {
+   "french": "Je me lève tout de suite.",
+   "english": "I get up right away."
+  },
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001004",
+  "word": "se doucher",
+  "base_translation": "to take a shower",
+  "meanings": [
+   "to take a shower"
+  ],
+  "example": {
+   "french": "Il se douche le matin.",
+   "english": "He showers in the morning."
+  },
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001005",
+  "word": "se laver",
+  "base_translation": "to wash (yourself)",
+  "meanings": [
+   "to wash (yourself)"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001006",
+  "word": "se brosser",
+  "base_translation": "to brush (se brosser les dents = to brush your teeth)",
+  "meanings": [
+   "to brush (se brosser les dents = to brush your teeth)"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001007",
+  "word": "dent",
+  "base_translation": "tooth",
+  "meanings": [
+   "tooth"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001008",
+  "word": "s’habiller",
+  "base_translation": "to get dressed",
+  "meanings": [
+   "to get dressed"
+  ],
+  "example": {
+   "french": "Je m’habille vite.",
+   "english": "I get dressed quickly."
+  },
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001009",
+  "word": "se préparer",
+  "base_translation": "to get ready",
+  "meanings": [
+   "to get ready"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001010",
+  "word": "petit-déjeuner",
+  "base_translation": "breakfast",
+  "meanings": [
+   "breakfast"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001011",
+  "word": "café",
+  "base_translation": "coffee; café",
+  "meanings": [
+   "coffee",
+   "café"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001012",
+  "word": "pain",
+  "base_translation": "bread",
+  "meanings": [
+   "bread"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001013",
+  "word": "tartine",
+  "base_translation": "slice of bread with butter or jam",
+  "meanings": [
+   "slice of bread with butter or jam"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001014",
+  "word": "beurre",
+  "base_translation": "butter",
+  "meanings": [
+   "butter"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001015",
+  "word": "confiture",
+  "base_translation": "jam",
+  "meanings": [
+   "jam"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001016",
+  "word": "manger",
+  "base_translation": "to eat",
+  "meanings": [
+   "to eat"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001017",
+  "word": "écouter",
+  "base_translation": "to listen (to)",
+  "meanings": [
+   "to listen (to)"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001018",
+  "word": "quitter",
+  "base_translation": "to leave (a place)",
+  "meanings": [
+   "to leave (a place)"
+  ],
+  "example": {
+   "french": "Je quitte la maison à huit heures.",
+   "english": "I leave home at eight."
+  },
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001019",
+  "word": "marcher",
+  "base_translation": "to walk",
+  "meanings": [
+   "to walk"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001020",
+  "word": "préparer",
+  "base_translation": "to prepare; to make (food)",
+  "meanings": [
+   "to prepare",
+   "to make (food)"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001021",
+  "word": "regarder",
+  "base_translation": "to look at; to watch",
+  "meanings": [
+   "to look at",
+   "to watch"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001022",
+  "word": "rester",
+  "base_translation": "to stay",
+  "meanings": [
+   "to stay"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001023",
+  "word": "d’abord",
+  "base_translation": "first",
+  "meanings": [
+   "first"
+  ],
+  "part_of_speech": "adverb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001024",
+  "word": "ensuite",
+  "base_translation": "then; next",
+  "meanings": [
+   "then",
+   "next"
+  ],
+  "part_of_speech": "adverb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001025",
+  "word": "puis",
+  "base_translation": "then",
+  "meanings": [
+   "then"
+  ],
+  "part_of_speech": "adverb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001026",
+  "word": "enfin",
+  "base_translation": "finally",
+  "meanings": [
+   "finally"
+  ],
+  "part_of_speech": "adverb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001027",
+  "word": "tout de suite",
+  "base_translation": "right away",
+  "meanings": [
+   "right away"
+  ],
+  "part_of_speech": "phrase",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": true,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001028",
+  "word": "vite",
+  "base_translation": "quickly; fast",
+  "meanings": [
+   "quickly",
+   "fast"
+  ],
+  "part_of_speech": "adverb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001029",
+  "word": "tôt",
+  "base_translation": "early",
+  "meanings": [
+   "early"
+  ],
+  "part_of_speech": "adverb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001030",
+  "word": "tard",
+  "base_translation": "late",
+  "meanings": [
+   "late"
+  ],
+  "part_of_speech": "adverb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001031",
+  "word": "pendant",
+  "base_translation": "during; for (a time)",
+  "meanings": [
+   "during",
+   "for (a time)"
+  ],
+  "part_of_speech": "preposition",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001032",
+  "word": "radio",
+  "base_translation": "radio",
+  "meanings": [
+   "radio"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001033",
+  "word": "sonner",
+  "base_translation": "to ring",
+  "meanings": [
+   "to ring"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001034",
+  "word": "jean",
+  "base_translation": "jeans",
+  "meanings": [
+   "jeans"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001035",
+  "word": "chemise",
+  "base_translation": "shirt",
+  "meanings": [
+   "shirt"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001036",
+  "word": "exercice",
+  "base_translation": "exercise; practice",
+  "meanings": [
+   "exercise",
+   "practice"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001037",
+  "word": "pyjama",
+  "base_translation": "pyjamas",
+  "meanings": [
+   "pyjamas"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001038",
+  "word": "jusqu’au",
+  "base_translation": "until the; as far as the (jusqu’à + le)",
+  "meanings": [
+   "until the",
+   "as far as the (jusqu’à + le)"
+  ],
+  "part_of_speech": "phrase",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": true,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001039",
+  "word": "écouteurs",
+  "base_translation": "earphones",
+  "meanings": [
+   "earphones"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001040",
+  "word": "courageux",
+  "base_translation": "brave",
+  "meanings": [
+   "brave"
+  ],
+  "part_of_speech": "adjective",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001041",
+  "word": "sinon",
+  "base_translation": "otherwise; if not",
+  "meanings": [
+   "otherwise",
+   "if not"
+  ],
+  "part_of_speech": "adverb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001042",
+  "word": "sacré",
+  "base_translation": "sacred; untouchable (casual: a must)",
+  "meanings": [
+   "sacred",
+   "untouchable (casual: a must)"
+  ],
+  "part_of_speech": "adjective",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001043",
+  "word": "sept",
+  "base_translation": "seven",
+  "meanings": [
+   "seven"
+  ],
+  "part_of_speech": "number",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001044",
+  "word": "huit",
+  "base_translation": "eight",
+  "meanings": [
+   "eight"
+  ],
+  "part_of_speech": "number",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001045",
+  "word": "six",
+  "base_translation": "six",
+  "meanings": [
+   "six"
+  ],
+  "part_of_speech": "number",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001046",
+  "word": "quart",
+  "base_translation": "quarter (et quart = quarter past)",
+  "meanings": [
+   "quarter (et quart = quarter past)"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001047",
+  "word": "demi",
+  "base_translation": "half (et demie = half past)",
+  "meanings": [
+   "half (et demie = half past)"
+  ],
+  "part_of_speech": "adjective",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001048",
+  "word": "difficile",
+  "base_translation": "difficult; hard",
+  "meanings": [
+   "difficult",
+   "hard"
+  ],
+  "part_of_speech": "adjective",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001049",
+  "word": "fatigué",
+  "base_translation": "tired",
+  "meanings": [
+   "tired"
+  ],
+  "part_of_speech": "adjective",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001050",
+  "word": "salle de bains",
+  "base_translation": "bathroom",
+  "meanings": [
+   "bathroom"
+  ],
+  "part_of_speech": "phrase",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": true,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001051",
+  "word": "métro",
+  "base_translation": "metro; underground",
+  "meanings": [
+   "metro",
+   "underground"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001052",
+  "word": "minute",
+  "base_translation": "minute",
+  "meanings": [
+   "minute"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001053",
+  "word": "chanson",
+  "base_translation": "song",
+  "meanings": [
+   "song"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001054",
+  "word": "brésilien",
+  "base_translation": "Brazilian",
+  "meanings": [
+   "Brazilian"
+  ],
+  "part_of_speech": "adjective",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001055",
+  "word": "jamais",
+  "base_translation": "never (ne… jamais)",
+  "meanings": [
+   "never (ne… jamais)"
+  ],
+  "part_of_speech": "adverb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001056",
+  "word": "chaque",
+  "base_translation": "each; every",
+  "meanings": [
+   "each",
+   "every"
+  ],
+  "part_of_speech": "determiner",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001057",
+  "word": "bus",
+  "base_translation": "bus",
+  "meanings": [
+   "bus"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001058",
+  "word": "sac",
+  "base_translation": "bag",
+  "meanings": [
+   "bag"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001059",
+  "word": "clé",
+  "base_translation": "key",
+  "meanings": [
+   "key"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000001060",
+  "word": "prêt",
+  "base_translation": "ready",
+  "meanings": [
+   "ready"
+  ],
+  "part_of_speech": "adjective",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002000",
+  "word": "médecin",
+  "base_translation": "doctor",
+  "meanings": [
+   "doctor"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002001",
+  "word": "infirmier",
+  "base_translation": "nurse (man)",
+  "meanings": [
+   "nurse (man)"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002002",
+  "word": "infirmière",
+  "base_translation": "nurse (woman)",
+  "meanings": [
+   "nurse (woman)"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002003",
+  "word": "professeur",
+  "base_translation": "teacher",
+  "meanings": [
+   "teacher"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002004",
+  "word": "avocat",
+  "base_translation": "lawyer (man)",
+  "meanings": [
+   "lawyer (man)"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002005",
+  "word": "avocate",
+  "base_translation": "lawyer (woman)",
+  "meanings": [
+   "lawyer (woman)"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002006",
+  "word": "serveur",
+  "base_translation": "waiter",
+  "meanings": [
+   "waiter"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002007",
+  "word": "serveuse",
+  "base_translation": "waitress",
+  "meanings": [
+   "waitress"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002008",
+  "word": "boulanger",
+  "base_translation": "baker (man)",
+  "meanings": [
+   "baker (man)"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002009",
+  "word": "boulangère",
+  "base_translation": "baker (woman)",
+  "meanings": [
+   "baker (woman)"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002010",
+  "word": "ingénieur",
+  "base_translation": "engineer",
+  "meanings": [
+   "engineer"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002011",
+  "word": "traductrice",
+  "base_translation": "translator (woman)",
+  "meanings": [
+   "translator (woman)"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002012",
+  "word": "retraité",
+  "base_translation": "retired (man)",
+  "meanings": [
+   "retired (man)"
+  ],
+  "part_of_speech": "adjective",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002013",
+  "word": "retraitée",
+  "base_translation": "retired (woman)",
+  "meanings": [
+   "retired (woman)"
+  ],
+  "part_of_speech": "adjective",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002014",
+  "word": "travail",
+  "base_translation": "work; job",
+  "meanings": [
+   "work",
+   "job"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002015",
+  "word": "métier",
+  "base_translation": "job; trade; profession",
+  "meanings": [
+   "job",
+   "trade",
+   "profession"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002016",
+  "word": "hôpital",
+  "base_translation": "hospital",
+  "meanings": [
+   "hospital"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002017",
+  "word": "école",
+  "base_translation": "school",
+  "meanings": [
+   "school"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002018",
+  "word": "élève",
+  "base_translation": "pupil; student (at school)",
+  "meanings": [
+   "pupil",
+   "student (at school)"
+  ],
+  "part_of_speech": "noun",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002019",
+  "word": "patient",
+  "base_translation": "patient",
+  "meanings": [
+   "patient"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002020",
+  "word": "livre",
+  "base_translation": "book",
+  "meanings": [
+   "book"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002021",
+  "word": "journée",
+  "base_translation": "day (the whole day)",
+  "meanings": [
+   "day (the whole day)"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002022",
+  "word": "finir",
+  "base_translation": "to finish",
+  "meanings": [
+   "to finish"
+  ],
+  "example": {
+   "french": "Je finis à dix-huit heures.",
+   "english": "I finish at six p.m."
+  },
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002023",
+  "word": "choisir",
+  "base_translation": "to choose",
+  "meanings": [
+   "to choose"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002024",
+  "word": "réussir",
+  "base_translation": "to succeed; to pass (an exam)",
+  "meanings": [
+   "to succeed",
+   "to pass (an exam)"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002025",
+  "word": "réfléchir",
+  "base_translation": "to think (carefully)",
+  "meanings": [
+   "to think (carefully)"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002026",
+  "word": "attendre",
+  "base_translation": "to wait (for)",
+  "meanings": [
+   "to wait (for)"
+  ],
+  "example": {
+   "french": "J’attends le bus.",
+   "english": "I am waiting for the bus."
+  },
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002027",
+  "word": "répondre",
+  "base_translation": "to answer",
+  "meanings": [
+   "to answer"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002028",
+  "word": "vendre",
+  "base_translation": "to sell",
+  "meanings": [
+   "to sell"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002029",
+  "word": "entendre",
+  "base_translation": "to hear",
+  "meanings": [
+   "to hear"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002030",
+  "word": "connaître",
+  "base_translation": "to know (a person, a place)",
+  "meanings": [
+   "to know (a person, a place)"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002031",
+  "word": "Édouard-Herriot",
+  "base_translation": "Édouard-Herriot (a big hospital in Lyon)",
+  "meanings": [
+   "Édouard-Herriot (a big hospital in Lyon)"
+  ],
+  "part_of_speech": "noun",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002032",
+  "word": "traduire",
+  "base_translation": "to translate",
+  "meanings": [
+   "to translate"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002033",
+  "word": "éditeur",
+  "base_translation": "publisher",
+  "meanings": [
+   "publisher"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002034",
+  "word": "dame",
+  "base_translation": "lady",
+  "meanings": [
+   "lady"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002035",
+  "word": "ha",
+  "base_translation": "ha (laughing)",
+  "meanings": [
+   "ha (laughing)"
+  ],
+  "part_of_speech": "interjection",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002036",
+  "word": "soirée",
+  "base_translation": "evening; party",
+  "meanings": [
+   "evening",
+   "party"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002037",
+  "word": "anniversaire",
+  "base_translation": "birthday",
+  "meanings": [
+   "birthday"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002038",
+  "word": "invité",
+  "base_translation": "guest",
+  "meanings": [
+   "guest"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002039",
+  "word": "question",
+  "base_translation": "question",
+  "meanings": [
+   "question"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002040",
+  "word": "classique",
+  "base_translation": "classic; typical",
+  "meanings": [
+   "classic",
+   "typical"
+  ],
+  "part_of_speech": "adjective",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002041",
+  "word": "enfant",
+  "base_translation": "child",
+  "meanings": [
+   "child"
+  ],
+  "part_of_speech": "noun",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002042",
+  "word": "nuit",
+  "base_translation": "night",
+  "meanings": [
+   "night"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002043",
+  "word": "gâteau",
+  "base_translation": "cake",
+  "meanings": [
+   "cake"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002044",
+  "word": "croissant",
+  "base_translation": "croissant",
+  "meanings": [
+   "croissant"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002045",
+  "word": "roman",
+  "base_translation": "novel",
+  "meanings": [
+   "novel"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002046",
+  "word": "japonais",
+  "base_translation": "Japanese",
+  "meanings": [
+   "Japanese"
+  ],
+  "part_of_speech": "adjective",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002047",
+  "word": "passionnant",
+  "base_translation": "fascinating; exciting",
+  "meanings": [
+   "fascinating",
+   "exciting"
+  ],
+  "part_of_speech": "adjective",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002048",
+  "word": "fatigant",
+  "base_translation": "tiring",
+  "meanings": [
+   "tiring"
+  ],
+  "part_of_speech": "adjective",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002049",
+  "word": "informatique",
+  "base_translation": "IT; computing",
+  "meanings": [
+   "IT",
+   "computing"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002050",
+  "word": "Paul",
+  "base_translation": "Paul (man’s first name)",
+  "meanings": [
+   "Paul (man’s first name)"
+  ],
+  "part_of_speech": "noun",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002051",
+  "word": "Sophie",
+  "base_translation": "Sophie (woman’s first name)",
+  "meanings": [
+   "Sophie (woman’s first name)"
+  ],
+  "part_of_speech": "noun",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000002052",
+  "word": "Yuki",
+  "base_translation": "Yuki (woman’s first name)",
+  "meanings": [
+   "Yuki (woman’s first name)"
+  ],
+  "part_of_speech": "noun",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003000",
+  "word": "heure",
+  "base_translation": "hour; time; o’clock",
+  "meanings": [
+   "hour",
+   "time",
+   "o’clock"
+  ],
+  "example": {
+   "french": "Il est huit heures.",
+   "english": "It is eight o’clock."
+  },
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003001",
+  "word": "minute",
+  "base_translation": "minute",
+  "meanings": [
+   "minute"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003002",
+  "word": "quart",
+  "base_translation": "quarter (et quart = quarter past; moins le quart = quarter to)",
+  "meanings": [
+   "quarter (et quart = quarter past",
+   "moins le quart = quarter to)"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003003",
+  "word": "demie",
+  "base_translation": "half (et demie = half past)",
+  "meanings": [
+   "half (et demie = half past)"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003004",
+  "word": "moins",
+  "base_translation": "minus; to (in times: huit heures moins dix = ten to eight)",
+  "meanings": [
+   "minus",
+   "to (in times: huit heures moins dix = ten to eight)"
+  ],
+  "part_of_speech": "adverb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003005",
+  "word": "midi",
+  "base_translation": "noon; midday",
+  "meanings": [
+   "noon",
+   "midday"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003006",
+  "word": "minuit",
+  "base_translation": "midnight",
+  "meanings": [
+   "midnight"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003007",
+  "word": "matin",
+  "base_translation": "morning",
+  "meanings": [
+   "morning"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003008",
+  "word": "après-midi",
+  "base_translation": "afternoon",
+  "meanings": [
+   "afternoon"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003009",
+  "word": "soir",
+  "base_translation": "evening",
+  "meanings": [
+   "evening"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003010",
+  "word": "rendez-vous",
+  "base_translation": "appointment; meeting; date",
+  "meanings": [
+   "appointment",
+   "meeting",
+   "date"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003011",
+  "word": "dentiste",
+  "base_translation": "dentist",
+  "meanings": [
+   "dentist"
+  ],
+  "part_of_speech": "noun",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003012",
+  "word": "cabinet",
+  "base_translation": "practice; surgery (of a doctor or dentist)",
+  "meanings": [
+   "practice",
+   "surgery (of a doctor or dentist)"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003013",
+  "word": "secrétaire",
+  "base_translation": "receptionist; secretary",
+  "meanings": [
+   "receptionist",
+   "secretary"
+  ],
+  "part_of_speech": "noun",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003014",
+  "word": "disponible",
+  "base_translation": "available; free",
+  "meanings": [
+   "available",
+   "free"
+  ],
+  "part_of_speech": "adjective",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003015",
+  "word": "libre",
+  "base_translation": "free (not busy)",
+  "meanings": [
+   "free (not busy)"
+  ],
+  "part_of_speech": "adjective",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003016",
+  "word": "commencer",
+  "base_translation": "to start; to begin",
+  "meanings": [
+   "to start",
+   "to begin"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003017",
+  "word": "durer",
+  "base_translation": "to last (a time)",
+  "meanings": [
+   "to last (a time)"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003018",
+  "word": "arriver",
+  "base_translation": "to arrive",
+  "meanings": [
+   "to arrive"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003019",
+  "word": "appeler",
+  "base_translation": "to call (on the phone)",
+  "meanings": [
+   "to call (on the phone)"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003020",
+  "word": "annuler",
+  "base_translation": "to cancel",
+  "meanings": [
+   "to cancel"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003021",
+  "word": "en avance",
+  "base_translation": "early (before the agreed time)",
+  "meanings": [
+   "early (before the agreed time)"
+  ],
+  "part_of_speech": "phrase",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": true,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003022",
+  "word": "à l’heure",
+  "base_translation": "on time",
+  "meanings": [
+   "on time"
+  ],
+  "part_of_speech": "phrase",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": true,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003023",
+  "word": "en retard",
+  "base_translation": "late (after the agreed time)",
+  "meanings": [
+   "late (after the agreed time)"
+  ],
+  "part_of_speech": "phrase",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": true,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003024",
+  "word": "retard",
+  "base_translation": "delay; lateness",
+  "meanings": [
+   "delay",
+   "lateness"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003025",
+  "word": "désolé",
+  "base_translation": "sorry",
+  "meanings": [
+   "sorry"
+  ],
+  "part_of_speech": "adjective",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003026",
+  "word": "pas de problème",
+  "base_translation": "no problem",
+  "meanings": [
+   "no problem"
+  ],
+  "part_of_speech": "phrase",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": true,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003027",
+  "word": "docteur",
+  "base_translation": "doctor (as a title: le docteur Moreau)",
+  "meanings": [
+   "doctor (as a title: le docteur Moreau)"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003028",
+  "word": "urgent",
+  "base_translation": "urgent",
+  "meanings": [
+   "urgent"
+  ],
+  "part_of_speech": "adjective",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003029",
+  "word": "Silva",
+  "base_translation": "Silva (family name)",
+  "meanings": [
+   "Silva (family name)"
+  ],
+  "part_of_speech": "noun",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003030",
+  "word": "adresse",
+  "base_translation": "address",
+  "meanings": [
+   "address"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003031",
+  "word": "République",
+  "base_translation": "République (rue de la République, main street in Lyon)",
+  "meanings": [
+   "République (rue de la République, main street in Lyon)"
+  ],
+  "part_of_speech": "noun",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003032",
+  "word": "mardi",
+  "base_translation": "Tuesday",
+  "meanings": [
+   "Tuesday"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003033",
+  "word": "jeudi",
+  "base_translation": "Thursday",
+  "meanings": [
+   "Thursday"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003034",
+  "word": "mal",
+  "base_translation": "pain; badly (avoir mal à = to have a pain in)",
+  "meanings": [
+   "pain",
+   "badly (avoir mal à = to have a pain in)"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003035",
+  "word": "téléphone",
+  "base_translation": "phone",
+  "meanings": [
+   "phone"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003036",
+  "word": "panne",
+  "base_translation": "breakdown (en panne = broken down)",
+  "meanings": [
+   "breakdown (en panne = broken down)"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003037",
+  "word": "courir",
+  "base_translation": "to run",
+  "meanings": [
+   "to run"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003038",
+  "word": "salle d’attente",
+  "base_translation": "waiting room",
+  "meanings": [
+   "waiting room"
+  ],
+  "part_of_speech": "phrase",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": true,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003039",
+  "word": "quinze",
+  "base_translation": "fifteen",
+  "meanings": [
+   "fifteen"
+  ],
+  "part_of_speech": "number",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003040",
+  "word": "dix-sept",
+  "base_translation": "seventeen",
+  "meanings": [
+   "seventeen"
+  ],
+  "part_of_speech": "number",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003041",
+  "word": "dix-huit",
+  "base_translation": "eighteen",
+  "meanings": [
+   "eighteen"
+  ],
+  "part_of_speech": "number",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003042",
+  "word": "quarante-cinq",
+  "base_translation": "forty-five",
+  "meanings": [
+   "forty-five"
+  ],
+  "part_of_speech": "number",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003043",
+  "word": "trente",
+  "base_translation": "thirty",
+  "meanings": [
+   "thirty"
+  ],
+  "part_of_speech": "number",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000003044",
+  "word": "Moreau",
+  "base_translation": "Moreau (family name)",
+  "meanings": [
+   "Moreau (family name)"
+  ],
+  "part_of_speech": "noun",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004000",
+  "word": "loisir",
+  "base_translation": "hobby; leisure activity",
+  "meanings": [
+   "hobby",
+   "leisure activity"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004001",
+  "word": "sport",
+  "base_translation": "sport",
+  "meanings": [
+   "sport"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004002",
+  "word": "football",
+  "base_translation": "football; soccer (casual: foot)",
+  "meanings": [
+   "football",
+   "soccer (casual: foot)"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004003",
+  "word": "tennis",
+  "base_translation": "tennis",
+  "meanings": [
+   "tennis"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004004",
+  "word": "vélo",
+  "base_translation": "bike; cycling (faire du vélo = to cycle)",
+  "meanings": [
+   "bike",
+   "cycling (faire du vélo = to cycle)"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004005",
+  "word": "natation",
+  "base_translation": "swimming",
+  "meanings": [
+   "swimming"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004006",
+  "word": "guitare",
+  "base_translation": "guitar",
+  "meanings": [
+   "guitar"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004007",
+  "word": "piano",
+  "base_translation": "piano",
+  "meanings": [
+   "piano"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004008",
+  "word": "musique",
+  "base_translation": "music",
+  "meanings": [
+   "music"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004009",
+  "word": "cinéma",
+  "base_translation": "cinema; the movies",
+  "meanings": [
+   "cinema",
+   "the movies"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004010",
+  "word": "film",
+  "base_translation": "film; movie",
+  "meanings": [
+   "film",
+   "movie"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004011",
+  "word": "série",
+  "base_translation": "TV series; show",
+  "meanings": [
+   "TV series",
+   "show"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004012",
+  "word": "musée",
+  "base_translation": "museum",
+  "meanings": [
+   "museum"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004013",
+  "word": "parc",
+  "base_translation": "park",
+  "meanings": [
+   "park"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004014",
+  "word": "jeu vidéo",
+  "base_translation": "video game",
+  "meanings": [
+   "video game"
+  ],
+  "part_of_speech": "phrase",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": true,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004015",
+  "word": "jouer",
+  "base_translation": "to play (jouer au foot = play football; jouer de la guitare = play the guitar)",
+  "meanings": [
+   "to play (jouer au foot = play football",
+   "jouer de la guitare = play the guitar)"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004016",
+  "word": "faire",
+  "base_translation": "to do; to make (faire du sport = do sport)",
+  "meanings": [
+   "to do",
+   "to make (faire du sport = do sport)"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004017",
+  "word": "aimer",
+  "base_translation": "to like; to love",
+  "meanings": [
+   "to like",
+   "to love"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004018",
+  "word": "adorer",
+  "base_translation": "to love; to adore",
+  "meanings": [
+   "to love",
+   "to adore"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004019",
+  "word": "détester",
+  "base_translation": "to hate",
+  "meanings": [
+   "to hate"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004020",
+  "word": "préférer",
+  "base_translation": "to prefer",
+  "meanings": [
+   "to prefer"
+  ],
+  "example": {
+   "french": "Je préfère le cinéma.",
+   "english": "I prefer the cinema."
+  },
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004021",
+  "word": "nager",
+  "base_translation": "to swim",
+  "meanings": [
+   "to swim"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004022",
+  "word": "danser",
+  "base_translation": "to dance",
+  "meanings": [
+   "to dance"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004023",
+  "word": "cuisiner",
+  "base_translation": "to cook",
+  "meanings": [
+   "to cook"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004024",
+  "word": "lire",
+  "base_translation": "to read",
+  "meanings": [
+   "to read"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004025",
+  "word": "sortir",
+  "base_translation": "to go out",
+  "meanings": [
+   "to go out"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004026",
+  "word": "toujours",
+  "base_translation": "always",
+  "meanings": [
+   "always"
+  ],
+  "part_of_speech": "adverb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004027",
+  "word": "souvent",
+  "base_translation": "often",
+  "meanings": [
+   "often"
+  ],
+  "part_of_speech": "adverb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004028",
+  "word": "parfois",
+  "base_translation": "sometimes",
+  "meanings": [
+   "sometimes"
+  ],
+  "part_of_speech": "adverb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004029",
+  "word": "rarement",
+  "base_translation": "rarely",
+  "meanings": [
+   "rarely"
+  ],
+  "part_of_speech": "adverb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004030",
+  "word": "ne… jamais",
+  "base_translation": "never",
+  "meanings": [
+   "never"
+  ],
+  "example": {
+   "french": "Je ne nage jamais.",
+   "english": "I never swim."
+  },
+  "part_of_speech": "phrase",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": true,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004031",
+  "word": "tous les jours",
+  "base_translation": "every day",
+  "meanings": [
+   "every day"
+  ],
+  "part_of_speech": "phrase",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": true,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004032",
+  "word": "fois",
+  "base_translation": "time (une fois par semaine = once a week)",
+  "meanings": [
+   "time (une fois par semaine = once a week)"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004033",
+  "word": "semaine",
+  "base_translation": "week",
+  "meanings": [
+   "week"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004034",
+  "word": "dos",
+  "base_translation": "back (of the body)",
+  "meanings": [
+   "back (of the body)"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004035",
+  "word": "plage",
+  "base_translation": "beach",
+  "meanings": [
+   "beach"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004036",
+  "word": "bar",
+  "base_translation": "bar",
+  "meanings": [
+   "bar"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004037",
+  "word": "foot",
+  "base_translation": "football (casual)",
+  "meanings": [
+   "football (casual)"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004038",
+  "word": "chercher",
+  "base_translation": "to look for",
+  "meanings": [
+   "to look for"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004039",
+  "word": "jeux vidéo",
+  "base_translation": "video games",
+  "meanings": [
+   "video games"
+  ],
+  "part_of_speech": "phrase",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": true,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004040",
+  "word": "carrément",
+  "base_translation": "totally; definitely (casual)",
+  "meanings": [
+   "totally",
+   "definitely (casual)"
+  ],
+  "part_of_speech": "adverb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004041",
+  "word": "samedi",
+  "base_translation": "Saturday",
+  "meanings": [
+   "Saturday"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004042",
+  "word": "club",
+  "base_translation": "club",
+  "meanings": [
+   "club"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004043",
+  "word": "piscine",
+  "base_translation": "swimming pool",
+  "meanings": [
+   "swimming pool"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004044",
+  "word": "match",
+  "base_translation": "match; game",
+  "meanings": [
+   "match",
+   "game"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004045",
+  "word": "équipe",
+  "base_translation": "team",
+  "meanings": [
+   "team"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004046",
+  "word": "italien",
+  "base_translation": "Italian",
+  "meanings": [
+   "Italian"
+  ],
+  "part_of_speech": "adjective",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004047",
+  "word": "pâtes",
+  "base_translation": "pasta",
+  "meanings": [
+   "pasta"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004048",
+  "word": "quais",
+  "base_translation": "riverbanks; quays (les quais du Rhône)",
+  "meanings": [
+   "riverbanks",
+   "quays (les quais du Rhône)"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004049",
+  "word": "Rhône",
+  "base_translation": "the Rhône (river in Lyon)",
+  "meanings": [
+   "the Rhône (river in Lyon)"
+  ],
+  "part_of_speech": "noun",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004050",
+  "word": "dimanche",
+  "base_translation": "Sunday",
+  "meanings": [
+   "Sunday"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004051",
+  "word": "pluie",
+  "base_translation": "rain",
+  "meanings": [
+   "rain"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004052",
+  "word": "quand",
+  "base_translation": "when",
+  "meanings": [
+   "when"
+  ],
+  "part_of_speech": "adverb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004053",
+  "word": "idée",
+  "base_translation": "idea",
+  "meanings": [
+   "idea"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004054",
+  "word": "ensemble",
+  "base_translation": "together",
+  "meanings": [
+   "together"
+  ],
+  "part_of_speech": "adverb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000004055",
+  "word": "OL",
+  "base_translation": "OL (Olympique Lyonnais, Lyon’s football club)",
+  "meanings": [
+   "OL (Olympique Lyonnais, Lyon’s football club)"
+  ],
+  "part_of_speech": "noun",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005000",
+  "word": "aller",
+  "base_translation": "to go",
+  "meanings": [
+   "to go"
+  ],
+  "example": {
+   "french": "Je vais au bureau.",
+   "english": "I am going to the office."
+  },
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005001",
+  "word": "partir",
+  "base_translation": "to leave; to go away",
+  "meanings": [
+   "to leave",
+   "to go away"
+  ],
+  "example": {
+   "french": "Je pars à huit heures.",
+   "english": "I leave at eight."
+  },
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005002",
+  "word": "sortir",
+  "base_translation": "to go out",
+  "meanings": [
+   "to go out"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005003",
+  "word": "dormir",
+  "base_translation": "to sleep",
+  "meanings": [
+   "to sleep"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005004",
+  "word": "prendre",
+  "base_translation": "to take; to have (a meal or drink)",
+  "meanings": [
+   "to take",
+   "to have (a meal or drink)"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005005",
+  "word": "faire",
+  "base_translation": "to do; to make",
+  "meanings": [
+   "to do",
+   "to make"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005006",
+  "word": "venir",
+  "base_translation": "to come",
+  "meanings": [
+   "to come"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005007",
+  "word": "pouvoir",
+  "base_translation": "can; to be able to",
+  "meanings": [
+   "can",
+   "to be able to"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005008",
+  "word": "vouloir",
+  "base_translation": "to want",
+  "meanings": [
+   "to want"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005009",
+  "word": "se coucher",
+  "base_translation": "to go to bed",
+  "meanings": [
+   "to go to bed"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005010",
+  "word": "rentrer",
+  "base_translation": "to go back home; to come back",
+  "meanings": [
+   "to go back home",
+   "to come back"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005011",
+  "word": "déjeuner",
+  "base_translation": "to have lunch (le déjeuner = lunch)",
+  "meanings": [
+   "to have lunch (le déjeuner = lunch)"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005012",
+  "word": "dîner",
+  "base_translation": "to have dinner (le dîner = dinner)",
+  "meanings": [
+   "to have dinner (le dîner = dinner)"
+  ],
+  "part_of_speech": "verb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005013",
+  "word": "goûter",
+  "base_translation": "afternoon snack (also: to taste)",
+  "meanings": [
+   "afternoon snack (also: to taste)"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005014",
+  "word": "pause",
+  "base_translation": "break",
+  "meanings": [
+   "break"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005015",
+  "word": "cantine",
+  "base_translation": "canteen",
+  "meanings": [
+   "canteen"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005016",
+  "word": "courses",
+  "base_translation": "grocery shopping (faire les courses)",
+  "meanings": [
+   "grocery shopping (faire les courses)"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005017",
+  "word": "lit",
+  "base_translation": "bed",
+  "meanings": [
+   "bed"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005018",
+  "word": "heure de pointe",
+  "base_translation": "rush hour",
+  "meanings": [
+   "rush hour"
+  ],
+  "part_of_speech": "phrase",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": true,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005019",
+  "word": "pointe",
+  "base_translation": "peak (l’heure de pointe = rush hour)",
+  "meanings": [
+   "peak (l’heure de pointe = rush hour)"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005020",
+  "word": "plein",
+  "base_translation": "full",
+  "meanings": [
+   "full"
+  ],
+  "part_of_speech": "adjective",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005021",
+  "word": "sacré",
+  "base_translation": "sacred; untouchable",
+  "meanings": [
+   "sacred",
+   "untouchable"
+  ],
+  "part_of_speech": "adjective",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005022",
+  "word": "foot",
+  "base_translation": "football (casual)",
+  "meanings": [
+   "football (casual)"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005023",
+  "word": "frigo",
+  "base_translation": "fridge (casual)",
+  "meanings": [
+   "fridge (casual)"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005024",
+  "word": "léger",
+  "base_translation": "light (not heavy)",
+  "meanings": [
+   "light (not heavy)"
+  ],
+  "part_of_speech": "adjective",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005025",
+  "word": "blog",
+  "base_translation": "blog",
+  "meanings": [
+   "blog"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005026",
+  "word": "article",
+  "base_translation": "article; post",
+  "meanings": [
+   "article",
+   "post"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005027",
+  "word": "Brésilien",
+  "base_translation": "Brazilian person (man)",
+  "meanings": [
+   "Brazilian person (man)"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005028",
+  "word": "différence",
+  "base_translation": "difference",
+  "meanings": [
+   "difference"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005029",
+  "word": "collègue",
+  "base_translation": "colleague",
+  "meanings": [
+   "colleague"
+  ],
+  "part_of_speech": "noun",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005030",
+  "word": "supermarché",
+  "base_translation": "supermarket",
+  "meanings": [
+   "supermarket"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005031",
+  "word": "vingt et une",
+  "base_translation": "twenty-one (feminine, as in 21 h)",
+  "meanings": [
+   "twenty-one (feminine, as in 21 h)"
+  ],
+  "part_of_speech": "number",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005032",
+  "word": "vingt-deux",
+  "base_translation": "twenty-two",
+  "meanings": [
+   "twenty-two"
+  ],
+  "part_of_speech": "number",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005033",
+  "word": "dix-neuf",
+  "base_translation": "nineteen",
+  "meanings": [
+   "nineteen"
+  ],
+  "part_of_speech": "number",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005034",
+  "word": "quatorze",
+  "base_translation": "fourteen",
+  "meanings": [
+   "fourteen"
+  ],
+  "part_of_speech": "number",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005035",
+  "word": "heure",
+  "base_translation": "hour; o’clock",
+  "meanings": [
+   "hour",
+   "o’clock"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005036",
+  "word": "tôt",
+  "base_translation": "early",
+  "meanings": [
+   "early"
+  ],
+  "part_of_speech": "adverb",
+  "gender": null,
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005037",
+  "word": "plat",
+  "base_translation": "dish; main course",
+  "meanings": [
+   "dish",
+   "main course"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005038",
+  "word": "sandwich",
+  "base_translation": "sandwich",
+  "meanings": [
+   "sandwich"
+  ],
+  "part_of_speech": "noun",
+  "gender": "masculine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005039",
+  "word": "surprise",
+  "base_translation": "surprise",
+  "meanings": [
+   "surprise"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
+  "register": "Courant",
+  "ipa_pronunciation": null,
+  "is_idiom": false,
+  "is_slang": false,
+  "idiom_explanation": null
+ },
+ {
+  "id": "50000000-0000-0000-0003-000000005040",
+  "word": "habitude",
+  "base_translation": "habit (d’habitude = usually)",
+  "meanings": [
+   "habit (d’habitude = usually)"
+  ],
+  "part_of_speech": "noun",
+  "gender": "feminine",
   "register": "Courant",
   "ipa_pronunciation": null,
   "is_idiom": false,

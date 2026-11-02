@@ -143,6 +143,10 @@ const PRIORITY_FORMS: [string, string[]][] = [
   ['aller', ['vais', 'vas', 'va', 'allons', 'allez', 'vont']],
   ['faire', ['fais', 'fait', 'faisons', 'faites', 'font']],
   ['présenter', ['présente', 'présentes', 'présentent']],
+  ['partir', ['pars', 'part', 'partons', 'partez', 'partent']],
+  ['sortir', ['sors', 'sort', 'sortons', 'sortez', 'sortent']],
+  ['dormir', ['dors', 'dort', 'dormons', 'dormez', 'dorment']],
+  ['préparer', ['prépare', 'prépares', 'préparons', 'préparez', 'préparent']],
 ]
 
 /** Resolve lemma id: full surface, then elision-stripped base, then hyphen clitic. */

@@ -21,6 +21,10 @@ export type UnitSpec = {
   id: string
   /** Prefix for token and exercise ids, e.g. "m2u1". */
   key: string
+  /** Short title shown on Home (French, a few words). Defaults to the catalog unit title. */
+  homeTitle?: string
+  /** Short English line under the Home title, e.g. "Present of -er verbs; reflexive verbs". */
+  homeFocus?: string
   title: string
   /** One sentence: what you can do after this lesson. */
   goal: string
