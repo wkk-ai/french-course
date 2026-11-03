@@ -106,14 +106,6 @@ export function ExerciseCard({
     }
   }, [exercise.id, exercise.type, answer])
 
-  const isMcqExercise =
-    exercise.type === 'register' ||
-    exercise.type === 'dialogue' ||
-    !exercise.type ||
-    exercise.type === 'mcq' ||
-    exercise.type === 'reading' ||
-    exercise.type === 'minimal-pair'
-
   const confirmDraftText = () => {
     if (!draftText.trim()) return
     submitText(draftText)
@@ -237,11 +229,17 @@ export function ExerciseCard({
           <p className="text-body-reading">{exercise.text.replace(/___+/g, '______')}</p>
           <input
             type="text"
-            value={draftText}
+            value={locked && answer?.kind === 'text' ? answer.value : draftText}
             disabled={locked}
             placeholder="Type your answer…"
             className="mt-3 w-full rounded-xl bg-white px-3.5 py-3 text-base disabled:opacity-70"
             onChange={(event) => setDraftText(event.target.value)}
+            autoCapitalize="none"
+            autoCorrect="off"
+            autoComplete="off"
+            spellCheck={false}
+            lang="fr"
+            enterKeyHint="done"
             onKeyDown={(event) => {
               if (event.key === 'Enter') confirmDraftText()
             }}
@@ -264,11 +262,17 @@ export function ExerciseCard({
           <p className="text-sm text-on-surface-variant">{exercise.direction === 'en-fr' ? 'English → French' : 'French → English'}</p>
           <input
             type="text"
-            value={draftText}
+            value={locked && answer?.kind === 'text' ? answer.value : draftText}
             disabled={locked}
             placeholder="Type your translation…"
             className="mt-3 w-full rounded-xl bg-white px-3.5 py-3 text-base disabled:opacity-70"
             onChange={(event) => setDraftText(event.target.value)}
+            autoCapitalize="none"
+            autoCorrect="off"
+            autoComplete="off"
+            spellCheck={false}
+            lang="fr"
+            enterKeyHint="done"
             onKeyDown={(event) => {
               if (event.key === 'Enter') confirmDraftText()
             }}
@@ -293,11 +297,17 @@ export function ExerciseCard({
           </p>
           <input
             type="text"
-            value={draftText}
+            value={locked && answer?.kind === 'text' ? answer.value : draftText}
             disabled={locked}
             placeholder="Type the conjugated form…"
             className="mt-3 w-full rounded-xl bg-white px-3.5 py-3 text-base disabled:opacity-70"
             onChange={(event) => setDraftText(event.target.value)}
+            autoCapitalize="none"
+            autoCorrect="off"
+            autoComplete="off"
+            spellCheck={false}
+            lang="fr"
+            enterKeyHint="done"
             onKeyDown={(event) => {
               if (event.key === 'Enter') confirmDraftText()
             }}
@@ -522,10 +532,11 @@ export function ExerciseCard({
         <div className="mt-4 space-y-3">
           <div role="status" className={`rounded-xl p-3.5 text-sm ${correct ? 'bg-success/15 text-tertiary' : 'bg-error-container/60 text-on-error-container'}`}>
             <p className="font-bold">{correct ? 'Correct!' : 'Not quite'}</p>
+            {!correct && answer?.kind === 'text' && <p className="mt-1">You wrote: <span className="font-semibold">{answer.value}</span></p>}
             {!correct && <p className="mt-1">Answer: <span className="font-semibold">{correctAnswerLabel(exercise)}</span></p>}
             <p className="mt-1 text-on-surface"><InlineText text={exercise.explanation} /></p>
           </div>
-          {!correct && isMcqExercise && onRetry && (
+          {!correct && onRetry && (
             <button
               type="button"
               onClick={onRetry}

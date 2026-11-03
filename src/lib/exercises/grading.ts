@@ -23,10 +23,38 @@ export function normalizeFrenchInput(value: string): string {
     .replace(/\s+/g, ' ')
 }
 
+const UNITS = ['zero', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf', 'dix', 'onze', 'douze', 'treize', 'quatorze', 'quinze', 'seize']
+const TENS: Record<string, number> = { vingt: 20, trente: 30, quarante: 40, cinquante: 50, soixante: 60 }
+
+/** "cinquante-deux" → 52, "soixante-dix" → 70, "quatre-vingt-dix" → 90 (0–100). Null if not a number word. */
+export function frenchNumberValue(text: string): number | null {
+  const t = normalizeFrenchInput(text).replace(/\s+et\s+/g, '-et-').replace(/\s+/g, '-')
+  if (/^\d+$/.test(t)) return Number(t)
+  if (t === 'cent') return 100
+  if (t === 'une') return 1
+  const simple = UNITS.indexOf(t)
+  if (simple >= 0) return simple
+  const parts = t.split('-').filter((part) => part !== 'et')
+  let total = 0
+  for (let i = 0; i < parts.length; i += 1) {
+    const part = parts[i]
+    if (part === 'quatre' && parts[i + 1]?.startsWith('vingt')) { total += 80; i += 1; continue }
+    if (TENS[part] !== undefined) { total += TENS[part]; continue }
+    const unit = UNITS.indexOf(part === 'une' ? 'un' : part)
+    if (unit >= 0) { total += unit; continue }
+    if (part === 'dix') { total += 10; continue }
+    return null
+  }
+  return parts.length ? total : null
+}
+
 function textMatches(answers: string[], input: string): boolean {
   const normalized = normalizeFrenchInput(input)
   if (!normalized) return false
-  return answers.some((answer) => normalizeFrenchInput(answer) === normalized)
+  if (answers.some((answer) => normalizeFrenchInput(answer) === normalized)) return true
+  // Numbers: accept digits for a number written in words (52 = cinquante-deux), and the reverse.
+  const typed = frenchNumberValue(normalized)
+  return typed !== null && answers.some((answer) => frenchNumberValue(answer) === typed)
 }
 
 export function isExerciseAnswered(exercise: LessonExercise, answer: ExerciseAnswer | undefined): boolean {

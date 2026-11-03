@@ -8,6 +8,7 @@ import {
 import { mergeCompletedChapterIds, readLocalCompletedChapters, readLocalDailyReadingHistory, readLocalStreak, subscribeCompletedChapters } from '@/lib/local-progress'
 import { AccountMenu } from '@/components/auth/AccountMenu'
 import { SaveCourseCard } from '@/components/SaveCourseCard'
+import { SoundTest } from '@/components/SoundTest'
 import { getAllLocalVocabulary } from '@/lib/local-vocab-vault'
 
 type VocabProgress = { vocab_id?: string; created_at: string; last_reviewed_at: string | null }
@@ -173,6 +174,7 @@ export default function CenterClient() {
       <section aria-label="Account and offline" className="tactile-card divide-y divide-surface-variant overflow-hidden">
         <AccountMenu variant="row" />
         <SaveCourseCard />
+        <SoundTest />
       </section>
 
       <section className="tactile-card p-5">

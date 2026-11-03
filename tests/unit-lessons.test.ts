@@ -86,3 +86,11 @@ test('common forms point to the right word in the dictionary', async () => {
   assert.equal(word('pars'), 'partir')
   assert.equal(word('dors'), 'dormir')
 })
+
+test('typed answers: digits count for numbers written in words', async () => {
+  const { isExerciseCorrect } = await import('../src/lib/exercises/grading')
+  const cloze = { id: 'n', type: 'cloze', category: 'x', prompt: 'p', text: 'Une année a ___ semaines.', answers: ['cinquante-deux'], explanation: 'e' } as never
+  assert.ok(isExerciseCorrect(cloze, { kind: 'text', value: '52' }))
+  assert.ok(isExerciseCorrect(cloze, { kind: 'text', value: 'Cinquante deux' }))
+  assert.ok(!isExerciseCorrect(cloze, { kind: 'text', value: '53' }))
+})

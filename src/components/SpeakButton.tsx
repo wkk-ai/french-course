@@ -21,7 +21,44 @@ function frenchVoice(synth: SpeechSynthesis): SpeechSynthesisVoice | undefined {
   )
 }
 
+let unlockAudio: HTMLAudioElement | null = null
+
+/** 0.2 s of silence as a WAV data URL (built once, no file needed). */
+function silentWav(): string {
+  const rate = 8000
+  const samples = rate / 5
+  const bytes = new Uint8Array(44 + samples)
+  const view = new DataView(bytes.buffer)
+  const text = (offset: number, value: string) => [...value].forEach((ch, i) => view.setUint8(offset + i, ch.charCodeAt(0)))
+  text(0, 'RIFF'); view.setUint32(4, 36 + samples, true); text(8, 'WAVE'); text(12, 'fmt ')
+  view.setUint32(16, 16, true); view.setUint16(20, 1, true); view.setUint16(22, 1, true)
+  view.setUint32(24, rate, true); view.setUint32(28, rate, true); view.setUint16(32, 1, true); view.setUint16(34, 8, true)
+  text(36, 'data'); view.setUint32(40, samples, true)
+  bytes.fill(128, 44)
+  let binary = ''
+  bytes.forEach((byte) => { binary += String.fromCharCode(byte) })
+  return `data:audio/wav;base64,${btoa(binary)}`
+}
+
+/**
+ * iPhone: speech is muted when the phone is on silent, but a playing <audio> element switches the
+ * page to "media playback", which is not muted. Play a short silence first, inside the tap.
+ */
+function unlockIosAudio() {
+  try {
+    if (!unlockAudio) {
+      unlockAudio = new Audio(silentWav())
+      unlockAudio.setAttribute('playsinline', '')
+    }
+    unlockAudio.currentTime = 0
+    void unlockAudio.play().catch(() => {})
+  } catch {
+    // not supported: speech may still work
+  }
+}
+
 export function speakFrench(text: string, onState?: (state: 'speaking' | 'idle' | 'silent') => void) {
+  unlockIosAudio()
   const synth = window.speechSynthesis
   const clean = text.replace(/\s*\([^)]*\)/g, '').trim()
   if (!clean) return
@@ -76,7 +113,7 @@ export function SpeakButton({ text, label = 'Listen' }: { text: string; label?: 
           className="absolute right-0 top-full z-20 mt-1 w-56 rounded-xl bg-on-surface px-3 py-2 text-xs leading-snug text-surface shadow-lg"
           onClick={() => setState('idle')}
         >
-          No sound? Turn off silent mode (the switch on the side of the iPhone) and turn the volume up, then tap again.
+          No sound? Turn silent mode off (Control Center bell, or the side button on older iPhones), turn the volume up and tap again. If it still fails: Settings › Accessibility › Spoken Content › Voices › French, download a voice.
         </span>
       )}
     </span>
